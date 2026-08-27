@@ -14,7 +14,6 @@
 
     <header id="main-navbar"></header>
 
-    <!-- Subnav Admin -->
     <div class="bg-slate-900/60 border-b border-slate-800 backdrop-blur-md sticky top-16 sm:top-20 z-30">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between overflow-x-auto py-3 space-x-6 text-sm">
             <div class="flex items-center space-x-2">
@@ -39,10 +38,8 @@
             <p class="text-sm text-slate-400 mt-1">Comunícate en tiempo real con los usuarios vía WebSocket STOMP</p>
         </div>
 
-        <!-- Consola de Chat Dividida -->
         <div class="flex-1 glass-panel rounded-3xl border border-slate-800 shadow-2xl flex flex-col md:flex-row overflow-hidden min-h-[550px]">
             
-            <!-- Panel Izquierdo: Lista de Conversaciones -->
             <div class="w-full md:w-80 border-b md:border-b-0 md:border-r border-slate-800 bg-slate-900/60 flex flex-col">
                 <div class="p-4 border-b border-slate-800 flex justify-between items-center">
                     <span class="text-xs font-bold text-slate-300 uppercase tracking-wider">Conversaciones Activas</span>
@@ -56,10 +53,8 @@
                 </div>
             </div>
 
-            <!-- Panel Derecho: Mensajes en Tiempo Real -->
             <div class="flex-1 flex flex-col bg-slate-950/40">
                 
-                <!-- Header de la conversación seleccionada -->
                 <div id="chat-header" class="p-4 border-b border-slate-800 bg-slate-900/40 flex items-center justify-between">
                     <div class="flex items-center space-x-3">
                         <div class="w-9 h-9 rounded-xl bg-indigo-600/30 text-indigo-400 border border-indigo-500/30 flex items-center justify-center font-bold text-sm">
@@ -72,14 +67,12 @@
                     </div>
                 </div>
 
-                <!-- Historial de Mensajes -->
                 <div id="admin-chat-messages" class="flex-1 p-6 overflow-y-auto space-y-4 text-sm">
                     <div class="h-full flex items-center justify-center text-slate-500 text-xs">
                         Selecciona un cliente de la lista para abrir la sesión de chat.
                     </div>
                 </div>
 
-                <!-- Barra de Entrada de Texto -->
                 <div class="p-4 border-t border-slate-800 bg-slate-900/60">
                     <form id="admin-chat-form" class="flex items-center space-x-3">
                         <input id="admin-chat-input" type="text" placeholder="Escribe una respuesta para el cliente..." disabled

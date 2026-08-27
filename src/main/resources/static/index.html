@@ -14,15 +14,16 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
 
-    <!-- Header / Navbar -->
     <header id="main-navbar"></header>
 
-    <!-- Hero Banner -->
     <section class="relative overflow-hidden pt-8 pb-12 sm:pt-12 sm:pb-16 bg-gradient-to-b from-indigo-950/40 via-slate-950 to-slate-950">
         <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl pointer-events-none animate-glow"></div>
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
             <span class="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 text-xs font-semibold uppercase tracking-wider mb-4">
-                ✨ Nueva Generación Tecnológica
+                <svg class="w-3.5 h-3.5 text-indigo-400" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2l2.4 7.2h7.6l-6 4.8 2.4 7.2-6.4-4.8-6.4 4.8 2.4-7.2-6-4.8h7.6z"/>
+                </svg>
+                <span>Nueva Generación Tecnológica</span>
             </span>
             <h1 class="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white max-w-4xl mx-auto leading-tight">
                 El ecosistema digital diseñado para potenciar tu productividad
@@ -33,14 +34,11 @@
         </div>
     </section>
 
-    <!-- Contenido Principal: Filtros y Catálogo -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full">
         
-        <!-- Barra de Búsqueda y Filtros Rápidos -->
         <div class="glass-panel p-4 sm:p-6 rounded-2xl mb-8 shadow-xl">
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 
-                <!-- Buscador por texto -->
                 <div class="relative">
                     <label class="block text-xs font-medium text-slate-400 mb-1.5">Buscar producto</label>
                     <div class="relative">
@@ -52,7 +50,6 @@
                     </div>
                 </div>
 
-                <!-- Categoría -->
                 <div>
                     <label class="block text-xs font-medium text-slate-400 mb-1.5">Categoría</label>
                     <select id="filter-categoria" class="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors">
@@ -60,7 +57,6 @@
                     </select>
                 </div>
 
-                <!-- Rango de Precios -->
                 <div>
                     <label class="block text-xs font-medium text-slate-400 mb-1.5">Precio Máximo (S/)</label>
                     <div class="flex items-center space-x-2">
@@ -70,7 +66,6 @@
                     </div>
                 </div>
 
-                <!-- Ordenar por -->
                 <div>
                     <label class="block text-xs font-medium text-slate-400 mb-1.5">Ordenar por</label>
                     <select id="filter-order" class="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors">
@@ -84,16 +79,13 @@
             </div>
         </div>
 
-        <!-- Grid de Productos -->
         <div id="products-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            <!-- Cargando esqueleto -->
             <div class="col-span-full py-16 text-center text-slate-500 flex flex-col items-center">
                 <div class="w-10 h-10 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin mb-4"></div>
                 <p class="text-sm">Cargando catálogo de productos...</p>
             </div>
         </div>
 
-        <!-- Paginación -->
         <div id="pagination-container" class="mt-12 flex justify-center items-center space-x-2 hidden">
             <button id="prev-page" class="px-4 py-2 rounded-xl bg-slate-800 border border-slate-700 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all">
                 Anterior
@@ -106,14 +98,12 @@
 
     </main>
 
-    <!-- Footer -->
     <footer class="border-t border-slate-800/80 bg-slate-950 py-8 mt-16 text-center text-xs text-slate-500">
         <div class="max-w-7xl mx-auto px-4">
-            <p>© 2026 NovaStore. Plataforma Web de Comercio Electrónico desarrollada para fines académicos.</p>
+            <p>© 2026 NovaStore. Plataforma Web de Comercio Electrónico.</p>
         </div>
     </footer>
 
-    <!-- Lógica JavaScript -->
     <script type="module">
         import { api } from '/assets/js/api.js';
         import { cart } from '/assets/js/cart.js';

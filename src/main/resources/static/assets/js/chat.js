@@ -94,16 +94,13 @@ export function initFloatingChat() {
 
     const widgetHTML = `
         <div id="floating-chat-container" class="fixed bottom-6 right-6 z-40">
-            <!-- Botón flotante -->
             <button id="chat-toggle-btn" class="w-14 h-14 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-xl flex items-center justify-center transition-all duration-300 transform hover:scale-110 focus:outline-none">
                 <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
                 </svg>
             </button>
 
-            <!-- Ventana de chat desplegable -->
             <div id="chat-window" class="hidden absolute bottom-16 right-0 w-80 sm:w-96 h-[460px] bg-slate-900/95 backdrop-blur-xl border border-slate-700/70 rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-all duration-300">
-                <!-- Header -->
                 <div class="bg-gradient-to-r from-indigo-600 to-purple-600 p-4 text-white flex items-center justify-between">
                     <div class="flex items-center space-x-3">
                         <div class="w-3 h-3 bg-emerald-400 rounded-full animate-pulse"></div>
@@ -117,12 +114,10 @@ export function initFloatingChat() {
                     </button>
                 </div>
 
-                <!-- Lista de mensajes -->
                 <div id="chat-messages" class="flex-1 p-4 overflow-y-auto space-y-3 text-sm">
                     <div class="text-center text-xs text-slate-400 my-2">Iniciando conversación...</div>
                 </div>
 
-                <!-- Input -->
                 <div class="p-3 border-t border-slate-800 bg-slate-950/60">
                     <form id="chat-form" class="flex items-center space-x-2">
                         <input id="chat-input" type="text" placeholder="Escribe tu mensaje..." class="flex-1 bg-slate-800/80 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors" autocomplete="off" />

@@ -83,7 +83,6 @@
                 container.innerHTML = `
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14">
                         
-                        <!-- Columna Izquierda: Imagen -->
                         <div class="relative bg-slate-900/80 rounded-2xl overflow-hidden border border-slate-800 flex items-center justify-center p-6 min-h-[380px] lg:min-h-[460px]">
                             <img 
                                 src="${p.imagenUrl || imagenFallback}" 
@@ -96,7 +95,6 @@
                             </span>
                         </div>
 
-                        <!-- Columna Derecha: Información y Compra -->
                         <div class="flex flex-col justify-between space-y-6">
                             
                             <div>
@@ -130,11 +128,9 @@
                                 </div>
                             </div>
 
-                            <!-- Selector de Cantidad y Agregar al Carrito -->
                             <div class="border-t border-slate-800 pt-6">
                                 ${tieneStock ? `
                                     <div class="flex flex-col sm:flex-row items-stretch sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
-                                        <!-- Contador -->
                                         <div class="flex items-center border border-slate-700 bg-slate-900 rounded-xl p-1 w-full sm:w-auto justify-between sm:justify-start">
                                             <button id="btn-minus" class="w-10 h-10 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-bold flex items-center justify-center transition-colors">
                                                 -
@@ -145,7 +141,6 @@
                                             </button>
                                         </div>
 
-                                        <!-- Botón de compra -->
                                         <button id="btn-add-cart" class="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg shadow-indigo-600/30 flex items-center justify-center space-x-2 transition-all transform hover:-translate-y-0.5">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
@@ -159,7 +154,6 @@
                                     </div>
                                 `}
 
-                                <!-- Beneficios -->
                                 <div class="grid grid-cols-2 gap-3 mt-6 text-xs text-slate-400">
                                     <div class="flex items-center space-x-2 p-3 bg-slate-900/50 rounded-xl border border-slate-800">
                                         <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>

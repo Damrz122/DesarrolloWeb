@@ -16,7 +16,6 @@ export function renderNavbar() {
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex items-center justify-between h-16 sm:h-20">
                     
-                    <!-- Logo / Brand -->
                     <div class="flex items-center space-x-3">
                         <a href="/index.html" class="flex items-center space-x-2.5 group">
                             <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/25 group-hover:scale-105 transition-transform duration-300">
@@ -30,7 +29,6 @@ export function renderNavbar() {
                         </a>
                     </div>
 
-                    <!-- Enlaces Centrales -->
                     <div class="hidden md:flex items-center space-x-1 sm:space-x-2">
                         <a href="/index.html" class="px-3.5 py-2 rounded-xl text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800/60 transition-all">
                             Catálogo
@@ -48,10 +46,8 @@ export function renderNavbar() {
                         ` : ''}
                     </div>
 
-                    <!-- Lado Derecho: Carrito y Usuario -->
                     <div class="flex items-center space-x-3">
                         
-                        <!-- Botón Carrito -->
                         <a href="/carrito.html" class="relative p-2.5 rounded-xl bg-slate-800/80 border border-slate-700/60 text-slate-300 hover:text-white hover:border-slate-600 transition-all flex items-center justify-center">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>

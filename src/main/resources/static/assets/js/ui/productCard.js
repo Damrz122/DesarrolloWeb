@@ -9,7 +9,6 @@ export function renderProductCard(producto, onAddToCart) {
     const imagenFallback = 'https://images.unsplash.com/photo-1526738549149-8e07eca6c147?w=600&auto=format&fit=crop&q=80';
 
     card.innerHTML = `
-        <!-- Imagen y Badges -->
         <div class="relative w-full h-56 bg-slate-950/40 overflow-hidden">
             <img 
                 src="${producto.imagenUrl || imagenFallback}" 
@@ -19,12 +18,10 @@ export function renderProductCard(producto, onAddToCart) {
             />
             <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-60"></div>
             
-            <!-- Badge de Categoría -->
             <span class="absolute top-3 left-3 bg-slate-900/80 backdrop-blur-md text-indigo-400 text-xs font-semibold px-2.5 py-1 rounded-lg border border-slate-700">
                 ${producto.categoriaNombre || 'Tecnología'}
             </span>
 
-            <!-- Badge de Stock -->
             <span class="absolute top-3 right-3 text-xs font-semibold px-2.5 py-1 rounded-lg backdrop-blur-md ${
                 producto.stock > 5 
                     ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-500/30' 
@@ -36,7 +33,6 @@ export function renderProductCard(producto, onAddToCart) {
             </span>
         </div>
 
-        <!-- Contenido -->
         <div class="flex-1 p-5 flex flex-col justify-between">
             <div>
                 <a href="/producto.html?id=${producto.id}" class="block group-hover:text-indigo-400 transition-colors">
@@ -47,7 +43,6 @@ export function renderProductCard(producto, onAddToCart) {
                 </p>
             </div>
 
-            <!-- Precio y Botón -->
             <div class="mt-5 pt-4 border-t border-slate-800/80 flex items-center justify-between">
                 <div>
                     <span class="text-xs text-slate-500 block">Precio</span>
