@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Categorías — Admin NovaStore</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/assets/css/output.css">
+    <!-- SockJS & StompJS -->
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased">
+
+    <header id="main-navbar"></header>
+
+    <!-- Subnav Admin -->
+    <div class="bg-slate-900/60 border-b border-slate-800 backdrop-blur-md sticky top-16 sm:top-20 z-30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between overflow-x-auto py-3 space-x-6 text-sm">
+            <div class="flex items-center space-x-2">
+                <span class="px-2.5 py-1 rounded-lg bg-indigo-500/20 text-indigo-400 font-bold text-xs">ADMIN</span>
+                <span class="font-bold text-white">Categorías</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <a href="/admin/dashboard.html" class="text-slate-400 hover:text-white transition-colors pb-1">Dashboard</a>
+                <a href="/admin/productos.html" class="text-slate-400 hover:text-white transition-colors pb-1">Productos</a>
+                <a href="/admin/categorias.html" class="text-indigo-400 font-semibold border-b-2 border-indigo-500 pb-1">Categorías</a>
+                <a href="/admin/pedidos.html" class="text-slate-400 hover:text-white transition-colors pb-1">Pedidos</a>
+                <a href="/admin/reportes.html" class="text-slate-400 hover:text-white transition-colors pb-1">Reportes</a>
+                <a href="/admin/chat.html" class="text-slate-400 hover:text-white transition-colors pb-1">Chat Clientes</a>
+            </div>
+        </div>
+    </div>
+
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full space-y-6">
+        
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-white">Categorías de Productos</h1>
+                <p class="text-sm text-slate-400 mt-1">Organiza la estructura de navegación del catálogo</p>
+            </div>
+            <button id="btn-nueva-cat" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 px-5 rounded-xl shadow-lg shadow-indigo-600/25 flex items-center space-x-2 text-sm transition-all">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                <span>Nueva Categoría</span>
+            </button>
+        </div>
+
+        <!-- Tabla Categorías -->
+        <div class="glass-panel rounded-3xl border border-slate-800 shadow-xl overflow-hidden">
+            <table class="w-full text-left text-xs text-slate-300">
+                <thead class="bg-slate-900 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
+                    <tr>
+                        <th class="p-4">ID</th>
+                        <th class="p-4">Nombre</th>
+                        <th class="p-4">Descripción</th>
+                        <th class="p-4 text-right">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="categorias-table-body" class="divide-y divide-slate-800/60">
+                    <tr>
+                        <td colspan="4" class="p-8 text-center text-slate-500">Cargando categorías...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </main>
+
+    <!-- Modal Categoría -->
+    <div id="cat-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+        <div class="glass-panel w-full max-w-md rounded-3xl border border-slate-800 shadow-2xl p-6 sm:p-8">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-4 mb-6">
+                <h3 id="cat-modal-title" class="text-lg font-bold text-white">Nueva Categoría</h3>
+                <button id="cat-modal-close" class="text-slate-400 hover:text-white p-1 rounded-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <form id="cat-form" class="space-y-4 text-sm">
+                <input type="hidden" id="cat-id" />
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Nombre de Categoría *</label>
+                    <input id="cat-nombre" type="text" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-indigo-500" />
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Descripción</label>
+                    <textarea id="cat-descripcion" rows="3" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white focus:outline-none focus:border-indigo-500"></textarea>
+                </div>
+
+                <div class="pt-4 border-t border-slate-800 flex justify-end space-x-3">
+                    <button type="button" id="btn-cat-cancelar" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition-colors">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md shadow-indigo-600/30 transition-all">
+                        Guardar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import { api } from '/assets/js/api.js';
+        import { auth } from '/assets/js/auth.js';
+        import { renderNavbar } from '/assets/js/ui/navbar.js';
+        import { showToast } from '/assets/js/ui/toast.js';
+
+        renderNavbar();
+
+        if (!auth.protegerRutaAdmin()) {
+            // Guard
+        } else {
+            initCategoriasAdmin();
+        }
+
+        const tbody = document.getElementById('categorias-table-body');
+        const modal = document.getElementById('cat-modal');
+        const modalClose = document.getElementById('cat-modal-close');
+        const btnCancelar = document.getElementById('btn-cat-cancelar');
+        const btnNueva = document.getElementById('btn-nueva-cat');
+        const form = document.getElementById('cat-form');
+        const modalTitle = document.getElementById('cat-modal-title');
+
+        function initCategoriasAdmin() {
+            cargarCategorias();
+
+            btnNueva.addEventListener('click', () => {
+                modalTitle.textContent = 'Nueva Categoría';
+                document.getElementById('cat-id').value = '';
+                document.getElementById('cat-nombre').value = '';
+                document.getElementById('cat-descripcion').value = '';
+                modal.classList.remove('hidden');
+            });
+
+            modalClose.addEventListener('click', () => modal.classList.add('hidden'));
+            btnCancelar.addEventListener('click', () => modal.classList.add('hidden'));
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await guardarCategoria();
+            });
+        }
+
+        async function cargarCategorias() {
+            try {
+                const res = await api.get('/api/categorias');
+                tbody.innerHTML = '';
+
+                if (res.exito && res.datos && res.datos.length > 0) {
+                    res.datos.forEach(c => {
+                        const tr = document.createElement('tr');
+                        tr.className = 'hover:bg-slate-900/50 transition-colors';
+                        tr.innerHTML = `
+                            <td class="p-4 font-bold text-white">#${c.id}</td>
+                            <td class="p-4 font-semibold text-slate-200">${c.nombre}</td>
+                            <td class="p-4 text-slate-400">${c.descripcion || '—'}</td>
+                            <td class="p-4 text-right space-x-2">
+                                <button class="btn-editar px-3 py-1 rounded-lg bg-indigo-950/80 hover:bg-indigo-900/80 text-indigo-300 font-semibold border border-indigo-700/50 transition-colors">
+                                    Editar
+                                </button>
+                                <button class="btn-eliminar px-3 py-1 rounded-lg bg-rose-950/80 hover:bg-rose-900/80 text-rose-300 font-semibold border border-rose-700/50 transition-colors">
+                                    Eliminar
+                                </button>
+                            </td>
+                        `;
+
+                        tr.querySelector('.btn-editar').addEventListener('click', () => {
+                            modalTitle.textContent = 'Editar Categoría #' + c.id;
+                            document.getElementById('cat-id').value = c.id;
+                            document.getElementById('cat-nombre').value = c.nombre;
+                            document.getElementById('cat-descripcion').value = c.descripcion || '';
+                            modal.classList.remove('hidden');
+                        });
+
+                        tr.querySelector('.btn-eliminar').addEventListener('click', () => eliminarCategoria(c.id, c.nombre));
+
+                        tbody.appendChild(tr);
+                    });
+                } else {
+                    tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-slate-500">No hay categorías creadas.</td></tr>`;
+                }
+            } catch (err) {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-rose-400">Error: ${err.message}</td></tr>`;
+            }
+        }
+
+        async function guardarCategoria() {
+            const id = document.getElementById('cat-id').value;
+            const payload = {
+                nombre: document.getElementById('cat-nombre').value.trim(),
+                descripcion: document.getElementById('cat-descripcion').value.trim()
+            };
+
+            try {
+                if (id) {
+                    await api.put(`/api/categorias/${id}`, payload);
+                    showToast('Categoría actualizada', 'success');
+                } else {
+                    await api.post('/api/categorias', payload);
+                    showToast('Categoría creada', 'success');
+                }
+                modal.classList.add('hidden');
+                cargarCategorias();
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        }
+
+        async function eliminarCategoria(id, nombre) {
+            if (!confirm(`¿Eliminar la categoría "${nombre}"?`)) return;
+            try {
+                await api.delete(`/api/categorias/${id}`);
+                showToast('Categoría eliminada', 'info');
+                cargarCategorias();
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finalizar Compra — NovaStore</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/assets/css/output.css">
+    <!-- SockJS & StompJS -->
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased">
+
+    <header id="main-navbar"></header>
+
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-1 w-full">
+        <div class="mb-8 text-center sm:text-left">
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-white">Confirmación y Entrega</h1>
+            <p class="text-sm text-slate-400 mt-1">Completa los datos de destino para procesar tu orden de compra</p>
+        </div>
+
+        <div id="checkout-container" class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+            
+            <!-- Formulario de Envío -->
+            <div class="glass-panel p-6 sm:p-8 rounded-3xl border border-slate-800 shadow-xl">
+                <h2 class="text-lg font-bold text-white mb-5 flex items-center space-x-2">
+                    <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    <span>Datos de Envío</span>
+                </h2>
+
+                <form id="checkout-form" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Dirección de entrega *</label>
+                        <input id="checkout-address" type="text" placeholder="Ej. Av. Javier Prado Este 1234, Dpto 502" required
+                               class="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors" />
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Teléfono de contacto *</label>
+                        <input id="checkout-phone" type="tel" placeholder="Ej. 987654321" required
+                               class="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors" />
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1.5">Método de entrega</label>
+                        <div class="p-3 bg-slate-900/80 rounded-xl border border-indigo-500/30 flex items-center justify-between">
+                            <span class="text-sm font-medium text-white">Despacho Express a Domicilio</span>
+                            <span class="text-xs font-bold text-emerald-400">Gratis</span>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="btn-confirm-order" class="w-full mt-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg shadow-indigo-600/30 flex items-center justify-center space-x-2 transition-all transform hover:-translate-y-0.5">
+                        <span>Confirmar y Generar Pedido</span>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Resumen y Desglose -->
+            <div class="glass-panel p-6 sm:p-8 rounded-3xl border border-slate-800 shadow-xl space-y-6">
+                <h2 class="text-lg font-bold text-white border-b border-slate-800 pb-3">Resumen de Compra</h2>
+                
+                <div id="checkout-items" class="space-y-3 max-h-64 overflow-y-auto pr-1 text-sm">
+                    <!-- Dinámico -->
+                </div>
+
+                <div class="border-t border-slate-800 pt-4 space-y-2 text-sm">
+                    <div class="flex justify-between text-slate-400">
+                        <span>Subtotal</span>
+                        <span id="checkout-subtotal" class="font-semibold text-white">S/ 0.00</span>
+                    </div>
+                    <div class="flex justify-between text-slate-400">
+                        <span>Envío</span>
+                        <span class="font-semibold text-emerald-400">S/ 0.00</span>
+                    </div>
+                    <div class="flex justify-between items-baseline pt-2 border-t border-slate-800 text-base">
+                        <span class="font-bold text-white">Total</span>
+                        <span id="checkout-total" class="text-2xl font-black text-indigo-400">S/ 0.00</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="border-t border-slate-800/80 bg-slate-950 py-8 mt-16 text-center text-xs text-slate-500">
+        <p>© 2026 NovaStore. Compra protegida y segura.</p>
+    </footer>
+
+    <script type="module">
+        import { api } from '/assets/js/api.js';
+        import { auth } from '/assets/js/auth.js';
+        import { cart } from '/assets/js/cart.js';
+        import { renderNavbar } from '/assets/js/ui/navbar.js';
+        import { showToast } from '/assets/js/ui/toast.js';
+
+        renderNavbar();
+
+        if (!auth.protegerRutaAutenticada()) {
+            // Detener ejecución si no está autenticado
+        } else {
+            initCheckout();
+        }
+
+        async function initCheckout() {
+            const itemsContainer = document.getElementById('checkout-items');
+            const subtotalEl = document.getElementById('checkout-subtotal');
+            const totalEl = document.getElementById('checkout-total');
+            const form = document.getElementById('checkout-form');
+            const confirmBtn = document.getElementById('btn-confirm-order');
+
+            try {
+                const datos = await cart.obtenerCarrito();
+                if (!datos || !datos.items || datos.items.length === 0) {
+                    showToast('Tu carrito está vacío. Agrega productos primero.', 'warning');
+                    setTimeout(() => window.location.href = '/index.html', 1000);
+                    return;
+                }
+
+                const totalFormateado = new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(datos.total);
+                subtotalEl.textContent = totalFormateado;
+                totalEl.textContent = totalFormateado;
+
+                itemsContainer.innerHTML = '';
+                datos.items.forEach(item => {
+                    const sub = new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(item.subtotal);
+                    itemsContainer.innerHTML += `
+                        <div class="flex justify-between items-center py-2 border-b border-slate-800/50">
+                            <div>
+                                <span class="font-medium text-white block">${item.productoNombre}</span>
+                                <span class="text-xs text-slate-400">${item.cantidad} x S/ ${item.precioUnitario}</span>
+                            </div>
+                            <span class="font-semibold text-slate-200">${sub}</span>
+                        </div>
+                    `;
+                });
+
+                form.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    confirmBtn.disabled = true;
+                    confirmBtn.innerHTML = `
+                        <div class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        <span>Generando orden...</span>
+                    `;
+
+                    const direccion = document.getElementById('checkout-address').value.trim();
+                    const telefono = document.getElementById('checkout-phone').value.trim();
+
+                    try {
+                        const res = await api.post('/api/pedidos', {
+                            direccionEnvio: direccion,
+                            telefono: telefono
+                        });
+
+                        if (res.exito && res.datos) {
+                            showToast('¡Pedido creado exitosamente con el ID #' + res.datos.id + '!', 'success');
+                            cart.actualizarBadge(0);
+                            setTimeout(() => {
+                                window.location.href = '/mis-pedidos.html';
+                            }, 1200);
+                        } else {
+                            throw new Error(res.mensaje || 'Error al procesar el pedido');
+                        }
+                    } catch (err) {
+                        showToast(err.message, 'error');
+                        confirmBtn.disabled = false;
+                        confirmBtn.innerHTML = `
+                            <span>Confirmar y Generar Pedido</span>
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        `;
+                    }
+                });
+
+            } catch (err) {
+                showToast('Error cargando orden: ' + err.message, 'error');
+            }
+        }
+    </script>
+</body>
+</html>

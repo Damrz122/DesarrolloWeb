@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Pedidos — Admin NovaStore</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/assets/css/output.css">
+    <!-- SockJS & StompJS -->
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased">
+
+    <header id="main-navbar"></header>
+
+    <!-- Subnav Admin -->
+    <div class="bg-slate-900/60 border-b border-slate-800 backdrop-blur-md sticky top-16 sm:top-20 z-30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between overflow-x-auto py-3 space-x-6 text-sm">
+            <div class="flex items-center space-x-2">
+                <span class="px-2.5 py-1 rounded-lg bg-indigo-500/20 text-indigo-400 font-bold text-xs">ADMIN</span>
+                <span class="font-bold text-white">Pedidos</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <a href="/admin/dashboard.html" class="text-slate-400 hover:text-white transition-colors pb-1">Dashboard</a>
+                <a href="/admin/productos.html" class="text-slate-400 hover:text-white transition-colors pb-1">Productos</a>
+                <a href="/admin/categorias.html" class="text-slate-400 hover:text-white transition-colors pb-1">Categorías</a>
+                <a href="/admin/pedidos.html" class="text-indigo-400 font-semibold border-b-2 border-indigo-500 pb-1">Pedidos</a>
+                <a href="/admin/reportes.html" class="text-slate-400 hover:text-white transition-colors pb-1">Reportes</a>
+                <a href="/admin/chat.html" class="text-slate-400 hover:text-white transition-colors pb-1">Chat Clientes</a>
+            </div>
+        </div>
+    </div>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full space-y-6">
+        
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-white">Control de Órdenes y Envíos</h1>
+                <p class="text-sm text-slate-400 mt-1">Supervisa y actualiza el estado logístico de cada pedido</p>
+            </div>
+
+            <!-- Filtro por Estado -->
+            <div class="flex items-center space-x-2">
+                <label class="text-xs text-slate-400 font-medium">Estado:</label>
+                <select id="filtro-estado" class="bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
+                    <option value="">Todos los estados</option>
+                    <option value="PENDIENTE">Pendientes</option>
+                    <option value="EN_PROCESO">En Proceso</option>
+                    <option value="ENVIADO">Enviados</option>
+                    <option value="ENTREGADO">Entregados</option>
+                    <option value="CANCELADO">Cancelados</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Tabla de Pedidos -->
+        <div class="glass-panel rounded-3xl border border-slate-800 shadow-xl overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs text-slate-300">
+                    <thead class="bg-slate-900 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
+                        <tr>
+                            <th class="p-4">Pedido</th>
+                            <th class="p-4">Cliente</th>
+                            <th class="p-4">Total</th>
+                            <th class="p-4">Destino / Teléfono</th>
+                            <th class="p-4">Estado Actual</th>
+                            <th class="p-4">Cambiar Estado</th>
+                            <th class="p-4 text-right">Detalle</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pedidos-table-body" class="divide-y divide-slate-800/60">
+                        <tr>
+                            <td colspan="7" class="p-8 text-center text-slate-500">Cargando órdenes...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Modal Detalle Pedido Admin -->
+    <div id="modal-pedido" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+        <div class="glass-panel w-full max-w-xl rounded-3xl border border-slate-800 shadow-2xl p-6 sm:p-8">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-4 mb-6">
+                <h3 id="modal-ped-title" class="text-lg font-bold text-white">Detalle de Pedido</h3>
+                <button id="modal-ped-close" class="text-slate-400 hover:text-white p-1 rounded-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div id="modal-ped-content" class="space-y-4 text-xs"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { api } from '/assets/js/api.js';
+        import { auth } from '/assets/js/auth.js';
+        import { renderNavbar } from '/assets/js/ui/navbar.js';
+        import { showToast } from '/assets/js/ui/toast.js';
+
+        renderNavbar();
+
+        if (!auth.protegerRutaAdmin()) {
+            // Redirige
+        } else {
+            initPedidosAdmin();
+        }
+
+        const tbody = document.getElementById('pedidos-table-body');
+        const filtroEstado = document.getElementById('filtro-estado');
+        const modal = document.getElementById('modal-pedido');
+        const modalClose = document.getElementById('modal-ped-close');
+        const modalTitle = document.getElementById('modal-ped-title');
+        const modalContent = document.getElementById('modal-ped-content');
+
+        modalClose.addEventListener('click', () => modal.classList.add('hidden'));
+
+        function initPedidosAdmin() {
+            cargarPedidosAdmin();
+            filtroEstado.addEventListener('change', () => {
+                cargarPedidosAdmin();
+            });
+        }
+
+        async function cargarPedidosAdmin() {
+            const estado = filtroEstado.value;
+            let url = '/api/pedidos?size=50';
+            if (estado) url += `&estado=${estado}`;
+
+            try {
+                const res = await api.get(url);
+                tbody.innerHTML = '';
+
+                if (res.exito && res.datos && res.datos.contenido.length > 0) {
+                    res.datos.contenido.forEach(p => {
+                        const total = new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(p.total);
+                        const fecha = new Date(p.fecha).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+                        const tr = document.createElement('tr');
+                        tr.className = 'hover:bg-slate-900/50 transition-colors';
+                        tr.innerHTML = `
+                            <td class="p-4">
+                                <span class="font-black text-white">#${p.id}</span>
+                                <div class="text-[11px] text-slate-500">${fecha}</div>
+                            </td>
+                            <td class="p-4">
+                                <div class="font-semibold text-slate-200">${p.usuarioNombre || 'Cliente'}</div>
+                                <div class="text-[11px] text-slate-500">${p.usuarioEmail || ''}</div>
+                            </td>
+                            <td class="p-4 font-black text-indigo-400">${total}</td>
+                            <td class="p-4 text-slate-300">
+                                <div>${p.direccionEnvio || '—'}</div>
+                                <div class="text-[11px] text-slate-500">Tel: ${p.telefono || '—'}</div>
+                            </td>
+                            <td class="p-4">${obtenerBadge(p.estado)}</td>
+                            <td class="p-4">
+                                <select class="select-cambiar-estado bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-[11px] text-white focus:outline-none focus:border-indigo-500">
+                                    <option value="PENDIENTE" ${p.estado === 'PENDIENTE' ? 'selected' : ''}>Pendiente</option>
+                                    <option value="EN_PROCESO" ${p.estado === 'EN_PROCESO' ? 'selected' : ''}>En Proceso</option>
+                                    <option value="ENVIADO" ${p.estado === 'ENVIADO' ? 'selected' : ''}>Enviado</option>
+                                    <option value="ENTREGADO" ${p.estado === 'ENTREGADO' ? 'selected' : ''}>Entregado</option>
+                                    <option value="CANCELADO" ${p.estado === 'CANCELADO' ? 'selected' : ''}>Cancelado</option>
+                                </select>
+                            </td>
+                            <td class="p-4 text-right">
+                                <button class="btn-ver-detalle px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold border border-slate-700 transition-colors">
+                                    Artículos
+                                </button>
+                            </td>
+                        `;
+
+                        tr.querySelector('.select-cambiar-estado').addEventListener('change', async (e) => {
+                            const nuevoEstado = e.target.value;
+                            await actualizarEstado(p.id, nuevoEstado);
+                        });
+
+                        tr.querySelector('.btn-ver-detalle').addEventListener('click', () => {
+                            abrirModal(p);
+                        });
+
+                        tbody.appendChild(tr);
+                    });
+                } else {
+                    tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-500">No se encontraron pedidos con ese criterio.</td></tr>`;
+                }
+            } catch (err) {
+                tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-rose-400">Error: ${err.message}</td></tr>`;
+            }
+        }
+
+        async function actualizarEstado(pedidoId, nuevoEstado) {
+            try {
+                await api.patch(`/api/pedidos/${pedidoId}/estado`, { estado: nuevoEstado });
+                showToast(`Pedido #${pedidoId} actualizado a ${nuevoEstado}`, 'success');
+                cargarPedidosAdmin();
+            } catch (err) {
+                showToast(err.message, 'error');
+                cargarPedidosAdmin();
+            }
+        }
+
+        function obtenerBadge(estado) {
+            switch (estado) {
+                case 'PENDIENTE': return `<span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-950/80 text-amber-300 border border-amber-500/30">Pendiente</span>`;
+                case 'EN_PROCESO': return `<span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-blue-950/80 text-blue-300 border border-blue-500/30">En Proceso</span>`;
+                case 'ENVIADO': return `<span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-purple-950/80 text-purple-300 border border-purple-500/30">Enviado</span>`;
+                case 'ENTREGADO': return `<span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-950/80 text-emerald-300 border border-emerald-500/30">Entregado</span>`;
+                case 'CANCELADO': return `<span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-rose-950/80 text-rose-300 border border-rose-500/30">Cancelado</span>`;
+                default: return `<span>${estado}</span>`;
+            }
+        }
+
+        function abrirModal(p) {
+            modalTitle.textContent = `Artículos de Orden #${p.id}`;
+            let html = '<div class="space-y-2">';
+            if (p.detalles && p.detalles.length > 0) {
+                p.detalles.forEach(d => {
+                    const sub = new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(d.subtotal);
+                    const pu = new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(d.precioUnitario);
+                    html += `
+                        <div class="flex justify-between items-center p-3 bg-slate-900/60 rounded-xl border border-slate-800">
+                            <div>
+                                <span class="font-bold text-white block">${d.productoNombre}</span>
+                                <span class="text-slate-400 text-[11px]">${d.cantidad} uds. x ${pu}</span>
+                            </div>
+                            <span class="font-black text-indigo-300">${sub}</span>
+                        </div>
+                    `;
+                });
+            } else {
+                html += '<p class="text-slate-400">Sin detalles.</p>';
+            }
+            html += '</div>';
+            modalContent.innerHTML = html;
+            modal.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

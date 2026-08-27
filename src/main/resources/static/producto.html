@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle de Producto — NovaStore</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/assets/css/output.css">
+    <!-- SockJS & StompJS -->
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased">
+
+    <header id="main-navbar"></header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-1 w-full">
+        
+        <!-- Migas de pan (Breadcrumbs) -->
+        <nav class="flex items-center space-x-2 text-xs text-slate-400 mb-8">
+            <a href="/index.html" class="hover:text-white transition-colors">Inicio</a>
+            <span>/</span>
+            <a href="/index.html" class="hover:text-white transition-colors">Catálogo</a>
+            <span>/</span>
+            <span id="breadcrumb-title" class="text-indigo-400 truncate max-w-xs">Cargando...</span>
+        </nav>
+
+        <!-- Contenedor del Producto -->
+        <div id="product-detail-container" class="glass-panel rounded-3xl p-6 sm:p-10 border border-slate-800 shadow-2xl">
+            <!-- Esqueleto de carga -->
+            <div class="py-20 text-center text-slate-500">
+                <div class="w-10 h-10 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin mx-auto mb-4"></div>
+                <p class="text-sm">Cargando detalles del producto...</p>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="border-t border-slate-800/80 bg-slate-950 py-8 mt-16 text-center text-xs text-slate-500">
+        <p>© 2026 NovaStore. Calidad y garantía tecnológica.</p>
+    </footer>
+
+    <script type="module">
+        import { api } from '/assets/js/api.js';
+        import { cart } from '/assets/js/cart.js';
+        import { renderNavbar } from '/assets/js/ui/navbar.js';
+        import { showToast } from '/assets/js/ui/toast.js';
+
+        renderNavbar();
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const productId = urlParams.get('id');
+        const container = document.getElementById('product-detail-container');
+        const breadcrumbTitle = document.getElementById('breadcrumb-title');
+
+        if (!productId) {
+            container.innerHTML = `
+                <div class="text-center py-12 text-rose-400">
+                    <p class="text-lg font-bold">No se especificó un producto válido.</p>
+                    <a href="/index.html" class="mt-4 inline-block text-indigo-400 hover:underline text-sm">Volver al catálogo</a>
+                </div>
+            `;
+        } else {
+            cargarDetalle(productId);
+        }
+
+        async function cargarDetalle(id) {
+            try {
+                const res = await api.get(`/api/productos/${id}`);
+                if (!res.exito || !res.datos) {
+                    throw new Error(res.mensaje || 'Producto no disponible');
+                }
+
+                const p = res.datos;
+                breadcrumbTitle.textContent = p.nombre;
+                document.title = `${p.nombre} — NovaStore`;
+
+                const precioFormateado = new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(p.precio);
+                const tieneStock = p.stock > 0;
+                const imagenFallback = 'https://images.unsplash.com/photo-1526738549149-8e07eca6c147?w=600&auto=format&fit=crop&q=80';
+
+                container.innerHTML = `
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14">
+                        
+                        <!-- Columna Izquierda: Imagen -->
+                        <div class="relative bg-slate-900/80 rounded-2xl overflow-hidden border border-slate-800 flex items-center justify-center p-6 min-h-[380px] lg:min-h-[460px]">
+                            <img 
+                                src="${p.imagenUrl || imagenFallback}" 
+                                alt="${p.nombre}"
+                                class="w-full max-h-[420px] object-contain rounded-xl shadow-lg hover:scale-105 transition-transform duration-500"
+                                onerror="this.src='${imagenFallback}'"
+                            />
+                            <span class="absolute top-4 left-4 bg-indigo-600/90 text-white text-xs font-semibold px-3 py-1.5 rounded-xl backdrop-blur-md">
+                                ${p.categoriaNombre || 'Tecnología'}
+                            </span>
+                        </div>
+
+                        <!-- Columna Derecha: Información y Compra -->
+                        <div class="flex flex-col justify-between space-y-6">
+                            
+                            <div>
+                                <div class="flex items-center space-x-3 mb-3">
+                                    <span class="text-xs font-semibold px-3 py-1 rounded-lg ${
+                                        p.stock > 5 
+                                            ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-500/30' 
+                                            : p.stock > 0 
+                                                ? 'bg-amber-950/80 text-amber-300 border border-amber-500/30'
+                                                : 'bg-rose-950/80 text-rose-300 border border-rose-500/30'
+                                    }">
+                                        ${p.stock > 0 ? `En Stock (${p.stock} unidades)` : 'Agotado Temporalmente'}
+                                    </span>
+                                    <span class="text-xs text-slate-500">ID: #${p.id}</span>
+                                </div>
+
+                                <h1 class="text-2xl sm:text-4xl font-extrabold text-white leading-tight">
+                                    ${p.nombre}
+                                </h1>
+
+                                <div class="mt-4 flex items-baseline space-x-3">
+                                    <span class="text-3xl sm:text-4xl font-black text-indigo-400">${precioFormateado}</span>
+                                    <span class="text-xs text-slate-400">Incluye IGV</span>
+                                </div>
+
+                                <div class="mt-6 border-t border-slate-800 pt-6">
+                                    <h3 class="text-sm font-semibold text-slate-300 mb-2">Descripción del Producto</h3>
+                                    <p class="text-sm text-slate-400 leading-relaxed whitespace-pre-line">
+                                        ${p.descripcion || 'Sin descripción detallada disponible.'}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Selector de Cantidad y Agregar al Carrito -->
+                            <div class="border-t border-slate-800 pt-6">
+                                ${tieneStock ? `
+                                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
+                                        <!-- Contador -->
+                                        <div class="flex items-center border border-slate-700 bg-slate-900 rounded-xl p-1 w-full sm:w-auto justify-between sm:justify-start">
+                                            <button id="btn-minus" class="w-10 h-10 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-bold flex items-center justify-center transition-colors">
+                                                -
+                                            </button>
+                                            <input id="cant-input" type="number" value="1" min="1" max="${p.stock}" class="w-14 bg-transparent text-center text-sm font-bold text-white focus:outline-none" readonly />
+                                            <button id="btn-plus" class="w-10 h-10 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-bold flex items-center justify-center transition-colors">
+                                                +
+                                            </button>
+                                        </div>
+
+                                        <!-- Botón de compra -->
+                                        <button id="btn-add-cart" class="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg shadow-indigo-600/30 flex items-center justify-center space-x-2 transition-all transform hover:-translate-y-0.5">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                            </svg>
+                                            <span>Agregar al Carrito</span>
+                                        </button>
+                                    </div>
+                                ` : `
+                                    <div class="p-4 bg-rose-950/40 border border-rose-800/40 rounded-xl text-rose-300 text-sm text-center">
+                                        Este producto se encuentra temporalmente agotado. Vuelve a consultar pronto.
+                                    </div>
+                                `}
+
+                                <!-- Beneficios -->
+                                <div class="grid grid-cols-2 gap-3 mt-6 text-xs text-slate-400">
+                                    <div class="flex items-center space-x-2 p-3 bg-slate-900/50 rounded-xl border border-slate-800">
+                                        <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                        <span>Garantía Oficial 12 Meses</span>
+                                    </div>
+                                    <div class="flex items-center space-x-2 p-3 bg-slate-900/50 rounded-xl border border-slate-800">
+                                        <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                        <span>Despacho Inmediato</span>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                `;
+
+                if (tieneStock) {
+                    const btnMinus = document.getElementById('btn-minus');
+                    const btnPlus = document.getElementById('btn-plus');
+                    const cantInput = document.getElementById('cant-input');
+                    const btnAddCart = document.getElementById('btn-add-cart');
+
+                    btnMinus.addEventListener('click', () => {
+                        let val = parseInt(cantInput.value);
+                        if (val > 1) cantInput.value = val - 1;
+                    });
+
+                    btnPlus.addEventListener('click', () => {
+                        let val = parseInt(cantInput.value);
+                        if (val < p.stock) cantInput.value = val + 1;
+                        else showToast(`Stock máximo alcanzado (${p.stock})`, 'warning');
+                    });
+
+                    btnAddCart.addEventListener('click', async () => {
+                        const cant = parseInt(cantInput.value);
+                        await cart.agregarItem(p.id, cant);
+                    });
+                }
+
+            } catch (err) {
+                container.innerHTML = `
+                    <div class="text-center py-12 text-rose-400">
+                        <p class="text-base font-semibold">Error al cargar producto: ${err.message}</p>
+                        <a href="/index.html" class="mt-4 inline-block text-indigo-400 hover:underline text-sm">Volver al catálogo</a>
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

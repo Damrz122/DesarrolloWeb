@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Administrador — NovaStore</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/assets/css/output.css">
+    <!-- SockJS & StompJS -->
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased">
+
+    <!-- Admin Nav -->
+    <header id="main-navbar"></header>
+
+    <!-- Sub-Navbar de Administrador -->
+    <div class="bg-slate-900/60 border-b border-slate-800 backdrop-blur-md sticky top-16 sm:top-20 z-30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between overflow-x-auto py-3 space-x-6 text-sm">
+            <div class="flex items-center space-x-2">
+                <span class="px-2.5 py-1 rounded-lg bg-indigo-500/20 text-indigo-400 font-bold text-xs">ADMIN</span>
+                <span class="font-bold text-white">Panel de Control</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <a href="/admin/dashboard.html" class="text-indigo-400 font-semibold border-b-2 border-indigo-500 pb-1">Dashboard</a>
+                <a href="/admin/productos.html" class="text-slate-400 hover:text-white transition-colors pb-1">Productos</a>
+                <a href="/admin/categorias.html" class="text-slate-400 hover:text-white transition-colors pb-1">Categorías</a>
+                <a href="/admin/pedidos.html" class="text-slate-400 hover:text-white transition-colors pb-1">Pedidos</a>
+                <a href="/admin/reportes.html" class="text-slate-400 hover:text-white transition-colors pb-1">Reportes</a>
+                <a href="/admin/chat.html" class="text-slate-400 hover:text-white transition-colors pb-1 flex items-center space-x-1">
+                    <span>Chat Clientes</span>
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenido del Dashboard -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full space-y-8">
+        
+        <div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-white">Métricas y Resumen General</h1>
+            <p class="text-sm text-slate-400 mt-1">Estadísticas en tiempo real de ventas, actividad y catálogo</p>
+        </div>
+
+        <!-- Tarjetas de Métricas -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            
+            <div class="glass-panel p-6 rounded-2xl border border-slate-800 space-y-2">
+                <div class="flex justify-between items-center text-slate-400 text-xs font-semibold uppercase tracking-wider">
+                    <span>Ventas del Mes</span>
+                    <div class="p-2 rounded-xl bg-emerald-500/10 text-emerald-400">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                </div>
+                <div id="stat-ventas" class="text-2xl font-black text-white">S/ 0.00</div>
+                <p class="text-[11px] text-emerald-400">Total acumulado activo</p>
+            </div>
+
+            <div class="glass-panel p-6 rounded-2xl border border-slate-800 space-y-2">
+                <div class="flex justify-between items-center text-slate-400 text-xs font-semibold uppercase tracking-wider">
+                    <span>Total Pedidos</span>
+                    <div class="p-2 rounded-xl bg-indigo-500/10 text-indigo-400">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                    </div>
+                </div>
+                <div id="stat-pedidos" class="text-2xl font-black text-white">0</div>
+                <p class="text-[11px] text-indigo-400">Órdenes generadas</p>
+            </div>
+
+            <div class="glass-panel p-6 rounded-2xl border border-slate-800 space-y-2">
+                <div class="flex justify-between items-center text-slate-400 text-xs font-semibold uppercase tracking-wider">
+                    <span>Ticket Promedio</span>
+                    <div class="p-2 rounded-xl bg-purple-500/10 text-purple-400">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                    </div>
+                </div>
+                <div id="stat-ticket" class="text-2xl font-black text-white">S/ 0.00</div>
+                <p class="text-[11px] text-purple-400">Promedio por cliente</p>
+            </div>
+
+            <div class="glass-panel p-6 rounded-2xl border border-slate-800 space-y-2">
+                <div class="flex justify-between items-center text-slate-400 text-xs font-semibold uppercase tracking-wider">
+                    <span>Alerta Stock Crítico</span>
+                    <div class="p-2 rounded-xl bg-rose-500/10 text-rose-400">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    </div>
+                </div>
+                <div id="stat-stock-bajo" class="text-2xl font-black text-rose-400">0</div>
+                <p class="text-[11px] text-slate-400">Productos con ≤ 5 uds.</p>
+            </div>
+
+        </div>
+
+        <!-- Accesos Rápidos y Últimos Pedidos -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+            
+            <!-- Últimos Pedidos -->
+            <div class="lg:col-span-2 glass-panel p-6 rounded-3xl border border-slate-800 shadow-xl space-y-4">
+                <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+                    <h2 class="text-base font-bold text-white">Últimas Órdenes Registradas</h2>
+                    <a href="/admin/pedidos.html" class="text-xs font-semibold text-indigo-400 hover:underline">Ver todas →</a>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs text-slate-300">
+                        <thead class="bg-slate-900/80 text-slate-400 uppercase tracking-wider">
+                            <tr>
+                                <th class="p-3">ID</th>
+                                <th class="p-3">Cliente</th>
+                                <th class="p-3">Total</th>
+                                <th class="p-3">Estado</th>
+                                <th class="p-3">Fecha</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-pedidos-body" class="divide-y divide-slate-800/60">
+                            <tr>
+                                <td colspan="5" class="p-6 text-center text-slate-500">Cargando órdenes recientes...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Accesos Rápidos -->
+            <div class="glass-panel p-6 rounded-3xl border border-slate-800 shadow-xl space-y-4">
+                <h2 class="text-base font-bold text-white border-b border-slate-800 pb-4">Acciones Frecuentes</h2>
+                <div class="space-y-3">
+                    <a href="/admin/productos.html" class="flex items-center justify-between p-3.5 bg-slate-900/60 hover:bg-slate-800/60 border border-slate-800 rounded-xl text-sm font-medium text-slate-200 transition-colors">
+                        <div class="flex items-center space-x-3">
+                            <span class="p-2 rounded-lg bg-indigo-500/10 text-indigo-400">📦</span>
+                            <span>Gestionar Inventario</span>
+                        </div>
+                        <span class="text-slate-500">→</span>
+                    </a>
+                    <a href="/admin/pedidos.html" class="flex items-center justify-between p-3.5 bg-slate-900/60 hover:bg-slate-800/60 border border-slate-800 rounded-xl text-sm font-medium text-slate-200 transition-colors">
+                        <div class="flex items-center space-x-3">
+                            <span class="p-2 rounded-lg bg-purple-500/10 text-purple-400">🚚</span>
+                            <span>Cambiar Estado de Pedidos</span>
+                        </div>
+                        <span class="text-slate-500">→</span>
+                    </a>
+                    <a href="/admin/chat.html" class="flex items-center justify-between p-3.5 bg-slate-900/60 hover:bg-slate-800/60 border border-slate-800 rounded-xl text-sm font-medium text-slate-200 transition-colors">
+                        <div class="flex items-center space-x-3">
+                            <span class="p-2 rounded-lg bg-emerald-500/10 text-emerald-400">💬</span>
+                            <span>Atender Clientes en Vivo</span>
+                        </div>
+                        <span class="text-slate-500">→</span>
+                    </a>
+                    <a href="/admin/reportes.html" class="flex items-center justify-between p-3.5 bg-slate-900/60 hover:bg-slate-800/60 border border-slate-800 rounded-xl text-sm font-medium text-slate-200 transition-colors">
+                        <div class="flex items-center space-x-3">
+                            <span class="p-2 rounded-lg bg-amber-500/10 text-amber-400">📊</span>
+                            <span>Exportar Reporte de Ventas</span>
+                        </div>
+                        <span class="text-slate-500">→</span>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <footer class="border-t border-slate-800/80 bg-slate-950 py-6 text-center text-xs text-slate-500">
+        <p>© 2026 NovaStore — Módulo de Administración.</p>
+    </footer>
+
+    <script type="module">
+        import { api } from '/assets/js/api.js';
+        import { auth } from '/assets/js/auth.js';
+        import { renderNavbar } from '/assets/js/ui/navbar.js';
+        import { showToast } from '/assets/js/ui/toast.js';
+
+        renderNavbar();
+
+        if (!auth.protegerRutaAdmin()) {
+            // Redirige
+        } else {
+            cargarDashboard();
+        }
+
+        async function cargarDashboard() {
+            try {
+                // 1. Reporte para estadísticas
+                const repRes = await api.get('/api/reportes/ventas');
+                if (repRes.exito && repRes.datos) {
+                    const r = repRes.datos;
+                    document.getElementById('stat-ventas').textContent = new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(r.totalVentas);
+                    document.getElementById('stat-pedidos').textContent = r.totalPedidos;
+                    document.getElementById('stat-ticket').textContent = new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(r.ticketPromedio);
+                    document.getElementById('stat-stock-bajo').textContent = r.productosBajoStock ? r.productosBajoStock.length : 0;
+                }
+
+                // 2. Últimos pedidos
+                const pedRes = await api.get('/api/pedidos?size=5');
+                const tbody = document.getElementById('table-pedidos-body');
+
+                if (pedRes.exito && pedRes.datos && pedRes.datos.contenido.length > 0) {
+                    tbody.innerHTML = '';
+                    pedRes.datos.contenido.forEach(p => {
+                        const total = new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(p.total);
+                        const fecha = new Date(p.fecha).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+                        tbody.innerHTML += `
+                            <tr class="hover:bg-slate-900/40 transition-colors">
+                                <td class="p-3 font-bold text-white">#${p.id}</td>
+                                <td class="p-3">${p.usuarioNombre || 'Cliente'}</td>
+                                <td class="p-3 font-semibold text-white">${total}</td>
+                                <td class="p-3">${obtenerBadge(p.estado)}</td>
+                                <td class="p-3 text-slate-400">${fecha}</td>
+                            </tr>
+                        `;
+                    });
+                } else {
+                    tbody.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-500">No hay órdenes registradas aún.</td></tr>`;
+                }
+
+            } catch (err) {
+                console.error('Error cargando dashboard:', err);
+                showToast('Error cargando datos del dashboard', 'error');
+            }
+        }
+
+        function obtenerBadge(estado) {
+            switch (estado) {
+                case 'PENDIENTE': return `<span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-950/80 text-amber-300 border border-amber-500/30">Pendiente</span>`;
+                case 'EN_PROCESO': return `<span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-blue-950/80 text-blue-300 border border-blue-500/30">En Proceso</span>`;
+                case 'ENVIADO': return `<span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-purple-950/80 text-purple-300 border border-purple-500/30">Enviado</span>`;
+                case 'ENTREGADO': return `<span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-950/80 text-emerald-300 border border-emerald-500/30">Entregado</span>`;
+                case 'CANCELADO': return `<span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-rose-950/80 text-rose-300 border border-rose-500/30">Cancelado</span>`;
+                default: return `<span>${estado}</span>`;
+            }
+        }
+    </script>
+</body>
+</html>

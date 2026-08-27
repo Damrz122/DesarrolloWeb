@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Soporte y Chat en Vivo — Admin NovaStore</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/assets/css/output.css">
+    <!-- SockJS & StompJS -->
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased">
+
+    <header id="main-navbar"></header>
+
+    <!-- Subnav Admin -->
+    <div class="bg-slate-900/60 border-b border-slate-800 backdrop-blur-md sticky top-16 sm:top-20 z-30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between overflow-x-auto py-3 space-x-6 text-sm">
+            <div class="flex items-center space-x-2">
+                <span class="px-2.5 py-1 rounded-lg bg-indigo-500/20 text-indigo-400 font-bold text-xs">ADMIN</span>
+                <span class="font-bold text-white">Centro de Mensajería</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <a href="/admin/dashboard.html" class="text-slate-400 hover:text-white transition-colors pb-1">Dashboard</a>
+                <a href="/admin/productos.html" class="text-slate-400 hover:text-white transition-colors pb-1">Productos</a>
+                <a href="/admin/categorias.html" class="text-slate-400 hover:text-white transition-colors pb-1">Categorías</a>
+                <a href="/admin/pedidos.html" class="text-slate-400 hover:text-white transition-colors pb-1">Pedidos</a>
+                <a href="/admin/reportes.html" class="text-slate-400 hover:text-white transition-colors pb-1">Reportes</a>
+                <a href="/admin/chat.html" class="text-indigo-400 font-semibold border-b-2 border-indigo-500 pb-1">Chat Clientes</a>
+            </div>
+        </div>
+    </div>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full flex flex-col">
+        
+        <div class="mb-6">
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-white">Atención al Cliente en Vivo</h1>
+            <p class="text-sm text-slate-400 mt-1">Comunícate en tiempo real con los usuarios vía WebSocket STOMP</p>
+        </div>
+
+        <!-- Consola de Chat Dividida -->
+        <div class="flex-1 glass-panel rounded-3xl border border-slate-800 shadow-2xl flex flex-col md:flex-row overflow-hidden min-h-[550px]">
+            
+            <!-- Panel Izquierdo: Lista de Conversaciones -->
+            <div class="w-full md:w-80 border-b md:border-b-0 md:border-r border-slate-800 bg-slate-900/60 flex flex-col">
+                <div class="p-4 border-b border-slate-800 flex justify-between items-center">
+                    <span class="text-xs font-bold text-slate-300 uppercase tracking-wider">Conversaciones Activas</span>
+                    <button id="btn-refrescar-convs" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors" title="Refrescar">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    </button>
+                </div>
+
+                <div id="conversaciones-lista" class="flex-1 overflow-y-auto divide-y divide-slate-800/50">
+                    <div class="p-6 text-center text-xs text-slate-500">Cargando conversaciones...</div>
+                </div>
+            </div>
+
+            <!-- Panel Derecho: Mensajes en Tiempo Real -->
+            <div class="flex-1 flex flex-col bg-slate-950/40">
+                
+                <!-- Header de la conversación seleccionada -->
+                <div id="chat-header" class="p-4 border-b border-slate-800 bg-slate-900/40 flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-9 h-9 rounded-xl bg-indigo-600/30 text-indigo-400 border border-indigo-500/30 flex items-center justify-center font-bold text-sm">
+                            <span id="chat-cliente-avatar">?</span>
+                        </div>
+                        <div>
+                            <h3 id="chat-cliente-nombre" class="font-bold text-white text-sm">Selecciona una conversación</h3>
+                            <p id="chat-cliente-estado" class="text-[11px] text-slate-400">Canal en espera</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Historial de Mensajes -->
+                <div id="admin-chat-messages" class="flex-1 p-6 overflow-y-auto space-y-4 text-sm">
+                    <div class="h-full flex items-center justify-center text-slate-500 text-xs">
+                        Selecciona un cliente de la lista para abrir la sesión de chat.
+                    </div>
+                </div>
+
+                <!-- Barra de Entrada de Texto -->
+                <div class="p-4 border-t border-slate-800 bg-slate-900/60">
+                    <form id="admin-chat-form" class="flex items-center space-x-3">
+                        <input id="admin-chat-input" type="text" placeholder="Escribe una respuesta para el cliente..." disabled
+                               class="flex-1 bg-slate-900 border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors disabled:opacity-50" autocomplete="off" />
+                        <button type="submit" id="admin-chat-send" disabled
+                                class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-5 py-2.5 rounded-xl shadow-md shadow-indigo-600/30 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+                            Enviar
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <script type="module">
+        import { api } from '/assets/js/api.js';
+        import { auth } from '/assets/js/auth.js';
+        import { ChatClient } from '/assets/js/chat.js';
+        import { renderNavbar } from '/assets/js/ui/navbar.js';
+        import { showToast } from '/assets/js/ui/toast.js';
+
+        renderNavbar();
+
+        if (!auth.protegerRutaAdmin()) {
+            // Guard
+        } else {
+            initChatAdmin();
+        }
+
+        const convsLista = document.getElementById('conversaciones-lista');
+        const btnRefrescar = document.getElementById('btn-refrescar-convs');
+        const messagesContainer = document.getElementById('admin-chat-messages');
+        const chatForm = document.getElementById('admin-chat-form');
+        const chatInput = document.getElementById('admin-chat-input');
+        const chatSend = document.getElementById('admin-chat-send');
+
+        const clienteNombre = document.getElementById('chat-cliente-nombre');
+        const clienteAvatar = document.getElementById('chat-cliente-avatar');
+        const clienteEstado = document.getElementById('chat-cliente-estado');
+
+        let chatClient = null;
+        let conversacionSeleccionada = null;
+
+        function initChatAdmin() {
+            cargarConversaciones();
+
+            btnRefrescar.addEventListener('click', () => {
+                cargarConversaciones();
+            });
+
+            chatForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const texto = chatInput.value.trim();
+                if (!texto || !chatClient || !conversacionSeleccionada) return;
+
+                chatClient.enviarMensaje(texto);
+                chatInput.value = '';
+            });
+        }
+
+        async function cargarConversaciones() {
+            try {
+                const res = await api.get('/api/chat/conversaciones');
+                convsLista.innerHTML = '';
+
+                if (res.exito && res.datos && res.datos.length > 0) {
+                    res.datos.forEach(conv => {
+                        const item = document.createElement('div');
+                        item.className = `p-4 cursor-pointer hover:bg-slate-800/60 transition-colors flex items-center justify-between ${
+                            conversacionSeleccionada && conversacionSeleccionada.id === conv.id ? 'bg-indigo-950/40 border-l-4 border-indigo-500' : ''
+                        }`;
+
+                        item.innerHTML = `
+                            <div class="flex items-center space-x-3 truncate">
+                                <div class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-xs font-bold text-white">
+                                    ${conv.clienteNombre ? conv.clienteNombre.charAt(0).toUpperCase() : 'C'}
+                                </div>
+                                <div class="truncate">
+                                    <div class="text-xs font-bold text-white truncate">${conv.clienteNombre}</div>
+                                    <div class="text-[11px] text-slate-400 truncate">${conv.ultimoMensaje || 'Sin mensajes'}</div>
+                                </div>
+                            </div>
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0"></span>
+                        `;
+
+                        item.addEventListener('click', () => {
+                            seleccionarConversacion(conv);
+                        });
+
+                        convsLista.appendChild(item);
+                    });
+                } else {
+                    convsLista.innerHTML = '<div class="p-6 text-center text-xs text-slate-500">No hay chats abiertos por clientes.</div>';
+                }
+            } catch (err) {
+                convsLista.innerHTML = `<div class="p-4 text-rose-400 text-xs">Error: ${err.message}</div>`;
+            }
+        }
+
+        async function seleccionarConversacion(conv) {
+            conversacionSeleccionada = conv;
+            clienteNombre.textContent = conv.clienteNombre;
+            clienteAvatar.textContent = conv.clienteNombre ? conv.clienteNombre.charAt(0).toUpperCase() : 'C';
+            clienteEstado.textContent = `Sala #${conv.id} — Conectado en tiempo real`;
+
+            chatInput.disabled = false;
+            chatSend.disabled = false;
+            chatInput.focus();
+
+            // Desconectar cliente STOMP previo si había
+            if (chatClient) {
+                chatClient.desconectar();
+            }
+
+            try {
+                // Cargar historial de la conversación
+                const resHistorial = await api.get(`/api/chat/conversaciones/${conv.id}/mensajes`);
+                messagesContainer.innerHTML = '';
+
+                if (resHistorial.exito && resHistorial.datos) {
+                    resHistorial.datos.forEach(m => agregarMensajeUI(m));
+                }
+
+                // Conectar al canal STOMP de esta conversación
+                chatClient = new ChatClient();
+                await chatClient.conectar(conv.id, (nuevoMensaje) => {
+                    agregarMensajeUI(nuevoMensaje);
+                });
+
+            } catch (err) {
+                console.error('Error al conectar chat admin:', err);
+                showToast('Error al conectar con la conversación', 'error');
+            }
+        }
+
+        function agregarMensajeUI(m) {
+            const user = auth.getUser();
+            const esMio = user && m.remitenteId === user.id;
+
+            const div = document.createElement('div');
+            div.className = `flex flex-col ${esMio ? 'items-end' : 'items-start'}`;
+
+            const hora = m.fechaEnvio ? new Date(m.fechaEnvio).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+
+            div.innerHTML = `
+                <div class="text-[11px] text-slate-400 mb-1 px-1">${m.remitenteNombre} (${m.remitenteRol})</div>
+                <div class="max-w-[75%] rounded-2xl px-4 py-2.5 text-sm shadow-md ${
+                    esMio 
+                        ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-br-none' 
+                        : 'bg-slate-800 text-slate-200 border border-slate-700 rounded-bl-none'
+                }">
+                    ${m.contenido}
+                </div>
+                <div class="text-[10px] text-slate-500 mt-1 px-1">${hora}</div>
+            `;
+
+            messagesContainer.appendChild(div);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+    </script>
+</body>
+</html>

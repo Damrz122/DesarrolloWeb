@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NovaStore — Tienda Virtual de Tecnología</title>
+    <meta name="description" content="Encuentra las mejores laptops, smartphones, accesorios y periféricos en NovaStore. Envíos rápidos y seguros.">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/assets/css/output.css">
+    <!-- SockJS & StompJS para chat en vivo -->
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
+
+    <!-- Header / Navbar -->
+    <header id="main-navbar"></header>
+
+    <!-- Hero Banner -->
+    <section class="relative overflow-hidden pt-8 pb-12 sm:pt-12 sm:pb-16 bg-gradient-to-b from-indigo-950/40 via-slate-950 to-slate-950">
+        <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl pointer-events-none animate-glow"></div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+            <span class="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 text-xs font-semibold uppercase tracking-wider mb-4">
+                ✨ Nueva Generación Tecnológica
+            </span>
+            <h1 class="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white max-w-4xl mx-auto leading-tight">
+                El ecosistema digital diseñado para potenciar tu productividad
+            </h1>
+            <p class="mt-4 text-base sm:text-lg text-slate-400 max-w-2xl mx-auto">
+                Explora lo último en hardware, smartphones y periféricos con garantía y soporte personalizado en tiempo real.
+            </p>
+        </div>
+    </section>
+
+    <!-- Contenido Principal: Filtros y Catálogo -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full">
+        
+        <!-- Barra de Búsqueda y Filtros Rápidos -->
+        <div class="glass-panel p-4 sm:p-6 rounded-2xl mb-8 shadow-xl">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                
+                <!-- Buscador por texto -->
+                <div class="relative">
+                    <label class="block text-xs font-medium text-slate-400 mb-1.5">Buscar producto</label>
+                    <div class="relative">
+                        <input id="filter-search" type="text" placeholder="Ej. MacBook, iPhone, Teclado..." 
+                               class="w-full bg-slate-900 border border-slate-700/80 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors">
+                        <svg class="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Categoría -->
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1.5">Categoría</label>
+                    <select id="filter-categoria" class="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors">
+                        <option value="">Todas las categorías</option>
+                    </select>
+                </div>
+
+                <!-- Rango de Precios -->
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1.5">Precio Máximo (S/)</label>
+                    <div class="flex items-center space-x-2">
+                        <input id="filter-price" type="range" min="0" max="10000" step="100" value="10000" 
+                               class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500">
+                        <span id="price-val" class="text-xs font-bold text-indigo-400 min-w-[70px] text-right">S/ 10,000</span>
+                    </div>
+                </div>
+
+                <!-- Ordenar por -->
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1.5">Ordenar por</label>
+                    <select id="filter-order" class="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors">
+                        <option value="fechaCreacion:desc">Más recientes</option>
+                        <option value="precio:asc">Precio: Menor a Mayor</option>
+                        <option value="precio:desc">Precio: Mayor a Menor</option>
+                        <option value="nombre:asc">Nombre: A - Z</option>
+                    </select>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Grid de Productos -->
+        <div id="products-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- Cargando esqueleto -->
+            <div class="col-span-full py-16 text-center text-slate-500 flex flex-col items-center">
+                <div class="w-10 h-10 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin mb-4"></div>
+                <p class="text-sm">Cargando catálogo de productos...</p>
+            </div>
+        </div>
+
+        <!-- Paginación -->
+        <div id="pagination-container" class="mt-12 flex justify-center items-center space-x-2 hidden">
+            <button id="prev-page" class="px-4 py-2 rounded-xl bg-slate-800 border border-slate-700 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all">
+                Anterior
+            </button>
+            <span id="page-info" class="px-4 py-2 text-sm text-slate-400 font-medium">Página 1 de 1</span>
+            <button id="next-page" class="px-4 py-2 rounded-xl bg-slate-800 border border-slate-700 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all">
+                Siguiente
+            </button>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800/80 bg-slate-950 py-8 mt-16 text-center text-xs text-slate-500">
+        <div class="max-w-7xl mx-auto px-4">
+            <p>© 2026 NovaStore. Plataforma Web de Comercio Electrónico desarrollada para fines académicos.</p>
+        </div>
+    </footer>
+
+    <!-- Lógica JavaScript -->
+    <script type="module">
+        import { api } from '/assets/js/api.js';
+        import { cart } from '/assets/js/cart.js';
+        import { renderNavbar } from '/assets/js/ui/navbar.js';
+        import { renderProductCard } from '/assets/js/ui/productCard.js';
+        import { showToast } from '/assets/js/ui/toast.js';
+
+        renderNavbar();
+
+        let currentPage = 0;
+        let totalPages = 1;
+        const pageSize = 12;
+
+        const productsContainer = document.getElementById('products-container');
+        const searchInput = document.getElementById('filter-search');
+        const categoriaSelect = document.getElementById('filter-categoria');
+        const priceInput = document.getElementById('filter-price');
+        const priceVal = document.getElementById('price-val');
+        const orderSelect = document.getElementById('filter-order');
+        const paginationContainer = document.getElementById('pagination-container');
+        const prevPageBtn = document.getElementById('prev-page');
+        const nextPageBtn = document.getElementById('next-page');
+        const pageInfo = document.getElementById('page-info');
+
+        async function cargarCategorias() {
+            try {
+                const res = await api.get('/api/categorias');
+                if (res.exito && res.datos) {
+                    res.datos.forEach(cat => {
+                        const opt = document.createElement('option');
+                        opt.value = cat.id;
+                        opt.textContent = cat.nombre;
+                        categoriaSelect.appendChild(opt);
+                    });
+                }
+            } catch (err) {
+                console.error('Error cargando categorías:', err);
+            }
+        }
+
+        async function cargarProductos() {
+            const nombre = searchInput.value.trim();
+            const categoriaId = categoriaSelect.value;
+            const precioMax = priceInput.value;
+            const [sortBy, direction] = orderSelect.value.split(':');
+
+            let query = `/api/productos?page=${currentPage}&size=${pageSize}&sortBy=${sortBy}&direction=${direction}`;
+            if (nombre) query += `&nombre=${encodeURIComponent(nombre)}`;
+            if (categoriaId) query += `&categoriaId=${categoriaId}`;
+            if (precioMax && precioMax < 10000) query += `&precioMax=${precioMax}`;
+
+            try {
+                const res = await api.get(query);
+                productsContainer.innerHTML = '';
+
+                if (res.exito && res.datos && res.datos.contenido.length > 0) {
+                    totalPages = res.datos.totalPaginas;
+                    res.datos.contenido.forEach(prod => {
+                        const card = renderProductCard(prod, async (p) => {
+                            await cart.agregarItem(p.id, 1);
+                        });
+                        productsContainer.appendChild(card);
+                    });
+
+                    // Paginación
+                    if (totalPages > 1) {
+                        paginationContainer.classList.remove('hidden');
+                        pageInfo.textContent = `Página ${currentPage + 1} de ${totalPages}`;
+                        prevPageBtn.disabled = currentPage === 0;
+                        nextPageBtn.disabled = currentPage >= totalPages - 1;
+                    } else {
+                        paginationContainer.classList.add('hidden');
+                    }
+                } else {
+                    paginationContainer.classList.add('hidden');
+                    productsContainer.innerHTML = `
+                        <div class="col-span-full py-16 text-center text-slate-500">
+                            <svg class="w-12 h-12 mx-auto mb-3 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <p class="text-base font-semibold text-slate-300">No encontramos productos con esos filtros</p>
+                            <p class="text-xs text-slate-500 mt-1">Intenta ajustando el precio o buscando otro término</p>
+                        </div>
+                    `;
+                }
+            } catch (err) {
+                productsContainer.innerHTML = `<div class="col-span-full py-12 text-center text-rose-400 text-sm">Error al cargar productos: ${err.message}</div>`;
+            }
+        }
+
+        // Filtros y eventos
+        let debounceTimer;
+        searchInput.addEventListener('input', () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                currentPage = 0;
+                cargarProductos();
+            }, 300);
+        });
+
+        categoriaSelect.addEventListener('change', () => {
+            currentPage = 0;
+            cargarProductos();
+        });
+
+        priceInput.addEventListener('input', (e) => {
+            priceVal.textContent = `S/ ${parseInt(e.target.value).toLocaleString()}`;
+        });
+
+        priceInput.addEventListener('change', () => {
+            currentPage = 0;
+            cargarProductos();
+        });
+
+        orderSelect.addEventListener('change', () => {
+            currentPage = 0;
+            cargarProductos();
+        });
+
+        prevPageBtn.addEventListener('click', () => {
+            if (currentPage > 0) {
+                currentPage--;
+                cargarProductos();
+                window.scrollTo({ top: 400, behavior: 'smooth' });
+            }
+        });
+
+        nextPageBtn.addEventListener('click', () => {
+            if (currentPage < totalPages - 1) {
+                currentPage++;
+                cargarProductos();
+                window.scrollTo({ top: 400, behavior: 'smooth' });
+            }
+        });
+
+        cargarCategorias();
+        cargarProductos();
+    </script>
+</body>
+</html>
