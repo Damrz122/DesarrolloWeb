@@ -4,7 +4,11 @@ import com.tienda.ecommerce.producto.Categoria;
 import com.tienda.ecommerce.producto.CategoriaRepository;
 import com.tienda.ecommerce.producto.Producto;
 import com.tienda.ecommerce.producto.ProductoRepository;
+import com.tienda.ecommerce.usuario.Rol;
+import com.tienda.ecommerce.usuario.Usuario;
+import com.tienda.ecommerce.usuario.UsuarioRepository;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -15,10 +19,19 @@ public class DataInitializer implements CommandLineRunner {
 
     private final CategoriaRepository categoriaRepository;
     private final ProductoRepository productoRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public DataInitializer(CategoriaRepository categoriaRepository, ProductoRepository productoRepository) {
+    public DataInitializer(
+            CategoriaRepository categoriaRepository,
+            ProductoRepository productoRepository,
+            UsuarioRepository usuarioRepository,
+            PasswordEncoder passwordEncoder
+    ) {
         this.categoriaRepository = categoriaRepository;
         this.productoRepository = productoRepository;
+        this.usuarioRepository = usuarioRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -63,6 +76,29 @@ public class DataInitializer implements CommandLineRunner {
             );
 
             productoRepository.saveAll(productosIniciales);
+        }
+
+        if (usuarioRepository.count() == 0) {
+            Usuario admin = new Usuario(
+                    null,
+                    "Administrador",
+                    "admin@tienda.com",
+                    passwordEncoder.encode("admin123"),
+                    Rol.ADMIN,
+                    true
+            );
+
+            Usuario cliente = new Usuario(
+                    null,
+                    "Cliente Demo",
+                    "cliente@tienda.com",
+                    passwordEncoder.encode("cliente123"),
+                    Rol.CLIENTE,
+                    true
+            );
+
+            usuarioRepository.save(admin);
+            usuarioRepository.save(cliente);
         }
     }
 }
