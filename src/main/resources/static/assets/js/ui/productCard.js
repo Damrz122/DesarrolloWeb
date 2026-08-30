@@ -1,73 +1,79 @@
-// productCard.js - Componente de tarjeta de producto con estética moderna
+// productCard.js - Componente de tarjeta de producto estilo Electronix / Mercado Libre
 
 export function renderProductCard(producto, onAddToCart) {
     const card = document.createElement('div');
-    card.className = 'group relative flex flex-col bg-slate-900/60 backdrop-blur-md rounded-2xl border border-slate-800 hover:border-indigo-500/50 transition-all duration-300 hover:shadow-2xl hover:shadow-indigo-500/10 overflow-hidden';
+    card.className = 'group relative flex flex-col bg-white border border-neutral-200 hover:border-[#1ca299]/60 rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300';
 
     const precioFormateado = new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(producto.precio);
     const tieneStock = producto.stock > 0;
+    const esEnvioGratis = producto.precio >= 199;
     const imagenFallback = 'https://images.unsplash.com/photo-1526738549149-8e07eca6c147?w=600&auto=format&fit=crop&q=80';
 
     card.innerHTML = `
-        <div class="relative w-full h-56 bg-slate-950/40 overflow-hidden">
+        <!-- Imagen -->
+        <div class="relative w-full h-52 bg-white p-4 flex items-center justify-center overflow-hidden border-b border-neutral-100">
             <img 
                 src="${producto.imagenUrl || imagenFallback}" 
                 alt="${producto.nombre}"
-                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                class="max-h-44 w-auto object-contain group-hover:scale-105 transition-transform duration-300"
                 onerror="this.src='${imagenFallback}'"
             />
-            <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-60"></div>
             
-            <span class="absolute top-3 left-3 bg-slate-900/80 backdrop-blur-md text-indigo-400 text-xs font-semibold px-2.5 py-1 rounded-lg border border-slate-700">
+            <span class="absolute top-2.5 left-2.5 bg-neutral-900/80 text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">
                 ${producto.categoriaNombre || 'Tecnología'}
             </span>
 
-            <span class="absolute top-3 right-3 text-xs font-semibold px-2.5 py-1 rounded-lg backdrop-blur-md ${
+            <span class="absolute top-2.5 right-2.5 text-[10px] font-bold px-2 py-0.5 rounded ${
                 producto.stock > 5 
-                    ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-500/30' 
+                    ? 'bg-emerald-100 text-emerald-800' 
                     : producto.stock > 0 
-                        ? 'bg-amber-950/80 text-amber-300 border border-amber-500/30'
-                        : 'bg-rose-950/80 text-rose-300 border border-rose-500/30'
+                        ? 'bg-amber-100 text-amber-800'
+                        : 'bg-rose-100 text-rose-800'
             }">
                 ${producto.stock > 0 ? `${producto.stock} disponibles` : 'Agotado'}
             </span>
         </div>
 
-        <div class="flex-1 p-5 flex flex-col justify-between">
+        <!-- Información -->
+        <div class="p-4 flex-1 flex flex-col justify-between bg-white">
             <div>
-                <a href="/producto.html?id=${producto.id}" class="block group-hover:text-indigo-400 transition-colors">
-                    <h3 class="text-base font-bold text-white line-clamp-1">${producto.nombre}</h3>
+                <a href="/producto.html?id=${producto.id}" class="block">
+                    <h3 class="text-sm font-semibold text-neutral-800 group-hover:text-[#14635c] line-clamp-2 leading-snug transition-colors">
+                        ${producto.nombre}
+                    </h3>
                 </a>
-                <p class="text-xs text-slate-400 mt-2 line-clamp-2 leading-relaxed">
-                    ${producto.descripcion || 'Sin descripción disponible'}
-                </p>
+
+                <div class="mt-2.5 flex items-baseline space-x-2">
+                    <span class="text-xl font-black text-neutral-900">${precioFormateado}</span>
+                </div>
+
+                ${esEnvioGratis ? `
+                    <div class="mt-1 flex items-center space-x-1 text-emerald-600 text-xs font-bold">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                        <span>Envío gratis</span>
+                    </div>
+                ` : ''}
             </div>
 
-            <div class="mt-5 pt-4 border-t border-slate-800/80 flex items-center justify-between">
-                <div>
-                    <span class="text-xs text-slate-500 block">Precio</span>
-                    <span class="text-lg font-black text-white">${precioFormateado}</span>
-                </div>
+            <!-- Botones de Acción -->
+            <div class="mt-4 pt-3 border-t border-neutral-100 flex items-center justify-between gap-2">
+                <a href="/producto.html?id=${producto.id}" class="px-3 py-1.5 rounded-lg bg-neutral-100 hover:bg-neutral-200 text-neutral-700 text-xs font-bold transition-colors">
+                    Ver detalle
+                </a>
 
-                <div class="flex space-x-2">
-                    <a href="/producto.html?id=${producto.id}" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition-colors title='Ver detalle'">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                    </a>
-
-                    <button 
-                        class="add-btn p-2.5 rounded-xl ${
-                            tieneStock 
-                                ? 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/20' 
-                                : 'bg-slate-800 text-slate-600 cursor-not-allowed'
-                        } transition-all duration-200"
-                        ${tieneStock ? '' : 'disabled'}
-                        title="${tieneStock ? 'Agregar al carrito' : 'Sin stock'}"
-                    >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                        </svg>
-                    </button>
-                </div>
+                <button 
+                    class="add-btn flex-1 py-1.5 px-3 rounded-lg text-xs font-bold flex items-center justify-center space-x-1.5 transition-all duration-200 ${
+                        tieneStock 
+                            ? 'bg-[#14635c] hover:bg-[#1ca299] text-white shadow-sm' 
+                            : 'bg-neutral-200 text-neutral-400 cursor-not-allowed'
+                    }"
+                    ${tieneStock ? '' : 'disabled'}
+                >
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    <span>${tieneStock ? 'Agregar' : 'Sin stock'}</span>
+                </button>
             </div>
         </div>
     `;

@@ -1,63 +1,41 @@
-/* output.css - Estilos base y utilidades premium para NovaStore */
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+/* output.css - Estilos globales y tokens visuales para Electronix */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap');
 
 :root {
-    --primary: #6366f1;
-    --primary-hover: #4f46e5;
-    --bg-dark: #090d16;
-    --card-bg: rgba(15, 23, 42, 0.75);
+    --brand-teal-dark: #0b2e2b;
+    --brand-teal-medium: #14635c;
+    --brand-teal-light: #1ca299;
+    --brand-teal-accent: #22d3ee;
+    --nav-bg: #1e1e1e;
+    --subnav-bg: #2d2d2d;
+    --body-bg: #eaebed;
+    --card-bg: #ffffff;
 }
 
 body {
     font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-    background-color: var(--bg-dark);
-    color: #f8fafc;
+    background-color: var(--body-bg);
+    color: #1f2937;
     overflow-x: hidden;
 }
 
 /* Scrollbar estilizada */
 ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 7px;
+    height: 7px;
 }
 ::-webkit-scrollbar-track {
-    background: #0b1120;
+    background: #e5e7eb;
 }
 ::-webkit-scrollbar-thumb {
-    background: #1e293b;
+    background: #9ca3af;
     border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-    background: #334155;
+    background: #6b7280;
 }
 
-/* Glassmorphism */
-.glass-panel {
-    background: rgba(15, 23, 42, 0.7);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.glass-card {
-    background: rgba(30, 41, 59, 0.5);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-/* Micro-animaciones */
-@keyframes pulseGlow {
-    0%, 100% {
-        opacity: 0.4;
-        transform: scale(1);
-    }
-    50% {
-        opacity: 0.8;
-        transform: scale(1.05);
-    }
-}
-
-.animate-glow {
-    animation: pulseGlow 4s infinite ease-in-out;
+/* Transiciones suaves */
+.transition-smooth {
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }

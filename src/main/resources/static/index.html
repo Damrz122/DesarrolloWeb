@@ -1,106 +1,352 @@
 <!DOCTYPE html>
-<html lang="es" class="dark">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NovaStore — Tienda Virtual de Tecnología</title>
-    <meta name="description" content="Encuentra las mejores laptops, smartphones, accesorios y periféricos en NovaStore. Envíos rápidos y seguros.">
-    <!-- Tailwind CSS CDN -->
+    <title>ELECTRONIX — Tienda Oficial de Equipos Electrónicos</title>
+    <meta name="description" content="Encuentra computadoras, portátiles, smartphones, televisores y equipos de sonido con garantía y envíos gratis en Electronix.">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="/assets/css/output.css">
-    <!-- SockJS & StompJS para chat en vivo -->
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
+<body class="bg-[#eaebed] text-neutral-800 min-h-screen flex flex-col antialiased">
 
-    <header id="main-navbar"></header>
+    <div id="main-navbar"></div>
 
-    <section class="relative overflow-hidden pt-8 pb-12 sm:pt-12 sm:pb-16 bg-gradient-to-b from-indigo-950/40 via-slate-950 to-slate-950">
-        <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl pointer-events-none animate-glow"></div>
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-            <span class="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 text-xs font-semibold uppercase tracking-wider mb-4">
-                <svg class="w-3.5 h-3.5 text-indigo-400" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2l2.4 7.2h7.6l-6 4.8 2.4 7.2-6.4-4.8-6.4 4.8 2.4-7.2-6-4.8h7.6z"/>
-                </svg>
-                <span>Nueva Generación Tecnológica</span>
-            </span>
-            <h1 class="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white max-w-4xl mx-auto leading-tight">
-                El ecosistema digital diseñado para potenciar tu productividad
-            </h1>
-            <p class="mt-4 text-base sm:text-lg text-slate-400 max-w-2xl mx-auto">
-                Explora lo último en hardware, smartphones y periféricos con garantía y soporte personalizado en tiempo real.
-            </p>
-        </div>
-    </section>
-
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full">
+    <!-- 1. HERO CAROUSEL BANNER -->
+    <section class="relative w-full bg-gradient-to-r from-neutral-900 via-neutral-800 to-neutral-900 text-white overflow-hidden pb-16 sm:pb-24">
         
-        <div class="glass-panel p-4 sm:p-6 rounded-2xl mb-8 shadow-xl">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                
-                <div class="relative">
-                    <label class="block text-xs font-medium text-slate-400 mb-1.5">Buscar producto</label>
-                    <div class="relative">
-                        <input id="filter-search" type="text" placeholder="Ej. MacBook, iPhone, Teclado..." 
-                               class="w-full bg-slate-900 border border-slate-700/80 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors">
-                        <svg class="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                        </svg>
+        <div id="hero-slider" class="relative max-w-7xl mx-auto px-4 sm:px-8 py-10 sm:py-16 flex items-center justify-between min-h-[360px] sm:min-h-[440px]">
+            
+            <!-- Slide 1 (Activo) -->
+            <div class="hero-slide flex flex-col md:flex-row items-center justify-between w-full gap-8">
+                <div class="flex-1 space-y-4 text-center md:text-left z-10">
+                    <span class="inline-block bg-[#1ca299] text-neutral-950 font-black text-xs px-3 py-1 rounded uppercase tracking-wider">
+                        Hasta 40% OFF + Envíos Gratis
+                    </span>
+                    <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black uppercase tracking-tight text-white leading-none">
+                        COMPUTADORA
+                    </h1>
+                    <p class="text-sm sm:text-base text-neutral-300 max-w-md">
+                        Potencia tus proyectos y juegos con setups de última generación, procesadores de alto rendimiento y monitores 24" Full HD.
+                    </p>
+                    <div class="pt-2">
+                        <a href="#catalogo" class="inline-flex items-center space-x-2 px-6 py-3 bg-[#14635c] hover:bg-[#1ca299] text-white text-sm font-bold rounded-xl shadow-lg transition-colors">
+                            <span>Ver Promociones</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        </a>
                     </div>
                 </div>
 
+                <div class="flex-1 flex justify-center items-center z-10">
+                    <img 
+                        src="https://images.unsplash.com/photo-1587831990711-23ca6441447b?w=800&auto=format&fit=crop&q=80" 
+                        alt="Computadora Gamer y Monitor" 
+                        class="max-h-72 sm:max-h-84 object-contain drop-shadow-2xl rounded-2xl"
+                    />
+                </div>
+            </div>
+
+            <!-- Flechas de Navegación del Slider -->
+            <button id="slider-prev" class="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-neutral-900/60 hover:bg-neutral-900 border border-neutral-700 text-white flex items-center justify-center transition-all z-20" title="Anterior">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
+            </button>
+            <button id="slider-next" class="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-neutral-900/60 hover:bg-neutral-900 border border-neutral-700 text-white flex items-center justify-center transition-all z-20" title="Siguiente">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+            </button>
+        </div>
+
+    </section>
+
+    <!-- 2. TARJETAS FLOTANTES SUPERPUESTAS (FIGMA: OFERTAS, + VENDIDOS, RECOMENDACIÓN) -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-8 -mt-12 sm:-mt-16 relative z-30 w-full mb-12">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+            
+            <!-- Tarjeta 1: OFERTAS -->
+            <a href="#catalogo" id="card-ofertas" class="group bg-[#0f443f] hover:bg-[#12534d] text-white p-6 sm:p-8 rounded-2xl shadow-xl border border-[#166059] flex flex-col justify-between min-h-[160px] sm:min-h-[190px] transition-all transform hover:-translate-y-1">
+                <h2 class="text-xl sm:text-2xl font-black uppercase tracking-wider text-white">
+                    OFERTAS
+                </h2>
+                <div class="flex items-center justify-between pt-4">
+                    <span class="text-xs text-slate-200 font-semibold group-hover:underline">Explorar descuentos &rarr;</span>
+                    <div class="w-12 h-12 rounded-xl bg-[#092b28] flex items-center justify-center text-[#1ca299]">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path></svg>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Tarjeta 2: + VENDIDOS (Icono Billete con Gráfico de Crecimiento) -->
+            <a href="#catalogo" id="card-mas-vendidos" class="group bg-[#14635c] hover:bg-[#18756d] text-white p-6 sm:p-8 rounded-2xl shadow-xl border border-[#1c8077] flex flex-col justify-between min-h-[160px] sm:min-h-[190px] transition-all transform hover:-translate-y-1">
+                <h2 class="text-xl sm:text-2xl font-black uppercase tracking-wider text-white">
+                    + VENDIDOS
+                </h2>
+                <div class="flex items-center justify-between pt-4">
+                    <span class="text-xs text-slate-200 font-semibold group-hover:underline">Lo más pedido &rarr;</span>
+                    <!-- Icono SVG Billete + Crecimiento idéntico al Figma -->
+                    <div class="w-14 h-12 flex items-center justify-center">
+                        <svg class="w-12 h-10 text-white" viewBox="0 0 64 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <!-- Billete -->
+                            <rect x="4" y="16" width="56" height="28" rx="4" fill="currentColor" fill-opacity="0.15" />
+                            <circle cx="32" cy="30" r="5" fill="currentColor" fill-opacity="0.3" />
+                            <line x1="8" y1="20" x2="8" y2="40" />
+                            <line x1="56" y1="20" x2="56" y2="40" />
+                            <!-- Flecha de crecimiento superior -->
+                            <polyline points="14,14 26,4 36,12 48,2" stroke="#22d3ee" stroke-width="3" />
+                            <polyline points="40,2 48,2 48,10" stroke="#22d3ee" stroke-width="3" />
+                        </svg>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Tarjeta 3: RECOMENDACIÓN -->
+            <a href="#catalogo" id="card-recomendacion" class="group bg-[#17857d] hover:bg-[#1ba096] text-white p-6 sm:p-8 rounded-2xl shadow-xl border border-[#1eb0a5] flex flex-col justify-between min-h-[160px] sm:min-h-[190px] transition-all transform hover:-translate-y-1">
+                <h2 class="text-xl sm:text-2xl font-black uppercase tracking-wider text-white">
+                    RECOMENDACIÓN
+                </h2>
+                <div class="flex items-center justify-between pt-4">
+                    <span class="text-xs text-slate-200 font-semibold group-hover:underline">Selección especial &rarr;</span>
+                    <div class="w-12 h-12 rounded-xl bg-[#0e524d] flex items-center justify-center text-white">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path></svg>
+                    </div>
+                </div>
+            </a>
+
+        </div>
+    </section>
+
+    <!-- 3. SECCIÓN: EQUIPOS ELECTRONICOS (GRID DE CATEGORIAS FIGMA) -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-8 mb-12 w-full">
+        <div class="mb-6">
+            <h2 class="text-xl sm:text-2xl font-black text-neutral-900 uppercase tracking-tight">
+                EQUIPOS ELECTRONICOS
+            </h2>
+        </div>
+
+        <div id="categorias-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+            <!-- Cajas de categorías estilizadas según Figma -->
+            <button class="cat-tile group relative h-40 bg-neutral-500 hover:bg-[#14635c] rounded-xl p-4 flex flex-col justify-between text-left overflow-hidden shadow-sm hover:shadow-lg transition-all" data-name="Televisores">
+                <span class="font-extrabold text-white text-sm sm:text-base uppercase tracking-wider z-10">
+                    TELEVISORES
+                </span>
+                <div class="self-end text-neutral-300 group-hover:text-white z-10">
+                    <svg class="w-8 h-8 opacity-80 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                </div>
+            </button>
+
+            <button class="cat-tile group relative h-40 bg-neutral-500 hover:bg-[#14635c] rounded-xl p-4 flex flex-col justify-between text-left overflow-hidden shadow-sm hover:shadow-lg transition-all" data-name="Smartphones">
+                <span class="font-extrabold text-white text-sm sm:text-base uppercase tracking-wider z-10">
+                    SMARTPHONES
+                </span>
+                <div class="self-end text-neutral-300 group-hover:text-white z-10">
+                    <svg class="w-8 h-8 opacity-80 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                </div>
+            </button>
+
+            <button class="cat-tile group relative h-40 bg-neutral-500 hover:bg-[#14635c] rounded-xl p-4 flex flex-col justify-between text-left overflow-hidden shadow-sm hover:shadow-lg transition-all" data-name="Laptops">
+                <span class="font-extrabold text-white text-sm sm:text-base uppercase tracking-wider z-10">
+                    PORTATILES
+                </span>
+                <div class="self-end text-neutral-300 group-hover:text-white z-10">
+                    <svg class="w-8 h-8 opacity-80 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                </div>
+            </button>
+
+            <button class="cat-tile group relative h-40 bg-neutral-500 hover:bg-[#14635c] rounded-xl p-4 flex flex-col justify-between text-left overflow-hidden shadow-sm hover:shadow-lg transition-all" data-name="Audio">
+                <span class="font-extrabold text-white text-sm sm:text-base uppercase tracking-wider z-10">
+                    EQUIPO DE SONIDO
+                </span>
+                <div class="self-end text-neutral-300 group-hover:text-white z-10">
+                    <svg class="w-8 h-8 opacity-80 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>
+                </div>
+            </button>
+
+            <button class="cat-tile group relative h-40 bg-neutral-500 hover:bg-[#14635c] rounded-xl p-4 flex flex-col justify-between text-left overflow-hidden shadow-sm hover:shadow-lg transition-all" data-name="Accesorios">
+                <span class="font-extrabold text-white text-sm sm:text-base uppercase tracking-wider z-10">
+                    ACCESORIOS Y PC
+                </span>
+                <div class="self-end text-neutral-300 group-hover:text-white z-10">
+                    <svg class="w-8 h-8 opacity-80 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+                </div>
+            </button>
+        </div>
+    </section>
+
+    <!-- 4. BANNERS PROMOCIONALES (FIGMA IMAGEN 2: BANNER ANCHO 70% + LATERAL 30%) -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-8 mb-14 w-full">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+            <!-- Banner Izquierdo Grande -->
+            <div class="lg:col-span-2 relative bg-gradient-to-r from-neutral-900 to-neutral-800 rounded-2xl p-6 sm:p-10 flex flex-col sm:flex-row items-center justify-between gap-6 overflow-hidden shadow-md text-white">
+                <div class="space-y-2 max-w-sm z-10">
+                    <span class="text-xs font-bold text-[#1ca299] uppercase tracking-wider">¡COMPRA AHORA!</span>
+                    <h3 class="text-2xl sm:text-3xl font-black uppercase">LO MEJOR EN HARDWARE Y GAMING</h3>
+                    <p class="text-xs text-neutral-300">Encuentra periféricos y componentes con entrega inmediata y garantía.</p>
+                </div>
+                <div class="z-10">
+                    <a href="#catalogo" class="px-5 py-2.5 bg-[#14635c] hover:bg-[#1ca299] text-white text-xs font-bold rounded-xl shadow transition-colors inline-block">
+                        Ver más &rarr;
+                    </a>
+                </div>
+            </div>
+
+            <!-- Banner Derecho -->
+            <div class="relative bg-[#14635c] rounded-2xl p-6 sm:p-8 flex flex-col justify-between overflow-hidden shadow-md text-white">
+                <div class="space-y-2">
+                    <span class="text-[11px] font-bold text-white/80 uppercase tracking-wider">NUEVA COLECCIÓN</span>
+                    <h3 class="text-xl font-black uppercase">PORTÁTILES ULTRALIVIANAS</h3>
+                </div>
+                <div class="pt-4">
+                    <a href="#catalogo" class="text-xs font-bold text-white hover:underline flex items-center space-x-1">
+                        <span>Ver productos</span>
+                        <span>&rarr;</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 5. CATÁLOGO DE PRODUCTOS -->
+    <main id="catalogo" class="max-w-7xl mx-auto px-4 sm:px-8 pb-16 flex-1 w-full">
+        
+        <!-- Barra de Filtros -->
+        <div class="bg-white p-4 sm:p-6 rounded-2xl mb-8 shadow-sm border border-neutral-200">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-100 pb-4 mb-4">
                 <div>
-                    <label class="block text-xs font-medium text-slate-400 mb-1.5">Categoría</label>
-                    <select id="filter-categoria" class="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors">
+                    <h2 class="text-lg sm:text-xl font-black text-neutral-900 uppercase">Catálogo de Productos</h2>
+                    <p class="text-xs text-neutral-500">Explora todos los artículos disponibles con stock en tiempo real</p>
+                </div>
+                <button id="btn-limpiar-filtros" class="text-xs font-bold text-[#14635c] hover:underline self-start sm:self-auto">
+                    Limpiar todos los filtros
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-neutral-700 mb-1.5">Buscar por nombre</label>
+                    <input id="filter-search" type="text" placeholder="Ej. MacBook, Smart TV..." 
+                           class="w-full bg-neutral-50 border border-neutral-300 rounded-xl px-3.5 py-2 text-xs text-neutral-900 focus:outline-none focus:border-[#14635c]" />
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-neutral-700 mb-1.5">Categoría</label>
+                    <select id="filter-categoria" class="w-full bg-neutral-50 border border-neutral-300 rounded-xl px-3.5 py-2 text-xs text-neutral-900 focus:outline-none focus:border-[#14635c]">
                         <option value="">Todas las categorías</option>
                     </select>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-medium text-slate-400 mb-1.5">Precio Máximo (S/)</label>
-                    <div class="flex items-center space-x-2">
-                        <input id="filter-price" type="range" min="0" max="10000" step="100" value="10000" 
-                               class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500">
-                        <span id="price-val" class="text-xs font-bold text-indigo-400 min-w-[70px] text-right">S/ 10,000</span>
-                    </div>
+                    <label class="block text-xs font-bold text-neutral-700 mb-1.5">Precio Máximo: <span id="price-val" class="font-extrabold text-[#14635c]">S/ 10,000</span></label>
+                    <input id="filter-price" type="range" min="0" max="10000" step="100" value="10000" 
+                           class="w-full h-2 bg-neutral-200 rounded-lg appearance-none cursor-pointer accent-[#14635c]">
                 </div>
 
                 <div>
-                    <label class="block text-xs font-medium text-slate-400 mb-1.5">Ordenar por</label>
-                    <select id="filter-order" class="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors">
+                    <label class="block text-xs font-bold text-neutral-700 mb-1.5">Ordenar por</label>
+                    <select id="filter-order" class="w-full bg-neutral-50 border border-neutral-300 rounded-xl px-3.5 py-2 text-xs text-neutral-900 focus:outline-none focus:border-[#14635c]">
                         <option value="fechaCreacion:desc">Más recientes</option>
                         <option value="precio:asc">Precio: Menor a Mayor</option>
                         <option value="precio:desc">Precio: Mayor a Menor</option>
                         <option value="nombre:asc">Nombre: A - Z</option>
                     </select>
                 </div>
-
             </div>
         </div>
 
-        <div id="products-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            <div class="col-span-full py-16 text-center text-slate-500 flex flex-col items-center">
-                <div class="w-10 h-10 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin mb-4"></div>
-                <p class="text-sm">Cargando catálogo de productos...</p>
+        <!-- Grid de Tarjetas de Producto -->
+        <div id="products-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <div class="col-span-full py-16 text-center text-neutral-400 flex flex-col items-center">
+                <div class="w-10 h-10 border-4 border-[#14635c]/30 border-t-[#14635c] rounded-full animate-spin mb-4"></div>
+                <p class="text-sm">Cargando productos de Electronix...</p>
             </div>
         </div>
 
-        <div id="pagination-container" class="mt-12 flex justify-center items-center space-x-2 hidden">
-            <button id="prev-page" class="px-4 py-2 rounded-xl bg-slate-800 border border-slate-700 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all">
+        <!-- Paginación -->
+        <div id="pagination-container" class="mt-10 flex justify-center items-center space-x-2 hidden">
+            <button id="prev-page" class="px-4 py-2 rounded-xl bg-white border border-neutral-300 text-xs font-bold text-neutral-700 hover:bg-neutral-50 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm transition-all">
                 Anterior
             </button>
-            <span id="page-info" class="px-4 py-2 text-sm text-slate-400 font-medium">Página 1 de 1</span>
-            <button id="next-page" class="px-4 py-2 rounded-xl bg-slate-800 border border-slate-700 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all">
+            <span id="page-info" class="px-4 py-2 text-xs text-neutral-600 font-bold">Página 1 de 1</span>
+            <button id="next-page" class="px-4 py-2 rounded-xl bg-white border border-neutral-300 text-xs font-bold text-neutral-700 hover:bg-neutral-50 disabled:opacity-40 disabled:cursor-not-allowed shadow-sm transition-all">
                 Siguiente
             </button>
         </div>
 
     </main>
 
-    <footer class="border-t border-slate-800/80 bg-slate-950 py-8 mt-16 text-center text-xs text-slate-500">
-        <div class="max-w-7xl mx-auto px-4">
-            <p>© 2026 NovaStore. Plataforma Web de Comercio Electrónico.</p>
+    <!-- 6. FOOTER DUAL-TONE (FIGMA IMAGEN 3) -->
+    <footer class="w-full mt-auto">
+        <!-- Franja Superior Teal (#14635c) -->
+        <div class="bg-[#14635c] text-white py-8 px-4 sm:px-8 border-b border-[#18756d]">
+            <div class="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-6 text-center sm:text-left">
+                <div class="flex items-center justify-center sm:justify-start space-x-3">
+                    <div class="p-2.5 rounded-xl bg-[#092b28]/60 text-white">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-sm">Garantía Asegurada</h4>
+                        <p class="text-xs text-slate-200">12 meses de soporte oficial de fábrica.</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-center sm:justify-start space-x-3">
+                    <div class="p-2.5 rounded-xl bg-[#092b28]/60 text-white">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-sm">Despacho Rápido</h4>
+                        <p class="text-xs text-slate-200">Envíos gratis a todo el Perú en compras > S/ 199.</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-center sm:justify-start space-x-3">
+                    <div class="p-2.5 rounded-xl bg-[#092b28]/60 text-white">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-sm">Chat en Vivo</h4>
+                        <p class="text-xs text-slate-200">Atención personalizada con asesores.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Franja Inferior Carbón (#1e1e1e) con Logo y Links -->
+        <div class="bg-[#1e1e1e] text-neutral-300 py-10 px-4 sm:px-8 border-t border-neutral-800">
+            <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
+                
+                <!-- Logo Footer -->
+                <div class="flex flex-col items-center md:items-start space-y-2">
+                    <div class="flex items-center space-x-2.5">
+                        <div class="w-10 h-10 flex items-center justify-center">
+                            <svg class="w-full h-full text-slate-200" viewBox="0 0 100 90" fill="currentColor">
+                                <path d="M15 12h65c4 0 7 3 7 7s-3 7-7 7H38l-4 12h32c3 0 6 3 5 7l-4 10c-1 3-3 5-6 5H24l-6 18c-1 3-4 5-8 5s-6-3-5-7L15 12z" />
+                                <polygon points="68,28 48,50 62,50 42,75 50,56 36,56" fill="#1ca299" />
+                                <circle cx="42" cy="82" r="6" fill="#1ca299" />
+                                <circle cx="68" cy="82" r="6" fill="#1ca299" />
+                            </svg>
+                        </div>
+                        <span class="text-2xl font-black tracking-wider text-white uppercase">
+                            ELECTRONI<span class="text-[#1ca299]">X</span>
+                        </span>
+                    </div>
+                    <p class="text-xs text-neutral-400 text-center md:text-left">
+                        Tu tienda de tecnología y equipamiento electrónico líder en el mercado.
+                    </p>
+                </div>
+
+                <!-- Enlaces del Footer (Figma: INICIO, PRODUCTOS, MAS VENDIDOS, POPULARES) -->
+                <div class="flex flex-wrap items-center justify-center gap-6 text-xs font-bold uppercase tracking-wider text-neutral-300">
+                    <a href="/index.html" class="hover:text-[#1ca299] transition-colors">Inicio</a>
+                    <a href="#catalogo" class="hover:text-[#1ca299] transition-colors">Productos</a>
+                    <a href="#catalogo" class="hover:text-[#1ca299] transition-colors">Más Vendidos</a>
+                    <a href="#catalogo" class="hover:text-[#1ca299] transition-colors">Populares</a>
+                </div>
+
+            </div>
+
+            <div class="max-w-7xl mx-auto mt-8 pt-6 border-t border-neutral-800 text-center text-xs text-neutral-500">
+                <p>© 2026 ELECTRONIX. Todos los derechos reservados.</p>
+            </div>
         </div>
     </footer>
 
@@ -116,6 +362,7 @@
         let currentPage = 0;
         let totalPages = 1;
         const pageSize = 12;
+        let categoriasList = [];
 
         const productsContainer = document.getElementById('products-container');
         const searchInput = document.getElementById('filter-search');
@@ -127,15 +374,26 @@
         const prevPageBtn = document.getElementById('prev-page');
         const nextPageBtn = document.getElementById('next-page');
         const pageInfo = document.getElementById('page-info');
+        const btnLimpiar = document.getElementById('btn-limpiar-filtros');
+
+        // Leer query params iniciales (por ejemplo si viene de ?q= o ?categoriaId=)
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('q')) {
+            searchInput.value = urlParams.get('q');
+        }
 
         async function cargarCategorias() {
             try {
                 const res = await api.get('/api/categorias');
                 if (res.exito && res.datos) {
+                    categoriasList = res.datos;
                     res.datos.forEach(cat => {
                         const opt = document.createElement('option');
                         opt.value = cat.id;
                         opt.textContent = cat.nombre;
+                        if (urlParams.get('categoriaId') == cat.id) {
+                            opt.selected = true;
+                        }
                         categoriaSelect.appendChild(opt);
                     });
                 }
@@ -168,7 +426,6 @@
                         productsContainer.appendChild(card);
                     });
 
-                    // Paginación
                     if (totalPages > 1) {
                         paginationContainer.classList.remove('hidden');
                         pageInfo.textContent = `Página ${currentPage + 1} de ${totalPages}`;
@@ -180,19 +437,51 @@
                 } else {
                     paginationContainer.classList.add('hidden');
                     productsContainer.innerHTML = `
-                        <div class="col-span-full py-16 text-center text-slate-500">
-                            <svg class="w-12 h-12 mx-auto mb-3 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            <p class="text-base font-semibold text-slate-300">No encontramos productos con esos filtros</p>
-                            <p class="text-xs text-slate-500 mt-1">Intenta ajustando el precio o buscando otro término</p>
+                        <div class="col-span-full py-16 text-center text-neutral-500 bg-white rounded-2xl border border-neutral-200">
+                            <svg class="w-12 h-12 mx-auto mb-3 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <p class="text-base font-bold text-neutral-800">No encontramos productos con esos filtros</p>
+                            <p class="text-xs text-neutral-500 mt-1">Intenta ajustando el precio o buscando otro término</p>
                         </div>
                     `;
                 }
             } catch (err) {
-                productsContainer.innerHTML = `<div class="col-span-full py-12 text-center text-rose-400 text-sm">Error al cargar productos: ${err.message}</div>`;
+                productsContainer.innerHTML = `<div class="col-span-full py-12 text-center text-rose-600 text-sm font-semibold">Error al cargar productos: ${err.message}</div>`;
             }
         }
 
-        // Filtros y eventos
+        // Filtros rápidos de las tarjetas superiores
+        document.querySelectorAll('.cat-tile').forEach(tile => {
+            tile.addEventListener('click', () => {
+                const nombreCat = tile.dataset.name.toLowerCase();
+                const matched = categoriasList.find(c => c.nombre.toLowerCase().includes(nombreCat));
+                if (matched) {
+                    categoriaSelect.value = matched.id;
+                } else {
+                    searchInput.value = tile.dataset.name;
+                }
+                currentPage = 0;
+                cargarProductos();
+                document.getElementById('catalogo').scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+
+        document.getElementById('card-ofertas').addEventListener('click', () => {
+            orderSelect.value = 'precio:asc';
+            currentPage = 0;
+            cargarProductos();
+        });
+
+        document.getElementById('card-mas-vendidos').addEventListener('click', () => {
+            orderSelect.value = 'fechaCreacion:desc';
+            currentPage = 0;
+            cargarProductos();
+        });
+
+        document.getElementById('card-recomendacion').addEventListener('click', () => {
+            currentPage = 0;
+            cargarProductos();
+        });
+
         let debounceTimer;
         searchInput.addEventListener('input', () => {
             clearTimeout(debounceTimer);
@@ -221,11 +510,21 @@
             cargarProductos();
         });
 
+        btnLimpiar.addEventListener('click', () => {
+            searchInput.value = '';
+            categoriaSelect.value = '';
+            priceInput.value = 10000;
+            priceVal.textContent = 'S/ 10,000';
+            orderSelect.value = 'fechaCreacion:desc';
+            currentPage = 0;
+            cargarProductos();
+        });
+
         prevPageBtn.addEventListener('click', () => {
             if (currentPage > 0) {
                 currentPage--;
                 cargarProductos();
-                window.scrollTo({ top: 400, behavior: 'smooth' });
+                document.getElementById('catalogo').scrollIntoView({ behavior: 'smooth' });
             }
         });
 
@@ -233,12 +532,12 @@
             if (currentPage < totalPages - 1) {
                 currentPage++;
                 cargarProductos();
-                window.scrollTo({ top: 400, behavior: 'smooth' });
+                document.getElementById('catalogo').scrollIntoView({ behavior: 'smooth' });
             }
         });
 
-        cargarCategorias();
-        cargarProductos();
+        await cargarCategorias();
+        await cargarProductos();
     </script>
 </body>
 </html>

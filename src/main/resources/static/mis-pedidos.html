@@ -1,41 +1,40 @@
 <!DOCTYPE html>
-<html lang="es" class="dark">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mis Pedidos — NovaStore</title>
+    <title>Mis Pedidos — ELECTRONIX</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="/assets/css/output.css">
-    <!-- SockJS & StompJS -->
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased">
+<body class="bg-[#eaebed] text-neutral-800 min-h-screen flex flex-col antialiased">
 
-    <header id="main-navbar"></header>
+    <div id="main-navbar"></div>
 
-    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-1 w-full">
-        <div class="mb-8">
-            <h1 class="text-2xl sm:text-3xl font-extrabold text-white">Historial de Mis Pedidos</h1>
-            <p class="text-sm text-slate-400 mt-1">Consulta el progreso, estado de despacho y detalles de tus compras</p>
+    <main class="max-w-6xl mx-auto px-4 sm:px-8 py-8 flex-1 w-full">
+        <div class="mb-6">
+            <h1 class="text-2xl sm:text-3xl font-black text-neutral-900 uppercase">Historial de Mis Pedidos</h1>
+            <p class="text-xs text-neutral-500 mt-1">Consulta el progreso, estado de entrega y detalles de tus compras en Electronix</p>
         </div>
 
         <div id="orders-container" class="space-y-4">
-            <div class="py-16 text-center text-slate-500">
-                <div class="w-10 h-10 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin mx-auto mb-4"></div>
-                <p class="text-sm">Cargando tu historial de compras...</p>
+            <div class="py-16 text-center text-neutral-400 bg-white rounded-2xl border border-neutral-200">
+                <div class="w-10 h-10 border-4 border-[#14635c]/30 border-t-[#14635c] rounded-full animate-spin mx-auto mb-4"></div>
+                <p class="text-sm font-semibold">Cargando tu historial de compras...</p>
             </div>
         </div>
     </main>
 
-    <div id="order-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
-        <div class="glass-panel w-full max-w-2xl rounded-3xl border border-slate-800 shadow-2xl p-6 sm:p-8 max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center border-b border-slate-800 pb-4 mb-6">
+    <div id="order-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-neutral-900/70 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-2xl rounded-2xl border border-neutral-200 shadow-2xl p-6 sm:p-8 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-neutral-200 pb-4 mb-6">
                 <div>
-                    <h3 id="modal-order-title" class="text-lg font-bold text-white">Detalle de Pedido</h3>
-                    <span id="modal-order-date" class="text-xs text-slate-400"></span>
+                    <h3 id="modal-order-title" class="text-lg font-black text-neutral-900 uppercase">Detalle de Pedido</h3>
+                    <span id="modal-order-date" class="text-xs text-neutral-500"></span>
                 </div>
-                <button id="modal-close-btn" class="text-slate-400 hover:text-white p-1 rounded-lg">
+                <button id="modal-close-btn" class="text-neutral-400 hover:text-neutral-700 p-1 rounded-lg">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
@@ -45,8 +44,8 @@
         </div>
     </div>
 
-    <footer class="border-t border-slate-800/80 bg-slate-950 py-8 mt-16 text-center text-xs text-slate-500">
-        <p>© 2026 NovaStore. Compra protegida y segura.</p>
+    <footer class="border-t border-neutral-200 bg-white py-6 text-center text-xs text-neutral-500 mt-auto">
+        <p>© 2026 ELECTRONIX. Todos los derechos reservados.</p>
     </footer>
 
     <script type="module">
@@ -58,36 +57,50 @@
         renderNavbar();
 
         if (!auth.protegerRutaAutenticada()) {
-            // Se redirige en auth.js
+            // Guard
         } else {
             cargarPedidos();
         }
 
         const container = document.getElementById('orders-container');
         const modal = document.getElementById('order-modal');
-        const modalCloseBtn = document.getElementById('modal-close-btn');
         const modalTitle = document.getElementById('modal-order-title');
         const modalDate = document.getElementById('modal-order-date');
         const modalContent = document.getElementById('modal-order-content');
+        const modalClose = document.getElementById('modal-close-btn');
 
-        modalCloseBtn.addEventListener('click', () => modal.classList.add('hidden'));
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) modal.classList.add('hidden');
-        });
+        modalClose.addEventListener('click', () => modal.classList.add('hidden'));
+
+        function getEstadoBadge(estado) {
+            switch (estado) {
+                case 'PENDIENTE':
+                    return '<span class="px-2.5 py-1 bg-amber-100 text-amber-800 border border-amber-300 rounded-lg text-xs font-bold">Pendiente</span>';
+                case 'PAGADO':
+                    return '<span class="px-2.5 py-1 bg-blue-100 text-blue-800 border border-blue-300 rounded-lg text-xs font-bold">Pagado</span>';
+                case 'EN_CAMINO':
+                    return '<span class="px-2.5 py-1 bg-purple-100 text-purple-800 border border-purple-300 rounded-lg text-xs font-bold">En Camino</span>';
+                case 'ENTREGADO':
+                    return '<span class="px-2.5 py-1 bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-lg text-xs font-bold">Entregado</span>';
+                case 'CANCELADO':
+                    return '<span class="px-2.5 py-1 bg-rose-100 text-rose-800 border border-rose-300 rounded-lg text-xs font-bold">Cancelado</span>';
+                default:
+                    return `<span class="px-2.5 py-1 bg-neutral-100 text-neutral-700 rounded-lg text-xs font-bold">${estado}</span>`;
+            }
+        }
 
         async function cargarPedidos() {
             try {
-                const res = await api.get('/api/pedidos/mios');
+                const res = await api.get('/api/pedidos/mis-pedidos');
                 if (!res.exito || !res.datos || res.datos.length === 0) {
                     container.innerHTML = `
-                        <div class="glass-panel rounded-3xl p-12 text-center max-w-xl mx-auto border border-slate-800">
-                            <div class="w-16 h-16 rounded-2xl bg-slate-800/80 text-slate-400 flex items-center justify-center mx-auto mb-4">
-                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                        <div class="bg-white rounded-2xl p-12 text-center border border-neutral-200 shadow-sm">
+                            <div class="w-14 h-14 rounded-2xl bg-neutral-100 text-neutral-400 flex items-center justify-center mx-auto mb-3">
+                                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
                             </div>
-                            <h2 class="text-xl font-bold text-white mb-2">No tienes pedidos registrados</h2>
-                            <p class="text-sm text-slate-400 mb-6">Cuando realices compras en nuestra tienda, podrás ver el seguimiento en esta sección.</p>
-                            <a href="/index.html" class="inline-flex items-center px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm transition-all shadow-lg shadow-indigo-600/30">
-                                Ir a Comprar
+                            <h3 class="text-base font-bold text-neutral-900 mb-1">Aún no has realizado pedidos</h3>
+                            <p class="text-xs text-neutral-500 mb-4">Descubre nuestros productos en tecnología y equipamiento electrónico.</p>
+                            <a href="/index.html" class="inline-flex items-center px-5 py-2.5 rounded-xl bg-[#14635c] hover:bg-[#1ca299] text-white font-bold text-xs transition-all shadow-md">
+                                Explorar Catálogo
                             </a>
                         </div>
                     `;
@@ -95,111 +108,89 @@
                 }
 
                 container.innerHTML = '';
-                res.datos.forEach(p => {
-                    const badge = obtenerBadgeEstado(p.estado);
-                    const fecha = new Date(p.fecha).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
-                    const total = new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(p.total);
+                res.datos.forEach(pedido => {
+                    const total = new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(pedido.total);
+                    const fecha = new Date(pedido.fechaCreacion).toLocaleString('es-PE', { dateStyle: 'medium', timeStyle: 'short' });
 
                     const card = document.createElement('div');
-                    card.className = 'glass-panel p-5 sm:p-6 rounded-2xl border border-slate-800/90 hover:border-slate-700 transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4';
+                    card.className = 'bg-white p-5 rounded-2xl border border-neutral-200 shadow-sm hover:shadow-md transition-all flex flex-col md:flex-row items-start md:items-center justify-between gap-4';
 
                     card.innerHTML = `
                         <div class="space-y-1">
                             <div class="flex items-center space-x-3">
-                                <span class="font-extrabold text-white text-base">Orden #${p.id}</span>
-                                ${badge}
+                                <span class="font-black text-neutral-900 text-base">Pedido #${pedido.id}</span>
+                                ${getEstadoBadge(pedido.estado)}
                             </div>
-                            <p class="text-xs text-slate-400">Fecha de compra: ${fecha}</p>
-                            <p class="text-xs text-slate-400">Destino: <span class="text-slate-300">${p.direccionEnvio || 'No especificada'}</span></p>
+                            <p class="text-xs text-neutral-500">Fecha de compra: ${fecha}</p>
+                            <p class="text-xs text-neutral-600">Destino: <strong>${pedido.direccionEnvio || 'No especificada'}</strong></p>
                         </div>
 
-                        <div class="flex items-center justify-between sm:justify-end w-full sm:w-auto space-x-6">
-                            <div class="text-right">
-                                <span class="text-xs text-slate-500 block">Total</span>
-                                <span class="text-lg font-black text-indigo-400">${total}</span>
+                        <div class="flex items-center justify-between w-full md:w-auto md:space-x-6 border-t md:border-t-0 pt-3 md:pt-0 border-neutral-100">
+                            <div class="text-left md:text-right">
+                                <span class="text-[10px] text-neutral-400 font-bold block uppercase">Total</span>
+                                <span class="text-lg font-black text-neutral-900">${total}</span>
                             </div>
-                            <button class="btn-ver-detalle px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition-colors" data-id="${p.id}">
-                                Ver Artículos
+
+                            <button class="btn-ver-detalle px-4 py-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 text-xs font-bold rounded-xl transition-colors" data-id="${pedido.id}">
+                                Ver Detalle
                             </button>
                         </div>
                     `;
 
-                    const btnVer = card.querySelector('.btn-ver-detalle');
-                    btnVer.addEventListener('click', () => abrirDetalleModal(p));
-
                     container.appendChild(card);
                 });
 
+                document.querySelectorAll('.btn-ver-detalle').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const id = btn.dataset.id;
+                        const ped = res.datos.find(p => p.id == id);
+                        if (ped) mostrarModalDetalle(ped);
+                    });
+                });
+
             } catch (err) {
-                container.innerHTML = `<div class="py-12 text-center text-rose-400 text-sm">Error cargando pedidos: ${err.message}</div>`;
+                container.innerHTML = `<div class="p-8 text-center text-rose-600 text-sm font-bold">Error al cargar historial: ${err.message}</div>`;
             }
         }
 
-        function obtenerBadgeEstado(estado) {
-            switch (estado) {
-                case 'PENDIENTE':
-                    return `<span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-950/80 text-amber-300 border border-amber-500/30">Pendiente</span>`;
-                case 'EN_PROCESO':
-                    return `<span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-950/80 text-blue-300 border border-blue-500/30">En Proceso</span>`;
-                case 'ENVIADO':
-                    return `<span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-950/80 text-purple-300 border border-purple-500/30">Enviado</span>`;
-                case 'ENTREGADO':
-                    return `<span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-950/80 text-emerald-300 border border-emerald-500/30">Entregado</span>`;
-                case 'CANCELADO':
-                    return `<span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-950/80 text-rose-300 border border-rose-500/30">Cancelado</span>`;
-                default:
-                    return `<span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-800 text-slate-300">${estado}</span>`;
-            }
-        }
+        function mostrarModalDetalle(pedido) {
+            const total = new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(pedido.total);
+            const fecha = new Date(pedido.fechaCreacion).toLocaleString('es-PE', { dateStyle: 'full', timeStyle: 'short' });
 
-        function abrirDetalleModal(pedido) {
-            modalTitle.textContent = `Detalle del Pedido #${pedido.id}`;
-            modalDate.textContent = `Registrado el ${new Date(pedido.fecha).toLocaleString()}`;
+            modalTitle.textContent = `Pedido #${pedido.id} - ${pedido.estado}`;
+            modalDate.textContent = `Registrado el ${fecha}`;
 
-            let itemsHTML = '';
-            if (pedido.detalles && pedido.detalles.length > 0) {
-                pedido.detalles.forEach(d => {
-                    const precioU = new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(d.precioUnitario);
-                    const sub = new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(d.subtotal);
-                    itemsHTML += `
-                        <div class="flex justify-between items-center p-3 bg-slate-900/60 rounded-xl border border-slate-800">
+            let itemsList = '';
+            if (pedido.items && pedido.items.length > 0) {
+                pedido.items.forEach(it => {
+                    const precioUnit = new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(it.precioUnitario);
+                    const sub = new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(it.subtotal);
+                    itemsList += `
+                        <div class="flex justify-between items-center py-2.5 border-b border-neutral-100 text-xs">
                             <div>
-                                <span class="font-bold text-white block">${d.productoNombre}</span>
-                                <span class="text-xs text-slate-400">${d.cantidad} x ${precioU}</span>
+                                <span class="font-bold text-neutral-900 block">${it.productoNombre}</span>
+                                <span class="text-neutral-500">${it.cantidad} x ${precioUnit}</span>
                             </div>
-                            <span class="font-extrabold text-slate-200">${sub}</span>
+                            <span class="font-black text-neutral-900">${sub}</span>
                         </div>
                     `;
                 });
-            } else {
-                itemsHTML = `<p class="text-xs text-slate-400">Sin detalles registrados.</p>`;
             }
 
-            const total = new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(pedido.total);
-
             modalContent.innerHTML = `
-                <div class="space-y-3">
-                    <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Productos incluidos</h4>
-                    ${itemsHTML}
+                <div class="p-4 bg-neutral-50 rounded-xl border border-neutral-200 text-xs space-y-1">
+                    <p><strong class="text-neutral-700">Dirección de entrega:</strong> ${pedido.direccionEnvio || '-'}</p>
+                    <p><strong class="text-neutral-700">Teléfono:</strong> ${pedido.telefono || '-'}</p>
                 </div>
 
-                <div class="border-t border-slate-800 pt-4 mt-6 space-y-2">
-                    <div class="flex justify-between text-slate-400 text-xs">
-                        <span>Dirección:</span>
-                        <span class="text-slate-200">${pedido.direccionEnvio || 'No especificada'}</span>
-                    </div>
-                    <div class="flex justify-between text-slate-400 text-xs">
-                        <span>Teléfono:</span>
-                        <span class="text-slate-200">${pedido.telefono || 'No especificado'}</span>
-                    </div>
-                    <div class="flex justify-between text-slate-400 text-xs">
-                        <span>Estado:</span>
-                        <span>${pedido.estado}</span>
-                    </div>
-                    <div class="flex justify-between items-baseline pt-3 border-t border-slate-800 text-base">
-                        <span class="font-bold text-white">Monto Total:</span>
-                        <span class="text-xl font-black text-indigo-400">${total}</span>
-                    </div>
+                <div class="space-y-1">
+                    <h4 class="font-bold text-neutral-900 text-xs uppercase tracking-wider mb-2">Artículos del Pedido</h4>
+                    ${itemsList}
+                </div>
+
+                <div class="pt-3 flex justify-between items-baseline border-t border-neutral-200">
+                    <span class="text-xs font-bold text-neutral-700 uppercase">Monto Total</span>
+                    <span class="text-xl font-black text-neutral-900">${total}</span>
                 </div>
             `;
 
