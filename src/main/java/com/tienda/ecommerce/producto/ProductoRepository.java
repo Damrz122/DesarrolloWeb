@@ -16,7 +16,7 @@ public interface ProductoRepository extends JpaRepository<Producto, Long> {
         SELECT p FROM Producto p
         JOIN FETCH p.categoria
         WHERE p.activo = true
-          AND (:nombre IS NULL OR LOWER(p.nombre) LIKE LOWER(CONCAT('%', :nombre, '%')))
+          AND (CAST(:nombre AS string) IS NULL OR LOWER(p.nombre) LIKE CONCAT('%', LOWER(CAST(:nombre AS string)), '%'))
           AND (:categoriaId IS NULL OR p.categoria.id = :categoriaId)
           AND (:precioMin IS NULL OR p.precio >= :precioMin)
           AND (:precioMax IS NULL OR p.precio <= :precioMax)
@@ -32,7 +32,7 @@ public interface ProductoRepository extends JpaRepository<Producto, Long> {
     @Query("""
         SELECT p FROM Producto p
         JOIN FETCH p.categoria
-        WHERE (:nombre IS NULL OR LOWER(p.nombre) LIKE LOWER(CONCAT('%', :nombre, '%')))
+        WHERE (CAST(:nombre AS string) IS NULL OR LOWER(p.nombre) LIKE CONCAT('%', LOWER(CAST(:nombre AS string)), '%'))
           AND (:categoriaId IS NULL OR p.categoria.id = :categoriaId)
           AND (:activo IS NULL OR p.activo = :activo)
     """)
