@@ -43,6 +43,12 @@ public class Pedido {
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DetallePedido> detalles = new ArrayList<>();
 
+    @OneToOne(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
+    private com.tienda.ecommerce.pago.Pago pago;
+
+    @OneToOne(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
+    private com.tienda.ecommerce.envio.Envio envio;
+
     public Pedido() {
     }
 
@@ -123,5 +129,27 @@ public class Pedido {
     public void agregarDetalle(DetallePedido detalle) {
         detalles.add(detalle);
         detalle.setPedido(this);
+    }
+
+    public com.tienda.ecommerce.pago.Pago getPago() {
+        return pago;
+    }
+
+    public void setPago(com.tienda.ecommerce.pago.Pago pago) {
+        this.pago = pago;
+        if (pago != null) {
+            pago.setPedido(this);
+        }
+    }
+
+    public com.tienda.ecommerce.envio.Envio getEnvio() {
+        return envio;
+    }
+
+    public void setEnvio(com.tienda.ecommerce.envio.Envio envio) {
+        this.envio = envio;
+        if (envio != null) {
+            envio.setPedido(this);
+        }
     }
 }

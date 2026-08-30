@@ -99,7 +99,26 @@ public class PedidoServiceImpl implements PedidoService {
         pedido.setTotal(total);
         pedido.setDetalles(detalles);
 
-        // Guardar el pedido y sus detalles en cascada
+        // Crear registro de Pago asociado
+        com.tienda.ecommerce.pago.Pago pago = new com.tienda.ecommerce.pago.Pago(
+                pedido,
+                com.tienda.ecommerce.pago.MetodoPago.TARJETA_CREDITO,
+                com.tienda.ecommerce.pago.EstadoPago.APROBADO,
+                total,
+                "TX-" + System.currentTimeMillis()
+        );
+        pedido.setPago(pago);
+
+        // Crear registro de Envío asociado
+        com.tienda.ecommerce.envio.Envio envio = new com.tienda.ecommerce.envio.Envio(
+                pedido,
+                pedido.getDireccionEnvio(),
+                "Electronix Express Logistics"
+        );
+        envio.setNumeroGuia("GUIA-ELX-" + System.currentTimeMillis());
+        pedido.setEnvio(envio);
+
+        // Guardar el pedido, detalles, pago y envío en cascada
         Pedido pedidoGuardado = pedidoRepository.save(pedido);
 
         // Vaciar el carrito del usuario tras confirmar la compra
