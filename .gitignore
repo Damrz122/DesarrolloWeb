@@ -33,3 +33,14 @@ node_modules/
 npm-debug.log
 .DS_Store
 Thumbs.db
+
+### Archivos de entorno y claves sensibles ###
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.secret
+*.log
+logs/
+
