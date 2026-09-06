@@ -9,6 +9,15 @@ public class ActualizarUsuarioRequest {
     @Size(min = 2, max = 100, message = "El nombre debe tener entre 2 y 100 caracteres")
     private String nombre;
 
+    @Size(min = 2, max = 100, message = "Los nombres deben tener entre 2 y 100 caracteres")
+    private String nombres;
+
+    @Size(min = 2, max = 100, message = "El apellido paterno debe tener entre 2 y 100 caracteres")
+    private String apellidoPaterno;
+
+    @Size(max = 100, message = "El apellido materno debe tener máximo 100 caracteres")
+    private String apellidoMaterno;
+
     @Size(min = 6, message = "Si desea cambiar la contraseña, debe tener al menos 6 caracteres")
     private String password;
 
@@ -26,6 +35,30 @@ public class ActualizarUsuarioRequest {
 
     public void setNombre(String nombre) {
         this.nombre = nombre;
+    }
+
+    public String getNombres() {
+        return nombres;
+    }
+
+    public void setNombres(String nombres) {
+        this.nombres = nombres;
+    }
+
+    public String getApellidoPaterno() {
+        return apellidoPaterno;
+    }
+
+    public void setApellidoPaterno(String apellidoPaterno) {
+        this.apellidoPaterno = apellidoPaterno;
+    }
+
+    public String getApellidoMaterno() {
+        return apellidoMaterno;
+    }
+
+    public void setApellidoMaterno(String apellidoMaterno) {
+        this.apellidoMaterno = apellidoMaterno;
     }
 
     public String getPassword() {

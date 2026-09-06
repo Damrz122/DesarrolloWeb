@@ -7,6 +7,7 @@ import com.tienda.ecommerce.carrito.CarritoService;
 import com.tienda.ecommerce.common.BadRequestException;
 import com.tienda.ecommerce.common.CredencialesInvalidasException;
 import com.tienda.ecommerce.usuario.Rol;
+import com.tienda.ecommerce.usuario.TipoDocumento;
 import com.tienda.ecommerce.usuario.Usuario;
 import com.tienda.ecommerce.usuario.UsuarioRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -42,12 +43,38 @@ public class AuthServiceImpl implements AuthService {
             throw new BadRequestException("Ya existe una cuenta registrada con el email: " + email);
         }
 
-        Usuario usuario = new Usuario();
-        usuario.setNombre(request.getNombre().trim());
-        usuario.setEmail(email);
-        usuario.setPasswordHash(passwordEncoder.encode(request.getPassword()));
-        usuario.setRol(Rol.CLIENTE);
-        usuario.setActivo(true);
+        String nombres = valor(request.getNombres());
+        String paterno = valor(request.getApellidoPaterno());
+        String materno = valor(request.getApellidoMaterno());
+        if (nombres == null || paterno == null) {
+            String legado = valor(request.getNombre());
+            if (legado == null) {
+                throw new BadRequestException("El nombre es obligatorio");
+            }
+            String[] partes = legado.split("\\s+");
+            if (nombres == null) {
+                nombres = partes[0];
+            }
+            if (paterno == null) {
+                paterno = partes.length > 1 ? partes[1] : null;
+            }
+            if (materno == null && partes.length > 2) {
+                materno = String.join(" ", java.util.Arrays.copyOfRange(partes, 2, partes.length));
+            }
+            if (paterno == null) {
+                throw new BadRequestException("Indica nombres y apellido paterno");
+            }
+        }
+
+        TipoDocumento tipo = request.getTipoDocumento() != null ? request.getTipoDocumento() : TipoDocumento.DNI;
+        String numero = valor(request.getNumeroDocumento());
+        validarDocumento(tipo, numero);
+        if (usuarioRepository.existsByNumeroDocumento(numero)) {
+            throw new BadRequestException("Ya existe una cuenta registrada con ese documento");
+        }
+
+        Usuario usuario = new Usuario(null, nombres, paterno, materno, tipo, numero,
+                email, passwordEncoder.encode(request.getPassword()), Rol.CLIENTE, true);
 
         Usuario guardado = usuarioRepository.save(usuario);
 
@@ -76,5 +103,23 @@ public class AuthServiceImpl implements AuthService {
 
         String token = jwtService.generarToken(usuario);
         return new AuthResponse(token, usuario.getId(), usuario.getNombre(), usuario.getEmail(), usuario.getRol());
+    }
+
+    private static String valor(String s) {
+        return s != null && !s.trim().isEmpty() ? s.trim() : null;
+    }
+
+    private static void validarDocumento(TipoDocumento tipo, String numero) {
+        if (numero == null) {
+            throw new BadRequestException("El número de documento es obligatorio");
+        }
+        boolean valido = tipo == TipoDocumento.CE
+                ? numero.matches("^[A-Za-z0-9]{9}$")
+                : numero.matches("^[0-9]{8}$");
+        if (!valido) {
+            throw new BadRequestException(tipo == TipoDocumento.CE
+                    ? "CE inválido: debe tener 9 caracteres alfanuméricos"
+                    : "DNI inválido: debe tener 8 dígitos");
+        }
     }
 }

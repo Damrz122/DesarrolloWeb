@@ -1,74 +1,57 @@
 <!DOCTYPE html>
-<html lang="es" class="dark">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Pedidos — ELECTRONIX</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Pedidos — ELECTRONIX Admin</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 90%27%3E%3Crect width=%27100%27 height=%2790%27 rx=%2718%27 fill=%27%23171717%27/%3E%3Cpath d=%27M15 12h65c4 0 7 3 7 7s-3 7-7 7H38l-4 12h32c3 0 6 3 5 7l-4 10c-1 3-3 5-6 5H24l-6 18c-1 3-4 5-8 5s-6-3-5-7L15 12z%27 fill=%27%23e5e7eb%27/%3E%3Cpolygon points=%2768,28 48,50 62,50 42,75 50,56 36,56%27 fill=%27%231ca299%27/%3E%3C/svg%3E">
     <link rel="stylesheet" href="/assets/css/output.css">
-    <!-- SockJS & StompJS -->
-    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+    <script>try{var t=localStorage.getItem("electronix_admin_theme");if(t==="dark"){document.documentElement.setAttribute("data-theme","dark");}}catch(e){}</script>
+    <link rel="stylesheet" href="/assets/css/admin.css">
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased">
+<body class="adm">
 
     <header id="main-navbar"></header>
 
-    <div class="bg-slate-900/60 border-b border-slate-800 backdrop-blur-md sticky top-16 sm:top-20 z-30">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between overflow-x-auto py-3 space-x-6 text-sm">
-            <div class="flex items-center space-x-2">
-                <span class="px-2.5 py-1 rounded-lg bg-indigo-500/20 text-indigo-400 font-bold text-xs">ADMIN</span>
-                <span class="font-bold text-white">Pedidos</span>
-            </div>
-            <div class="flex items-center space-x-4">
-                <a href="/admin/dashboard.html" class="text-slate-400 hover:text-white transition-colors pb-1">Dashboard</a>
-                <a href="/admin/productos.html" class="text-slate-400 hover:text-white transition-colors pb-1">Productos</a>
-                <a href="/admin/categorias.html" class="text-slate-400 hover:text-white transition-colors pb-1">Categorías</a>
-                <a href="/admin/pedidos.html" class="text-indigo-400 font-semibold border-b-2 border-indigo-500 pb-1">Pedidos</a>
-                <a href="/admin/reportes.html" class="text-slate-400 hover:text-white transition-colors pb-1">Reportes</a>
-                <a href="/admin/chat.html" class="text-slate-400 hover:text-white transition-colors pb-1">Chat Clientes</a>
-            </div>
-        </div>
-    </div>
+    <main class="adm-main">
 
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full space-y-6">
-        
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="adm-pagehead">
             <div>
-                <h1 class="text-2xl sm:text-3xl font-extrabold text-white">Control de Órdenes y Envíos</h1>
-                <p class="text-sm text-slate-400 mt-1">Supervisa y actualiza el estado logístico de cada pedido</p>
+                <h1 class="adm-title">Control de órdenes y envíos</h1>
+                <p class="adm-subtitle">Supervisa y actualiza el estado logístico de cada pedido</p>
             </div>
-
-            <div class="flex items-center space-x-2">
-                <label class="text-xs text-slate-400 font-medium">Estado:</label>
-                <select id="filtro-estado" class="bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-indigo-500">
-                    <option value="">Todos los estados</option>
-                    <option value="PENDIENTE">Pendientes</option>
-                    <option value="EN_PROCESO">En Proceso</option>
-                    <option value="ENVIADO">Enviados</option>
-                    <option value="ENTREGADO">Entregados</option>
-                    <option value="CANCELADO">Cancelados</option>
-                </select>
+            <div class="adm-actions">
+                <div>
+                    <label class="adm-label" for="filtro-estado" style="margin-bottom:4px;">Estado</label>
+                    <select id="filtro-estado" class="adm-select" style="width:auto;min-width:180px;">
+                        <option value="">Todos los estados</option>
+                        <option value="PENDIENTE">Pendientes</option>
+                        <option value="EN_PROCESO">En proceso</option>
+                        <option value="ENVIADO">Enviados</option>
+                        <option value="ENTREGADO">Entregados</option>
+                        <option value="CANCELADO">Cancelados</option>
+                    </select>
+                </div>
             </div>
         </div>
 
-        <div class="glass-panel rounded-3xl border border-slate-800 shadow-xl overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs text-slate-300">
-                    <thead class="bg-slate-900 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
+        <div class="adm-card">
+            <div class="adm-table-wrap">
+                <table class="adm-table">
+                    <thead>
                         <tr>
-                            <th class="p-4">Pedido</th>
-                            <th class="p-4">Cliente</th>
-                            <th class="p-4">Total</th>
-                            <th class="p-4">Destino / Teléfono</th>
-                            <th class="p-4">Estado Actual</th>
-                            <th class="p-4">Cambiar Estado</th>
-                            <th class="p-4 text-right">Detalle</th>
+                            <th>Pedido</th>
+                            <th>Cliente</th>
+                            <th>Total</th>
+                            <th>Destino / Teléfono</th>
+                            <th>Estado actual</th>
+                            <th>Cambiar estado</th>
+                            <th class="num">Detalle</th>
                         </tr>
                     </thead>
-                    <tbody id="pedidos-table-body" class="divide-y divide-slate-800/60">
+                    <tbody id="pedidos-table-body">
                         <tr>
-                            <td colspan="7" class="p-8 text-center text-slate-500">Cargando órdenes...</td>
+                            <td colspan="7" class="adm-empty">Cargando órdenes…</td>
                         </tr>
                     </tbody>
                 </table>
@@ -78,32 +61,29 @@
     </main>
 
     <!-- Modal Detalle Pedido Admin -->
-    <div id="modal-pedido" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
-        <div class="glass-panel w-full max-w-xl rounded-3xl border border-slate-800 shadow-2xl p-6 sm:p-8">
-            <div class="flex justify-between items-center border-b border-slate-800 pb-4 mb-6">
-                <h3 id="modal-ped-title" class="text-lg font-bold text-white">Detalle de Pedido</h3>
-                <button id="modal-ped-close" class="text-slate-400 hover:text-white p-1 rounded-lg">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+    <div id="modal-pedido" class="adm-modal-backdrop hidden">
+        <div class="adm-modal" style="max-width:600px;">
+            <div class="adm-modal-head">
+                <h3 id="modal-ped-title" class="adm-modal-title">Detalle de pedido</h3>
+                <button id="modal-ped-close" class="adm-close" aria-label="Cerrar">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
-            <div id="modal-ped-content" class="space-y-4 text-xs"></div>
+            <div id="modal-ped-content"></div>
         </div>
     </div>
+
+    <footer class="adm-footer">
+        <p>© 2026 ELECTRONIX — Módulo de Administración.</p>
+    </footer>
 
     <script type="module">
         import { api } from '/assets/js/api.js';
         import { auth } from '/assets/js/auth.js';
-        import { renderNavbar } from '/assets/js/ui/navbar.js';
+        import { renderAdminShell } from '/assets/js/ui/adminShell.js';
         import { showToast } from '/assets/js/ui/toast.js';
 
-        renderNavbar();
-
-        if (!auth.protegerRutaAdmin()) {
-            // Redirige
-        } else {
-            initPedidosAdmin();
-        }
-
+        // NOTA: referencias DOM primero (evita TDZ si init las toca antes del await).
         const tbody = document.getElementById('pedidos-table-body');
         const filtroEstado = document.getElementById('filtro-estado');
         const modal = document.getElementById('modal-pedido');
@@ -111,7 +91,22 @@
         const modalTitle = document.getElementById('modal-ped-title');
         const modalContent = document.getElementById('modal-ped-content');
 
+        renderAdminShell('pedidos');
+
+        if (!auth.protegerRutaAdmin()) {
+            // Redirige
+        } else {
+            initPedidosAdmin();
+        }
+
         modalClose.addEventListener('click', () => modal.classList.add('hidden'));
+
+        function esc(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
 
         function initPedidosAdmin() {
             cargarPedidosAdmin();
@@ -135,35 +130,32 @@
                         const fecha = new Date(p.fecha).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 
                         const tr = document.createElement('tr');
-                        tr.className = 'hover:bg-slate-900/50 transition-colors';
                         tr.innerHTML = `
-                            <td class="p-4">
-                                <span class="font-black text-white">#${p.id}</span>
-                                <div class="text-[11px] text-slate-500">${fecha}</div>
+                            <td>
+                                <span class="adm-id">#${p.id}</span>
+                                <div class="adm-sub">${fecha}</div>
                             </td>
-                            <td class="p-4">
-                                <div class="font-semibold text-slate-200">${p.usuarioNombre || 'Cliente'}</div>
-                                <div class="text-[11px] text-slate-500">${p.usuarioEmail || ''}</div>
+                            <td>
+                                <div class="adm-strong">${esc(p.usuarioNombre) || 'Cliente'}</div>
+                                <div class="adm-sub">${esc(p.usuarioEmail) || ''}</div>
                             </td>
-                            <td class="p-4 font-black text-indigo-400">${total}</td>
-                            <td class="p-4 text-slate-300">
-                                <div>${p.direccionEnvio || '—'}</div>
-                                <div class="text-[11px] text-slate-500">Tel: ${p.telefono || '—'}</div>
+                            <td class="adm-strong" style="color:var(--adm-teal);">${total}</td>
+                            <td>
+                                <div>${esc(p.direccionEnvio) || '—'}</div>
+                                <div class="adm-sub">Tel: ${esc(p.telefono) || '—'}</div>
                             </td>
-                            <td class="p-4">${obtenerBadge(p.estado)}</td>
-                            <td class="p-4">
-                                <select class="select-cambiar-estado bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-[11px] text-white focus:outline-none focus:border-indigo-500">
+                            <td>${obtenerBadge(p.estado)}</td>
+                            <td>
+                                <select class="adm-select select-cambiar-estado" style="width:auto;font-size:0.72rem;padding:7px 10px;">
                                     <option value="PENDIENTE" ${p.estado === 'PENDIENTE' ? 'selected' : ''}>Pendiente</option>
-                                    <option value="EN_PROCESO" ${p.estado === 'EN_PROCESO' ? 'selected' : ''}>En Proceso</option>
+                                    <option value="EN_PROCESO" ${p.estado === 'EN_PROCESO' ? 'selected' : ''}>En proceso</option>
                                     <option value="ENVIADO" ${p.estado === 'ENVIADO' ? 'selected' : ''}>Enviado</option>
                                     <option value="ENTREGADO" ${p.estado === 'ENTREGADO' ? 'selected' : ''}>Entregado</option>
                                     <option value="CANCELADO" ${p.estado === 'CANCELADO' ? 'selected' : ''}>Cancelado</option>
                                 </select>
                             </td>
-                            <td class="p-4 text-right">
-                                <button class="btn-ver-detalle px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold border border-slate-700 transition-colors">
-                                    Artículos
-                                </button>
+                            <td class="num">
+                                <button class="adm-btn adm-btn-ghost adm-btn-sm btn-ver-detalle">Artículos</button>
                             </td>
                         `;
 
@@ -179,10 +171,10 @@
                         tbody.appendChild(tr);
                     });
                 } else {
-                    tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-500">No se encontraron pedidos con ese criterio.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="7" class="adm-empty">No se encontraron pedidos con ese criterio.</td></tr>`;
                 }
             } catch (err) {
-                tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-rose-400">Error: ${err.message}</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="adm-err">Error: ${esc(err.message)}</td></tr>`;
             }
         }
 
@@ -199,34 +191,34 @@
 
         function obtenerBadge(estado) {
             switch (estado) {
-                case 'PENDIENTE': return `<span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-950/80 text-amber-300 border border-amber-500/30">Pendiente</span>`;
-                case 'EN_PROCESO': return `<span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-blue-950/80 text-blue-300 border border-blue-500/30">En Proceso</span>`;
-                case 'ENVIADO': return `<span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-purple-950/80 text-purple-300 border border-purple-500/30">Enviado</span>`;
-                case 'ENTREGADO': return `<span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-950/80 text-emerald-300 border border-emerald-500/30">Entregado</span>`;
-                case 'CANCELADO': return `<span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-rose-950/80 text-rose-300 border border-rose-500/30">Cancelado</span>`;
-                default: return `<span>${estado}</span>`;
+                case 'PENDIENTE': return `<span class="adm-badge b-pendiente">Pendiente</span>`;
+                case 'EN_PROCESO': return `<span class="adm-badge b-proceso">En proceso</span>`;
+                case 'ENVIADO': return `<span class="adm-badge b-enviado">Enviado</span>`;
+                case 'ENTREGADO': return `<span class="adm-badge b-entregado">Entregado</span>`;
+                case 'CANCELADO': return `<span class="adm-badge b-cancelado">Cancelado</span>`;
+                default: return `<span class="adm-badge b-off">${esc(estado)}</span>`;
             }
         }
 
         function abrirModal(p) {
-            modalTitle.textContent = `Artículos de Orden #${p.id}`;
-            let html = '<div class="space-y-2">';
+            modalTitle.textContent = `Artículos de orden #${p.id}`;
+            let html = '<div style="display:flex;flex-direction:column;gap:8px;">';
             if (p.detalles && p.detalles.length > 0) {
                 p.detalles.forEach(d => {
                     const sub = new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(d.subtotal);
                     const pu = new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(d.precioUnitario);
                     html += `
-                        <div class="flex justify-between items-center p-3 bg-slate-900/60 rounded-xl border border-slate-800">
+                        <div class="adm-detail-row">
                             <div>
-                                <span class="font-bold text-white block">${d.productoNombre}</span>
-                                <span class="text-slate-400 text-[11px]">${d.cantidad} uds. x ${pu}</span>
+                                <span class="adm-strong" style="display:block;">${esc(d.productoNombre)}</span>
+                                <span class="adm-sub">${d.cantidad} uds. × ${pu}</span>
                             </div>
-                            <span class="font-black text-indigo-300">${sub}</span>
+                            <span class="adm-strong" style="color:var(--adm-teal);">${sub}</span>
                         </div>
                     `;
                 });
             } else {
-                html += '<p class="text-slate-400">Sin detalles.</p>';
+                html += '<p style="color:var(--adm-muted);font-size:0.8rem;">Sin detalles.</p>';
             }
             html += '</div>';
             modalContent.innerHTML = html;
@@ -235,3 +227,5 @@
     </script>
 </body>
 </html>
+
+

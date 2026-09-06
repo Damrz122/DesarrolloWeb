@@ -7,6 +7,7 @@ import com.tienda.ecommerce.carrito.CarritoService;
 import com.tienda.ecommerce.common.BadRequestException;
 import com.tienda.ecommerce.common.CredencialesInvalidasException;
 import com.tienda.ecommerce.usuario.Rol;
+import com.tienda.ecommerce.usuario.TipoDocumento;
 import com.tienda.ecommerce.usuario.Usuario;
 import com.tienda.ecommerce.usuario.UsuarioRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -52,9 +53,11 @@ class AuthServiceTest {
     @Test
     @DisplayName("Debe registrar un nuevo usuario y devolver token JWT")
     void registro_exitoso() {
-        RegistroRequest request = new RegistroRequest("Carlos Lopez", "carlos@tienda.com", "pass12345");
+        RegistroRequest request = new RegistroRequest("Carlos", "Lopez", "Perez",
+                TipoDocumento.DNI, "12345678", "carlos@tienda.com", "pass12345");
 
         when(usuarioRepository.existsByEmail("carlos@tienda.com")).thenReturn(false);
+        when(usuarioRepository.existsByNumeroDocumento("12345678")).thenReturn(false);
         when(passwordEncoder.encode("pass12345")).thenReturn("hashBcrypt");
         when(usuarioRepository.save(any(Usuario.class))).thenReturn(usuario);
         when(jwtService.generarToken(any(Usuario.class))).thenReturn("fake.jwt.token");
@@ -73,11 +76,53 @@ class AuthServiceTest {
     @Test
     @DisplayName("Debe rechazar el registro si el email ya existe")
     void registro_emailDuplicado() {
-        RegistroRequest request = new RegistroRequest("Carlos Lopez", "carlos@tienda.com", "pass12345");
+        RegistroRequest request = new RegistroRequest("Carlos", "Lopez", "Perez",
+                TipoDocumento.DNI, "12345678", "carlos@tienda.com", "pass12345");
         when(usuarioRepository.existsByEmail("carlos@tienda.com")).thenReturn(true);
 
         assertThrows(BadRequestException.class, () -> authService.registro(request));
         verify(usuarioRepository, never()).save(any(Usuario.class));
+    }
+
+    @Test
+    @DisplayName("Debe rechazar DNI con formato inválido")
+    void registro_dniInvalido() {
+        RegistroRequest request = new RegistroRequest("Carlos", "Lopez", null,
+                TipoDocumento.DNI, "1234", "carlos@tienda.com", "pass12345");
+
+        assertThrows(BadRequestException.class, () -> authService.registro(request));
+        verify(usuarioRepository, never()).save(any(Usuario.class));
+    }
+
+    @Test
+    @DisplayName("Debe rechazar el registro si el documento ya existe")
+    void registro_documentoDuplicado() {
+        RegistroRequest request = new RegistroRequest("Carlos", "Lopez", null,
+                TipoDocumento.DNI, "12345678", "carlos@tienda.com", "pass12345");
+        when(usuarioRepository.existsByEmail("carlos@tienda.com")).thenReturn(false);
+        when(usuarioRepository.existsByNumeroDocumento("12345678")).thenReturn(true);
+
+        assertThrows(BadRequestException.class, () -> authService.registro(request));
+        verify(usuarioRepository, never()).save(any(Usuario.class));
+    }
+
+    @Test
+    @DisplayName("Debe aceptar nombre completo legado partiéndolo en partes")
+    void registro_nombreLegado() {
+        RegistroRequest request = new RegistroRequest("Carlos Lopez", "carlos@tienda.com", "pass12345");
+        request.setTipoDocumento(TipoDocumento.DNI);
+        request.setNumeroDocumento("12345678");
+
+        when(usuarioRepository.existsByEmail("carlos@tienda.com")).thenReturn(false);
+        when(usuarioRepository.existsByNumeroDocumento("12345678")).thenReturn(false);
+        when(passwordEncoder.encode("pass12345")).thenReturn("hashBcrypt");
+        when(usuarioRepository.save(any(Usuario.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(jwtService.generarToken(any(Usuario.class))).thenReturn("fake.jwt.token");
+
+        authService.registro(request);
+
+        verify(usuarioRepository).save(argThat(u ->
+                "Carlos".equals(u.getNombres()) && "Lopez".equals(u.getApellidoPaterno())));
     }
 
     @Test

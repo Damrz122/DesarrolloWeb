@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -69,7 +70,9 @@ public class ProductoServiceImpl implements ProductoService {
         producto.setDescripcion(request.getDescripcion());
         producto.setPrecio(request.getPrecio());
         producto.setStock(request.getStock());
-        producto.setImagenUrl(request.getImagenUrl());
+        List<String> galeria = resolverGaleria(request);
+        producto.setImagenUrl(galeria.isEmpty() ? null : galeria.get(0));
+        producto.reemplazarImagenes(galeria);
         producto.setCategoria(categoria);
         producto.setActivo(true);
 
@@ -90,7 +93,9 @@ public class ProductoServiceImpl implements ProductoService {
         producto.setDescripcion(request.getDescripcion());
         producto.setPrecio(request.getPrecio());
         producto.setStock(request.getStock());
-        producto.setImagenUrl(request.getImagenUrl());
+        List<String> galeria = resolverGaleria(request);
+        producto.setImagenUrl(galeria.isEmpty() ? null : galeria.get(0));
+        producto.reemplazarImagenes(galeria);
         producto.setCategoria(categoria);
 
         Producto actualizado = productoRepository.save(producto);
@@ -121,17 +126,55 @@ public class ProductoServiceImpl implements ProductoService {
     }
 
     private ProductoResponse mapearADto(Producto p) {
+        List<String> galeria = new ArrayList<>();
+        if (p.getImagenes() != null) {
+            galeria = p.getImagenes().stream()
+                    .sorted((a, b) -> {
+                        int c = Integer.compare(a.getOrden(), b.getOrden());
+                        return c != 0 ? c : Long.compare(
+                                a.getId() != null ? a.getId() : 0L,
+                                b.getId() != null ? b.getId() : 0L);
+                    })
+                    .map(img -> img.getUrl())
+                    .filter(url -> url != null && !url.trim().isEmpty())
+                    .toList();
+        }
+        if (galeria.isEmpty() && p.getImagenUrl() != null && !p.getImagenUrl().trim().isEmpty()) {
+            galeria = List.of(p.getImagenUrl());
+        }
+        String portada = galeria.isEmpty() ? p.getImagenUrl() : galeria.get(0);
         return new ProductoResponse(
                 p.getId(),
                 p.getNombre(),
                 p.getDescripcion(),
                 p.getPrecio(),
                 p.getStock(),
-                p.getImagenUrl(),
+                portada,
+                galeria,
                 p.getCategoria() != null ? p.getCategoria().getId() : null,
                 p.getCategoria() != null ? p.getCategoria().getNombre() : null,
                 p.isActivo(),
                 p.getFechaCreacion()
         );
+    }
+
+    /**
+     * 4FN: si el cliente envía galería, manda; si no, se degrada a imagenUrl única.
+     */
+    private List<String> resolverGaleria(ProductoRequest request) {
+        if (request.getImagenes() != null) {
+            List<String> limpia = request.getImagenes().stream()
+                    .filter(url -> url != null && !url.trim().isEmpty())
+                    .map(String::trim)
+                    .distinct()
+                    .toList();
+            if (!limpia.isEmpty()) {
+                return limpia;
+            }
+        }
+        if (request.getImagenUrl() != null && !request.getImagenUrl().trim().isEmpty()) {
+            return List.of(request.getImagenUrl().trim());
+        }
+        return List.of();
     }
 }

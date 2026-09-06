@@ -2,17 +2,23 @@ package com.tienda.ecommerce.pago;
 
 import com.tienda.ecommerce.pedido.Pedido;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import org.hibernate.annotations.Check;
 
 @Entity
 @Table(
     name = "pagos",
+    uniqueConstraints = {
+        @UniqueConstraint(name = "uk_pagos_codigo_transaccion", columnNames = {"codigo_transaccion"})
+    },
     indexes = {
         @Index(name = "idx_pago_estado", columnList = "estado_pago"),
         @Index(name = "idx_pago_transaccion", columnList = "codigo_transaccion")
     }
 )
+@Check(constraints = "monto >= 0")
 public class Pago {
 
     @Id
@@ -32,9 +38,10 @@ public class Pago {
     private EstadoPago estadoPago = EstadoPago.PENDIENTE;
 
     @Column(nullable = false, precision = 10, scale = 2)
+    @Min(value = 0, message = "El monto no puede ser negativo")
     private BigDecimal monto;
 
-    @Column(name = "codigo_transaccion", length = 100)
+    @Column(name = "codigo_transaccion", length = 100, unique = true)
     private String codigoTransaccion;
 
     @Column(name = "referencia_comprobante", length = 100)

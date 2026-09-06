@@ -5,9 +5,11 @@ import com.tienda.ecommerce.producto.CategoriaRepository;
 import com.tienda.ecommerce.producto.Producto;
 import com.tienda.ecommerce.producto.ProductoRepository;
 import com.tienda.ecommerce.usuario.Rol;
+import com.tienda.ecommerce.usuario.TipoDocumento;
 import com.tienda.ecommerce.usuario.Usuario;
 import com.tienda.ecommerce.usuario.UsuarioRepository;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -15,6 +17,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @Component
+@Order(1)
 public class DataInitializer implements CommandLineRunner {
 
     private final CategoriaRepository categoriaRepository;
@@ -75,13 +78,21 @@ public class DataInitializer implements CommandLineRunner {
                             new BigDecimal("1499.00"), 4, "https://images.unsplash.com/photo-1547082299-de196ea013d6?w=600&auto=format&fit=crop&q=80", catMonitores, true)
             );
 
+            // 4FN: la galería vive en producto_imagenes; se siembra la portada
+            // como orden = 0 antes del primer save (cascade ALL la persiste).
+            for (Producto p : productosIniciales) {
+                if (p.getImagenes().isEmpty() && p.getImagenUrl() != null) {
+                    p.agregarImagen(p.getImagenUrl(), 0);
+                }
+            }
             productoRepository.saveAll(productosIniciales);
         }
 
         if (usuarioRepository.count() == 0) {
             Usuario admin = new Usuario(
                     null,
-                    "Administrador",
+                    "Administrador", "Sistema", null,
+                    TipoDocumento.DNI, "00000001",
                     "admin@tienda.com",
                     passwordEncoder.encode("admin123"),
                     Rol.ADMIN,
@@ -90,7 +101,8 @@ public class DataInitializer implements CommandLineRunner {
 
             Usuario cliente = new Usuario(
                     null,
-                    "Cliente Demo",
+                    "Cliente", "Demo", null,
+                    TipoDocumento.DNI, "45678901",
                     "cliente@tienda.com",
                     passwordEncoder.encode("cliente123"),
                     Rol.CLIENTE,

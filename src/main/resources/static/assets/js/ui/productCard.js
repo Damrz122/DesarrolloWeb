@@ -1,5 +1,14 @@
 // productCard.js - Componente de tarjeta de producto con clases CSS semánticas
 
+function escapeHtml(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 export function renderProductCard(producto, onAddToCart) {
     const card = document.createElement('div');
     card.className = 'elx-product-card';
@@ -15,25 +24,25 @@ export function renderProductCard(producto, onAddToCart) {
     card.innerHTML = `
         <div class="elx-product-img-wrap">
             <img 
-                src="${producto.imagenUrl || imagenFallback}" 
-                alt="${producto.nombre}"
+                src="${escapeHtml(producto.imagenUrl) || imagenFallback}" 
+                alt="${escapeHtml(producto.nombre)}"
                 class="elx-product-img"
                 onerror="this.src='${imagenFallback}'"
             />
             
             <span class="elx-product-badge">
-                ${producto.categoriaNombre || 'Tecnología'}
+                ${escapeHtml(producto.categoriaNombre) || 'Tecnología'}
             </span>
 
             <span class="elx-stock-badge ${stockClass}">
-                ${stockText}
+                ${escapeHtml(stockText)}
             </span>
         </div>
 
         <div class="elx-product-info">
             <div>
-                <a href="/producto.html?id=${producto.id}">
-                    <h3 class="elx-product-title">${producto.nombre}</h3>
+                <a href="/producto.html?id=${Number(producto.id) || ''}">
+                    <h3 class="elx-product-title">${escapeHtml(producto.nombre)}</h3>
                 </a>
 
                 <div class="elx-product-price">${precioFormateado}</div>
@@ -47,7 +56,7 @@ export function renderProductCard(producto, onAddToCart) {
             </div>
 
             <div class="elx-product-actions">
-                <a href="/producto.html?id=${producto.id}" class="elx-btn-detail">
+                <a href="/producto.html?id=${Number(producto.id) || ''}" class="elx-btn-detail">
                     Ver detalle
                 </a>
 

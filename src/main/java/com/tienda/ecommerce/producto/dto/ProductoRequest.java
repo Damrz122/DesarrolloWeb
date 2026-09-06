@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import java.math.BigDecimal;
+import java.util.List;
 
 public class ProductoRequest {
 
@@ -23,6 +24,12 @@ public class ProductoRequest {
 
     private String imagenUrl;
 
+    /**
+     * 4FN: galería completa. Si viene no vacía, tiene prioridad sobre imagenUrl.
+     * Si viene nula/vacía, se usa imagenUrl como portada única.
+     */
+    private List<String> imagenes;
+
     @NotNull(message = "La categoría es obligatoria")
     private Long categoriaId;
 
@@ -35,6 +42,16 @@ public class ProductoRequest {
         this.precio = precio;
         this.stock = stock;
         this.imagenUrl = imagenUrl;
+        this.categoriaId = categoriaId;
+    }
+
+    public ProductoRequest(String nombre, String descripcion, BigDecimal precio, Integer stock, String imagenUrl, List<String> imagenes, Long categoriaId) {
+        this.nombre = nombre;
+        this.descripcion = descripcion;
+        this.precio = precio;
+        this.stock = stock;
+        this.imagenUrl = imagenUrl;
+        this.imagenes = imagenes;
         this.categoriaId = categoriaId;
     }
 
@@ -76,6 +93,14 @@ public class ProductoRequest {
 
     public void setImagenUrl(String imagenUrl) {
         this.imagenUrl = imagenUrl;
+    }
+
+    public List<String> getImagenes() {
+        return imagenes;
+    }
+
+    public void setImagenes(List<String> imagenes) {
+        this.imagenes = imagenes;
     }
 
     public Long getCategoriaId() {

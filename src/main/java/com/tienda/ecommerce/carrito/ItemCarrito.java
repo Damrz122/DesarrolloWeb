@@ -2,9 +2,21 @@ package com.tienda.ecommerce.carrito;
 
 import com.tienda.ecommerce.producto.Producto;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
+import org.hibernate.annotations.Check;
 
 @Entity
-@Table(name = "items_carrito")
+@Table(
+    name = "items_carrito",
+    uniqueConstraints = {
+        @UniqueConstraint(name = "uk_items_carrito_carrito_producto", columnNames = {"carrito_id", "producto_id"})
+    },
+    indexes = {
+        @Index(name = "idx_items_carrito_carrito", columnList = "carrito_id"),
+        @Index(name = "idx_items_carrito_producto", columnList = "producto_id")
+    }
+)
+@Check(constraints = "cantidad > 0")
 public class ItemCarrito {
 
     @Id
@@ -20,6 +32,7 @@ public class ItemCarrito {
     private Producto producto;
 
     @Column(nullable = false)
+    @Min(value = 1, message = "La cantidad debe ser mayor a 0")
     private int cantidad;
 
     public ItemCarrito() {

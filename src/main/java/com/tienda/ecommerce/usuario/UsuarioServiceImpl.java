@@ -42,7 +42,20 @@ public class UsuarioServiceImpl implements UsuarioService {
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado con id: " + id));
 
-        usuario.setNombre(request.getNombre().trim());
+        if (request.getNombres() != null && !request.getNombres().trim().isEmpty()) {
+            usuario.setNombres(request.getNombres().trim());
+        }
+        if (request.getApellidoPaterno() != null && !request.getApellidoPaterno().trim().isEmpty()) {
+            usuario.setApellidoPaterno(request.getApellidoPaterno().trim());
+        }
+        if (request.getApellidoMaterno() != null) {
+            String materno = request.getApellidoMaterno().trim();
+            usuario.setApellidoMaterno(materno.isEmpty() ? null : materno);
+        }
+        if (request.getNombres() == null && request.getApellidoPaterno() == null
+                && request.getApellidoMaterno() == null) {
+            usuario.setNombre(request.getNombre().trim());
+        }
         if (request.getPassword() != null && !request.getPassword().trim().isEmpty()) {
             usuario.setPasswordHash(passwordEncoder.encode(request.getPassword().trim()));
         }
@@ -74,6 +87,11 @@ public class UsuarioServiceImpl implements UsuarioService {
         return new UsuarioResponse(
                 u.getId(),
                 u.getNombre(),
+                u.getNombres(),
+                u.getApellidoPaterno(),
+                u.getApellidoMaterno(),
+                u.getTipoDocumento(),
+                u.getNumeroDocumento(),
                 u.getEmail(),
                 u.getRol(),
                 u.isActivo(),

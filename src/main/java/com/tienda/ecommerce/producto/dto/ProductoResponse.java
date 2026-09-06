@@ -2,6 +2,7 @@ package com.tienda.ecommerce.producto.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class ProductoResponse {
 
@@ -11,6 +12,8 @@ public class ProductoResponse {
     private BigDecimal precio;
     private int stock;
     private String imagenUrl;
+    /** 4FN: galería completa ordenada. imagenUrl es la portada (elemento 0 si existe). */
+    private List<String> imagenes;
     private Long categoriaId;
     private String categoriaNombre;
     private boolean activo;
@@ -20,12 +23,19 @@ public class ProductoResponse {
     }
 
     public ProductoResponse(Long id, String nombre, String descripcion, BigDecimal precio, int stock, String imagenUrl, Long categoriaId, String categoriaNombre, boolean activo, LocalDateTime fechaCreacion) {
+        this(id, nombre, descripcion, precio, stock, imagenUrl,
+                imagenUrl != null ? List.of(imagenUrl) : List.of(),
+                categoriaId, categoriaNombre, activo, fechaCreacion);
+    }
+
+    public ProductoResponse(Long id, String nombre, String descripcion, BigDecimal precio, int stock, String imagenUrl, List<String> imagenes, Long categoriaId, String categoriaNombre, boolean activo, LocalDateTime fechaCreacion) {
         this.id = id;
         this.nombre = nombre;
         this.descripcion = descripcion;
         this.precio = precio;
         this.stock = stock;
         this.imagenUrl = imagenUrl;
+        this.imagenes = imagenes != null ? List.copyOf(imagenes) : List.of();
         this.categoriaId = categoriaId;
         this.categoriaNombre = categoriaNombre;
         this.activo = activo;
@@ -78,6 +88,14 @@ public class ProductoResponse {
 
     public void setImagenUrl(String imagenUrl) {
         this.imagenUrl = imagenUrl;
+    }
+
+    public List<String> getImagenes() {
+        return imagenes;
+    }
+
+    public void setImagenes(List<String> imagenes) {
+        this.imagenes = imagenes;
     }
 
     public Long getCategoriaId() {

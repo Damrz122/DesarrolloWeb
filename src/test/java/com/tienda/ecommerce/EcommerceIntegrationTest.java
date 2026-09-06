@@ -35,7 +35,8 @@ class EcommerceIntegrationTest {
     void flujoCompletoRegistroLoginYCatalogo() throws Exception {
         // 1. Registro de nuevo usuario
         RegistroRequest registroReq = new RegistroRequest(
-                "Estudiante Test",
+                "Estudiante", "Test", "Apellido",
+                com.tienda.ecommerce.usuario.TipoDocumento.DNI, "87654321",
                 "estudiante@tienda.com",
                 "passwordSegura123"
         );

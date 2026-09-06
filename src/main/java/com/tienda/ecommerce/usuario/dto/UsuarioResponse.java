@@ -1,12 +1,18 @@
 package com.tienda.ecommerce.usuario.dto;
 
 import com.tienda.ecommerce.usuario.Rol;
+import com.tienda.ecommerce.usuario.TipoDocumento;
 import java.time.LocalDateTime;
 
 public class UsuarioResponse {
 
     private Long id;
     private String nombre;
+    private String nombres;
+    private String apellidoPaterno;
+    private String apellidoMaterno;
+    private TipoDocumento tipoDocumento;
+    private String numeroDocumento;
     private String email;
     private Rol rol;
     private boolean activo;
@@ -18,6 +24,22 @@ public class UsuarioResponse {
     public UsuarioResponse(Long id, String nombre, String email, Rol rol, boolean activo, LocalDateTime fechaRegistro) {
         this.id = id;
         this.nombre = nombre;
+        this.email = email;
+        this.rol = rol;
+        this.activo = activo;
+        this.fechaRegistro = fechaRegistro;
+    }
+
+    public UsuarioResponse(Long id, String nombre, String nombres, String apellidoPaterno, String apellidoMaterno,
+                           TipoDocumento tipoDocumento, String numeroDocumento,
+                           String email, Rol rol, boolean activo, LocalDateTime fechaRegistro) {
+        this.id = id;
+        this.nombre = nombre;
+        this.nombres = nombres;
+        this.apellidoPaterno = apellidoPaterno;
+        this.apellidoMaterno = apellidoMaterno;
+        this.tipoDocumento = tipoDocumento;
+        this.numeroDocumento = numeroDocumento;
         this.email = email;
         this.rol = rol;
         this.activo = activo;
@@ -38,6 +60,46 @@ public class UsuarioResponse {
 
     public void setNombre(String nombre) {
         this.nombre = nombre;
+    }
+
+    public String getNombres() {
+        return nombres;
+    }
+
+    public void setNombres(String nombres) {
+        this.nombres = nombres;
+    }
+
+    public String getApellidoPaterno() {
+        return apellidoPaterno;
+    }
+
+    public void setApellidoPaterno(String apellidoPaterno) {
+        this.apellidoPaterno = apellidoPaterno;
+    }
+
+    public String getApellidoMaterno() {
+        return apellidoMaterno;
+    }
+
+    public void setApellidoMaterno(String apellidoMaterno) {
+        this.apellidoMaterno = apellidoMaterno;
+    }
+
+    public TipoDocumento getTipoDocumento() {
+        return tipoDocumento;
+    }
+
+    public void setTipoDocumento(TipoDocumento tipoDocumento) {
+        this.tipoDocumento = tipoDocumento;
+    }
+
+    public String getNumeroDocumento() {
+        return numeroDocumento;
+    }
+
+    public void setNumeroDocumento(String numeroDocumento) {
+        this.numeroDocumento = numeroDocumento;
     }
 
     public String getEmail() {

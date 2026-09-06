@@ -57,6 +57,18 @@
 			<scope>runtime</scope>
 		</dependency>
 
+		<!-- Flyway Core (migraciones versionadas: normalización 3FN/BCNF) -->
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-core</artifactId>
+		</dependency>
+
+		<!-- Flyway PostgreSQL support -->
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-database-postgresql</artifactId>
+		</dependency>
+
 		<!-- H2 In-Memory Database (for testing / fallback) -->
 		<dependency>
 			<groupId>com.h2database</groupId>

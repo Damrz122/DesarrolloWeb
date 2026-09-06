@@ -2,18 +2,22 @@ package com.tienda.ecommerce.pedido;
 
 import com.tienda.ecommerce.usuario.Usuario;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import org.hibernate.annotations.Check;
 
 @Entity
 @Table(
     name = "pedidos",
     indexes = {
-        @Index(name = "idx_pedido_estado", columnList = "estado")
+        @Index(name = "idx_pedido_estado", columnList = "estado"),
+        @Index(name = "idx_pedido_usuario_fecha", columnList = "usuario_id, fecha")
     }
 )
+@Check(constraints = "total >= 0")
 public class Pedido {
 
     @Id
@@ -29,6 +33,7 @@ public class Pedido {
     private EstadoPedido estado = EstadoPedido.PENDIENTE;
 
     @Column(nullable = false, precision = 10, scale = 2)
+    @Min(value = 0, message = "El total no puede ser negativo")
     private BigDecimal total;
 
     @Column(name = "direccion_envio", length = 255)

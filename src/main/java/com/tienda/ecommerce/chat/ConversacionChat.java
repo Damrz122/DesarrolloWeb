@@ -5,9 +5,18 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import org.hibernate.annotations.Check;
 
 @Entity
-@Table(name = "conversaciones_chat")
+@Table(
+    name = "conversaciones_chat",
+    indexes = {
+        @Index(name = "idx_conversacion_cliente", columnList = "cliente_id"),
+        @Index(name = "idx_conversacion_admin", columnList = "admin_id"),
+        @Index(name = "idx_conversacion_estado", columnList = "estado")
+    }
+)
+@Check(constraints = "estado IN ('ACTIVA', 'CERRADA', 'ARCHIVADA')")
 public class ConversacionChat {
 
     @Id

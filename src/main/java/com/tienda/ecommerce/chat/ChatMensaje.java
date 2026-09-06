@@ -5,7 +5,13 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "chat_mensajes")
+@Table(
+    name = "chat_mensajes",
+    indexes = {
+        @Index(name = "idx_chat_mensaje_conversacion_fecha", columnList = "conversacion_id, fecha_envio"),
+        @Index(name = "idx_chat_mensaje_remitente", columnList = "remitente_id")
+    }
+)
 public class ChatMensaje {
 
     @Id

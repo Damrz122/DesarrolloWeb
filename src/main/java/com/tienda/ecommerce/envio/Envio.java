@@ -3,15 +3,21 @@ package com.tienda.ecommerce.envio;
 import com.tienda.ecommerce.pedido.Pedido;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import org.hibernate.annotations.Check;
 
 @Entity
 @Table(
     name = "envios",
+    uniqueConstraints = {
+        @UniqueConstraint(name = "uk_envios_numero_guia", columnNames = {"numero_guia"})
+    },
     indexes = {
         @Index(name = "idx_envio_estado", columnList = "estado_envio"),
-        @Index(name = "idx_envio_guia", columnList = "numero_guia")
+        @Index(name = "idx_envio_guia", columnList = "numero_guia"),
+        @Index(name = "idx_envio_pedido", columnList = "pedido_id")
     }
 )
+@Check(constraints = "fecha_entrega_real IS NULL OR fecha_despacho IS NULL OR fecha_entrega_real >= fecha_despacho")
 public class Envio {
 
     @Id
@@ -29,7 +35,7 @@ public class Envio {
     @Column(name = "empresa_courier", length = 100)
     private String empresaCourier = "Electronix Express Logistics";
 
-    @Column(name = "numero_guia", length = 100)
+    @Column(name = "numero_guia", length = 100, unique = true)
     private String numeroGuia;
 
     @Column(name = "direccion_destino", nullable = false, length = 255)

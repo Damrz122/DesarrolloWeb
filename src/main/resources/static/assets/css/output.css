@@ -1199,3 +1199,372 @@ a {
     color: #4b5563;
     padding: 8px 12px;
 }
+
+/* ==========================================================================
+   3. MENÚ DE USUARIO LOGUEADO (renderizado dinámico por navbar.js)
+   Usa solo clases elx-*: las utilidades Tailwind no están compiladas en este
+   archivo y el CDN no carga en todas las páginas (p. ej. index.html).
+   ========================================================================== */
+
+.elx-user-name {
+    max-width: 110px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@media (max-width: 767px) {
+    .elx-user-name {
+        display: none;
+    }
+}
+
+.elx-user-meta {
+    padding: 8px 16px;
+    border-bottom: 1px solid #333333;
+    font-size: 0.6875rem;
+    color: #a3a3a3;
+    line-height: 1.5;
+}
+
+.elx-user-meta strong {
+    color: #ffffff;
+    word-break: break-all;
+}
+
+.elx-admin-link {
+    color: var(--elx-teal-accent) !important;
+    font-weight: 900 !important;
+}
+
+.elx-logout-btn {
+    color: #fda4af !important;
+    font-weight: 700 !important;
+}
+
+/* Apertura por clic (táctil/móvil); en escritorio también abre con :hover */
+.elx-dropdown.elx-open {
+    display: block;
+}
+
+/* ==========================================================================
+   4. WIDGET FLOTANTE "SOPORTE EN VIVO" (renderizado por chat.js)
+   ========================================================================== */
+
+.elx-chat-float {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 40;
+}
+
+.elx-chat-toggle {
+    width: 56px;
+    height: 56px;
+    border-radius: 9999px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    background: linear-gradient(135deg, #14635c 0%, #1ca299 100%);
+    box-shadow: 0 10px 25px rgba(20, 99, 92, 0.45);
+    transition: transform 0.2s;
+}
+
+.elx-chat-toggle:hover {
+    transform: scale(1.08);
+}
+
+.elx-chat-toggle:focus {
+    outline: 2px solid var(--elx-teal-accent);
+    outline-offset: 2px;
+}
+
+.elx-chat-window {
+    position: absolute;
+    bottom: 68px;
+    right: 0;
+    width: 320px;
+    max-width: calc(100vw - 48px);
+    height: 460px;
+    max-height: calc(100vh - 140px);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background-color: rgba(23, 23, 23, 0.97);
+    border: 1px solid #404040;
+    border-radius: 16px;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+}
+
+.elx-chat-window.elx-hidden {
+    display: none;
+}
+
+.elx-chat-header {
+    background: linear-gradient(135deg, #14635c 0%, #1ca299 100%);
+    padding: 14px 16px;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+}
+
+.elx-chat-header-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.elx-chat-status-dot {
+    width: 10px;
+    height: 10px;
+    background-color: #34d399;
+    border-radius: 9999px;
+    animation: elx-pulse 1.6s ease-in-out infinite;
+    flex-shrink: 0;
+}
+
+@keyframes elx-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+}
+
+.elx-chat-title {
+    font-weight: 700;
+    font-size: 0.875rem;
+    margin: 0;
+}
+
+.elx-chat-subtitle {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.85);
+    margin: 0;
+}
+
+.elx-chat-close {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 8px;
+    display: flex;
+}
+
+.elx-chat-close:hover {
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+.elx-chat-messages {
+    flex: 1;
+    padding: 14px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-size: 0.875rem;
+}
+
+.elx-chat-hint {
+    text-align: center;
+    font-size: 0.75rem;
+    color: #a3a3a3;
+    margin: 8px 0;
+}
+
+.elx-chat-error {
+    text-align: center;
+    font-size: 0.75rem;
+    color: #fda4af;
+}
+
+.elx-chat-row {
+    display: flex;
+    flex-direction: column;
+}
+
+.elx-chat-row.elx-mine {
+    align-items: flex-end;
+}
+
+.elx-chat-row:not(.elx-mine) {
+    align-items: flex-start;
+}
+
+.elx-chat-sender {
+    font-size: 0.6875rem;
+    color: #a3a3a3;
+    margin-bottom: 3px;
+    padding: 0 4px;
+}
+
+.elx-chat-bubble {
+    max-width: 80%;
+    border-radius: 16px;
+    padding: 8px 12px;
+    font-size: 0.875rem;
+    line-height: 1.4;
+    word-break: break-word;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.elx-chat-row.elx-mine .elx-chat-bubble {
+    background: linear-gradient(135deg, #14635c 0%, #1ca299 100%);
+    color: #ffffff;
+    border-bottom-right-radius: 4px;
+}
+
+.elx-chat-row:not(.elx-mine) .elx-chat-bubble {
+    background-color: #2d2d2d;
+    color: #e5e7eb;
+    border: 1px solid #404040;
+    border-bottom-left-radius: 4px;
+}
+
+.elx-chat-time {
+    font-size: 0.625rem;
+    color: #737373;
+    margin-top: 3px;
+    padding: 0 4px;
+}
+
+.elx-chat-footer {
+    padding: 10px;
+    border-top: 1px solid #333333;
+    background-color: rgba(0, 0, 0, 0.35);
+    flex-shrink: 0;
+}
+
+.elx-chat-form {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.elx-chat-input {
+    flex: 1;
+    min-width: 0;
+    background-color: #2d2d2d;
+    border: 1px solid #404040;
+    border-radius: 12px;
+    padding: 8px 12px;
+    font-size: 0.875rem;
+    color: #ffffff;
+    outline: none;
+}
+
+.elx-chat-input::placeholder {
+    color: #a3a3a3;
+}
+
+.elx-chat-input:focus {
+    border-color: var(--elx-teal-accent);
+}
+
+.elx-chat-send {
+    background-color: var(--elx-teal-primary);
+    border: none;
+    color: #ffffff;
+    padding: 8px;
+    border-radius: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background-color 0.2s;
+}
+
+.elx-chat-send:hover {
+    background-color: var(--elx-teal-accent);
+}
+
+/* ==========================================================================
+   5. NOTIFICACIONES TOAST (renderizadas por toast.js)
+   ========================================================================== */
+
+.elx-toast-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 380px;
+    width: calc(100% - 40px);
+    pointer-events: none;
+    padding: 0 4px;
+}
+
+.elx-toast {
+    pointer-events: auto;
+    display: flex;
+    align-items: center;
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: 1px solid;
+    font-size: 0.875rem;
+    font-weight: 500;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+    transform: translateY(16px);
+    opacity: 0;
+    transition: transform 0.3s, opacity 0.3s;
+}
+
+.elx-toast.elx-show {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.elx-toast svg {
+    flex-shrink: 0;
+    margin-right: 10px;
+}
+
+.elx-toast-body {
+    flex: 1;
+}
+
+.elx-toast-close {
+    margin-left: 10px;
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    display: flex;
+    padding: 2px;
+}
+
+.elx-toast-close:hover {
+    color: #ffffff;
+}
+
+.elx-toast-success {
+    background-color: rgba(6, 78, 59, 0.95);
+    border-color: rgba(16, 185, 129, 0.5);
+    color: #d1fae5;
+}
+
+.elx-toast-error {
+    background-color: rgba(76, 5, 25, 0.95);
+    border-color: rgba(244, 63, 94, 0.5);
+    color: #ffe4e6;
+}
+
+.elx-toast-warning {
+    background-color: rgba(69, 26, 3, 0.95);
+    border-color: rgba(245, 158, 11, 0.5);
+    color: #fef3c7;
+}
+
+.elx-toast-info {
+    background-color: rgba(23, 23, 23, 0.95);
+    border-color: #404040;
+    color: #e5e7eb;
+}

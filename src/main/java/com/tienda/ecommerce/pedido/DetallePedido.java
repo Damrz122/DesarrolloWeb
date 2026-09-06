@@ -2,10 +2,19 @@ package com.tienda.ecommerce.pedido;
 
 import com.tienda.ecommerce.producto.Producto;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import java.math.BigDecimal;
+import org.hibernate.annotations.Check;
 
 @Entity
-@Table(name = "detalles_pedido")
+@Table(
+    name = "detalles_pedido",
+    indexes = {
+        @Index(name = "idx_detalle_pedido_id", columnList = "pedido_id"),
+        @Index(name = "idx_detalle_producto_id", columnList = "producto_id")
+    }
+)
+@Check(constraints = "cantidad > 0 AND precio_unitario >= 0")
 public class DetallePedido {
 
     @Id
@@ -21,9 +30,11 @@ public class DetallePedido {
     private Producto producto;
 
     @Column(nullable = false)
+    @Min(value = 1, message = "La cantidad debe ser mayor a 0")
     private int cantidad;
 
     @Column(name = "precio_unitario", nullable = false, precision = 10, scale = 2)
+    @Min(value = 0, message = "El precio unitario no puede ser negativo")
     private BigDecimal precioUnitario;
 
     public DetallePedido() {

@@ -1,17 +1,25 @@
 package com.tienda.ecommerce.producto;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import org.hibernate.annotations.Check;
 
 @Entity
 @Table(
     name = "productos",
+    uniqueConstraints = {
+        @UniqueConstraint(name = "uk_productos_nombre_categoria", columnNames = {"nombre", "categoria_id"})
+    },
     indexes = {
         @Index(name = "idx_producto_nombre", columnList = "nombre"),
         @Index(name = "idx_producto_categoria", columnList = "categoria_id")
     }
 )
+@Check(constraints = "precio >= 0 AND stock >= 0")
 public class Producto {
 
     @Id
@@ -25,13 +33,24 @@ public class Producto {
     private String descripcion;
 
     @Column(nullable = false, precision = 10, scale = 2)
+    @Min(value = 0, message = "El precio no puede ser negativo")
     private BigDecimal precio;
 
     @Column(nullable = false)
+    @Min(value = 0, message = "El stock no puede ser negativo")
     private int stock;
 
     @Column(name = "imagen_url", length = 500)
     private String imagenUrl;
+
+    /**
+     * 4FN: galería multivaluada (producto ->> url).
+     * Fuente de verdad de las N imágenes; imagenUrl es solo la portada
+     * (orden = 0) conservada por compatibilidad con frontend/API.
+     */
+    @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("orden ASC, id ASC")
+    private List<ProductoImagen> imagenes = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "categoria_id", nullable = false)
@@ -40,7 +59,7 @@ public class Producto {
     @Column(nullable = false)
     private boolean activo = true;
 
-    @Column(name = "fecha_creacion")
+    @Column(name = "fecha_creacion", nullable = false, updatable = false)
     private LocalDateTime fechaCreacion = LocalDateTime.now();
 
     public Producto() {
@@ -128,5 +147,37 @@ public class Producto {
 
     public void setFechaCreacion(LocalDateTime fechaCreacion) {
         this.fechaCreacion = fechaCreacion;
+    }
+
+    public List<ProductoImagen> getImagenes() {
+        return imagenes;
+    }
+
+    public void setImagenes(List<ProductoImagen> imagenes) {
+        this.imagenes = imagenes != null ? imagenes : new ArrayList<>();
+    }
+
+    public void agregarImagen(String url, int orden) {
+        if (url == null || url.trim().isEmpty()) {
+            return;
+        }
+        ProductoImagen imagen = new ProductoImagen();
+        imagen.setProducto(this);
+        imagen.setUrl(url.trim());
+        imagen.setOrden(orden);
+        this.imagenes.add(imagen);
+    }
+
+    public void reemplazarImagenes(List<String> urls) {
+        this.imagenes.clear();
+        if (urls == null) {
+            return;
+        }
+        int orden = 0;
+        for (String url : urls) {
+            if (url != null && !url.trim().isEmpty()) {
+                agregarImagen(url, orden++);
+            }
+        }
     }
 }

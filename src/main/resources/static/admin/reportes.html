@@ -1,123 +1,160 @@
 <!DOCTYPE html>
-<html lang="es" class="dark">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reportes y Métricas — ELECTRONIX</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Reportes — ELECTRONIX Admin</title>
+    <meta name="description" content="Reporte de desempeño comercial de ELECTRONIX: ingresos, órdenes por fecha y stock crítico.">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 90%27%3E%3Crect width=%27100%27 height=%2790%27 rx=%2718%27 fill=%27%23171717%27/%3E%3Cpath d=%27M15 12h65c4 0 7 3 7 7s-3 7-7 7H38l-4 12h32c3 0 6 3 5 7l-4 10c-1 3-3 5-6 5H24l-6 18c-1 3-4 5-8 5s-6-3-5-7L15 12z%27 fill=%27%23e5e7eb%27/%3E%3Cpolygon points=%2768,28 48,50 62,50 42,75 50,56 36,56%27 fill=%27%231ca299%27/%3E%3C/svg%3E">
     <link rel="stylesheet" href="/assets/css/output.css">
-    <!-- SockJS & StompJS -->
-    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+    <script>try{var t=localStorage.getItem("electronix_admin_theme");if(t==="dark"){document.documentElement.setAttribute("data-theme","dark");}}catch(e){}</script>
+    <link rel="stylesheet" href="/assets/css/admin.css">
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased">
+<body class="adm">
 
     <header id="main-navbar"></header>
 
-    <div class="bg-slate-900/60 border-b border-slate-800 backdrop-blur-md sticky top-16 sm:top-20 z-30">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between overflow-x-auto py-3 space-x-6 text-sm">
-            <div class="flex items-center space-x-2">
-                <span class="px-2.5 py-1 rounded-lg bg-indigo-500/20 text-indigo-400 font-bold text-xs">ADMIN</span>
-                <span class="font-bold text-white">Reportes</span>
-            </div>
-            <div class="flex items-center space-x-4">
-                <a href="/admin/dashboard.html" class="text-slate-400 hover:text-white transition-colors pb-1">Dashboard</a>
-                <a href="/admin/productos.html" class="text-slate-400 hover:text-white transition-colors pb-1">Productos</a>
-                <a href="/admin/categorias.html" class="text-slate-400 hover:text-white transition-colors pb-1">Categorías</a>
-                <a href="/admin/pedidos.html" class="text-slate-400 hover:text-white transition-colors pb-1">Pedidos</a>
-                <a href="/admin/reportes.html" class="text-indigo-400 font-semibold border-b-2 border-indigo-500 pb-1">Reportes</a>
-                <a href="/admin/chat.html" class="text-slate-400 hover:text-white transition-colors pb-1">Chat Clientes</a>
-            </div>
-        </div>
-    </div>
+    <main class="adm-main">
 
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full space-y-8">
-        
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <!-- ── Encabezado ─────────────────────────────────── -->
+        <div class="adm-pagehead">
             <div>
-                <h1 class="text-2xl sm:text-3xl font-extrabold text-white">Reporte de Desempeño Comercial</h1>
-                <p class="text-sm text-slate-400 mt-1">Analiza el volumen de ingresos, comportamiento por fechas y stock crítico</p>
-            </div>
-
-            <form id="form-fechas" class="flex flex-wrap items-center gap-2">
-                <div>
-                    <label class="block text-[10px] text-slate-400">Desde:</label>
-                    <input id="rep-desde" type="date" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500" />
-                </div>
-                <div>
-                    <label class="block text-[10px] text-slate-400">Hasta:</label>
-                    <input id="rep-hasta" type="date" class="bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500" />
-                </div>
-                <button type="submit" class="mt-3.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-4 py-2 rounded-xl text-xs transition-colors shadow-md shadow-indigo-600/20">
-                    Filtrar
-                </button>
-            </form>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
-            <div class="glass-panel p-6 rounded-2xl border border-slate-800 space-y-1">
-                <span class="text-xs text-slate-400 uppercase font-semibold">Total Facturado</span>
-                <div id="rep-total-ventas" class="text-3xl font-black text-emerald-400">S/ 0.00</div>
-                <span class="text-[11px] text-slate-500">En el período consultado</span>
-            </div>
-            <div class="glass-panel p-6 rounded-2xl border border-slate-800 space-y-1">
-                <span class="text-xs text-slate-400 uppercase font-semibold">Órdenes Realizadas</span>
-                <div id="rep-cant-pedidos" class="text-3xl font-black text-indigo-400">0</div>
-                <span class="text-[11px] text-slate-500">Pedidos no cancelados</span>
-            </div>
-            <div class="glass-panel p-6 rounded-2xl border border-slate-800 space-y-1">
-                <span class="text-xs text-slate-400 uppercase font-semibold">Ticket Promedio</span>
-                <div id="rep-ticket-promedio" class="text-3xl font-black text-purple-400">S/ 0.00</div>
-                <span class="text-[11px] text-slate-500">Gasto promedio por orden</span>
+                <h1 class="adm-title">Reporte de desempeño</h1>
+                <p class="adm-subtitle">Analiza ingresos, comportamiento por fechas y stock crítico</p>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-            
-            <div class="glass-panel rounded-3xl border border-slate-800 shadow-xl overflow-hidden">
-                <div class="p-5 border-b border-slate-800 flex justify-between items-center">
-                    <h2 class="text-sm font-bold text-white">Desglose de Ventas Diarias</h2>
-                    <span class="text-xs text-slate-500">Agrupado por día</span>
+        <!-- ── Barra de filtro de fechas ──────────────────── -->
+        <form id="form-fechas" class="rp-filter-bar">
+            <div class="rp-filter-group">
+                <label class="rp-filter-label" for="rep-desde">Desde</label>
+                <input id="rep-desde" type="date" class="rp-filter-input">
+            </div>
+            <div class="rp-filter-group">
+                <label class="rp-filter-label" for="rep-hasta">Hasta</label>
+                <input id="rep-hasta" type="date" class="rp-filter-input">
+            </div>
+            <button type="submit" class="rp-filter-btn" id="btn-filtrar">
+                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z"/>
+                </svg>
+                Filtrar
+            </button>
+        </form>
+
+        <!-- ── KPI Cards ──────────────────────────────────── -->
+        <div class="rp-kpi-grid">
+
+            <div class="rp-kpi rp-kpi--teal">
+                <div class="rp-kpi-icon" aria-hidden="true">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
                 </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-xs text-slate-300">
-                        <thead class="bg-slate-900 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
+                <div>
+                    <p class="rp-kpi-label">Total facturado</p>
+                    <div id="rep-total-ventas" class="rp-kpi-value">S/ 0.00</div>
+                </div>
+                <div class="rp-kpi-foot">
+                    <span class="rp-kpi-sub">En el período consultado</span>
+                </div>
+            </div>
+
+            <div class="rp-kpi rp-kpi--violet">
+                <div class="rp-kpi-icon" aria-hidden="true">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                    </svg>
+                </div>
+                <div>
+                    <p class="rp-kpi-label">Órdenes realizadas</p>
+                    <div id="rep-cant-pedidos" class="rp-kpi-value">0</div>
+                </div>
+                <div class="rp-kpi-foot">
+                    <span class="rp-kpi-sub">Pedidos no cancelados</span>
+                </div>
+            </div>
+
+            <div class="rp-kpi rp-kpi--dark">
+                <div class="rp-kpi-icon" aria-hidden="true">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                    </svg>
+                </div>
+                <div>
+                    <p class="rp-kpi-label">Ticket promedio</p>
+                    <div id="rep-ticket-promedio" class="rp-kpi-value">S/ 0.00</div>
+                </div>
+                <div class="rp-kpi-foot">
+                    <span class="rp-kpi-sub">Gasto promedio por orden</span>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ── Paneles: tabla ventas + stock crítico ──────── -->
+        <div class="rp-main-grid">
+
+            <!-- Tabla desglose por fecha -->
+            <div class="rp-panel">
+                <div class="rp-panel-head">
+                    <h2 class="rp-panel-title">Desglose de ventas diarias</h2>
+                    <span class="rp-sub-text">Agrupado por día</span>
+                </div>
+                <div class="rp-panel-scroll">
+                    <table class="rp-table" aria-label="Desglose de ventas diarias">
+                        <thead>
                             <tr>
-                                <th class="p-3.5">Fecha</th>
-                                <th class="p-3.5">Órdenes</th>
-                                <th class="p-3.5 text-right">Monto Total</th>
+                                <th scope="col">Fecha</th>
+                                <th scope="col">Órdenes</th>
+                                <th scope="col" class="num">Monto total</th>
                             </tr>
                         </thead>
-                        <tbody id="rep-fechas-body" class="divide-y divide-slate-800/60">
+                        <tbody id="rep-fechas-body">
                             <tr>
-                                <td colspan="3" class="p-6 text-center text-slate-500">Cargando reporte...</td>
+                                <td colspan="3">
+                                    <div class="rp-empty"><p>Cargando reporte…</p></div>
+                                </td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- Productos con Bajo Stock -->
-            <div class="glass-panel rounded-3xl border border-slate-800 shadow-xl overflow-hidden">
-                <div class="p-5 border-b border-slate-800 flex justify-between items-center">
-                    <h2 class="text-sm font-bold text-white flex items-center space-x-2">
-                        <span class="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse"></span>
-                        <span>Inventario Crítico (Stock ≤ 5)</span>
+            <!-- Panel inventario crítico -->
+            <div class="rp-panel">
+                <div class="rp-panel-head">
+                    <h2 class="rp-panel-title">
+                        <span class="rp-live-dot" aria-hidden="true"></span>
+                        Inventario crítico
+                        <small>(stock ≤ 5)</small>
                     </h2>
-                    <span class="text-xs text-rose-400 font-semibold">Reponer</span>
+                    <span class="rp-reponer-badge">
+                        <svg width="10" height="10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        </svg>
+                        Reponer
+                    </span>
                 </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-xs text-slate-300">
-                        <thead class="bg-slate-900 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
+                <div class="rp-panel-scroll">
+                    <table class="rp-table" aria-label="Inventario crítico">
+                        <thead>
                             <tr>
-                                <th class="p-3.5">Producto</th>
-                                <th class="p-3.5">Categoría</th>
-                                <th class="p-3.5 text-right">Stock Disponible</th>
+                                <th scope="col">Producto</th>
+                                <th scope="col">Categoría</th>
+                                <th scope="col" class="num">Stock</th>
                             </tr>
                         </thead>
-                        <tbody id="rep-stock-body" class="divide-y divide-slate-800/60">
+                        <tbody id="rep-stock-body">
                             <tr>
-                                <td colspan="3" class="p-6 text-center text-slate-500">Verificando niveles de stock...</td>
+                                <td colspan="3">
+                                    <div class="rp-empty"><p>Verificando niveles…</p></div>
+                                </td>
                             </tr>
                         </tbody>
                     </table>
@@ -128,17 +165,24 @@
 
     </main>
 
-    <footer class="border-t border-slate-800/80 bg-slate-950 py-6 text-center text-xs text-slate-500">
-        <p>© 2026 NovaStore — Módulo de Reportes de Ventas.</p>
+    <footer class="adm-footer">
+        <p>© 2026 ELECTRONIX — Módulo de Administración.</p>
     </footer>
 
     <script type="module">
         import { api } from '/assets/js/api.js';
         import { auth } from '/assets/js/auth.js';
-        import { renderNavbar } from '/assets/js/ui/navbar.js';
+        import { renderAdminShell } from '/assets/js/ui/adminShell.js';
         import { showToast } from '/assets/js/ui/toast.js';
 
-        renderNavbar();
+        const form       = document.getElementById('form-fechas');
+        const desdeInput = document.getElementById('rep-desde');
+        const hastaInput = document.getElementById('rep-hasta');
+        const fechasBody = document.getElementById('rep-fechas-body');
+        const stockBody  = document.getElementById('rep-stock-body');
+        const btnFiltrar = document.getElementById('btn-filtrar');
+
+        renderAdminShell('reportes');
 
         if (!auth.protegerRutaAdmin()) {
             // Guard
@@ -146,29 +190,29 @@
             initReportes();
         }
 
-        const form = document.getElementById('form-fechas');
-        const desdeInput = document.getElementById('rep-desde');
-        const hastaInput = document.getElementById('rep-hasta');
-        const fechasBody = document.getElementById('rep-fechas-body');
-        const stockBody = document.getElementById('rep-stock-body');
+        function esc(v) {
+            return String(v ?? '')
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        }
+        const fmt = v => new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(v);
 
         function initReportes() {
-            // Fechas por defecto: últimos 30 días
-            const hoy = new Date().toISOString().split('T')[0];
+            const hoy     = new Date().toISOString().split('T')[0];
             const hace30d = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-
             desdeInput.value = hace30d;
             hastaInput.value = hoy;
-
             cargarReporte(hace30d, hoy);
 
-            form.addEventListener('submit', (e) => {
+            form.addEventListener('submit', e => {
                 e.preventDefault();
                 cargarReporte(desdeInput.value, hastaInput.value);
             });
         }
 
         async function cargarReporte(desde, hasta) {
+            btnFiltrar.disabled = true;
+            btnFiltrar.textContent = 'Cargando…';
             try {
                 let url = '/api/reportes/ventas';
                 if (desde && hasta) url += `?desde=${desde}&hasta=${hasta}`;
@@ -177,49 +221,67 @@
                 if (res.exito && res.datos) {
                     const r = res.datos;
 
-                    document.getElementById('rep-total-ventas').textContent = new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(r.totalVentas);
-                    document.getElementById('rep-cant-pedidos').textContent = r.totalPedidos;
-                    document.getElementById('rep-ticket-promedio').textContent = new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(r.ticketPromedio);
+                    document.getElementById('rep-total-ventas').textContent    = fmt(r.totalVentas);
+                    document.getElementById('rep-cant-pedidos').textContent    = r.totalPedidos;
+                    document.getElementById('rep-ticket-promedio').textContent = fmt(r.ticketPromedio);
 
-                    // 1. Tabla Fechas
+                    // ── Tabla fechas ──
                     fechasBody.innerHTML = '';
                     if (r.ventasPorFecha && r.ventasPorFecha.length > 0) {
                         r.ventasPorFecha.forEach(v => {
-                            const tot = new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(v.total);
                             fechasBody.innerHTML += `
-                                <tr class="hover:bg-slate-900/40">
-                                    <td class="p-3.5 font-bold text-white">${v.fecha}</td>
-                                    <td class="p-3.5">${v.cantidadPedidos} pedidos</td>
-                                    <td class="p-3.5 text-right font-black text-emerald-400">${tot}</td>
-                                </tr>
-                            `;
+                                <tr>
+                                    <td><span class="rp-date-strong">${esc(v.fecha)}</span></td>
+                                    <td>${v.cantidadPedidos} pedido${v.cantidadPedidos !== 1 ? 's' : ''}</td>
+                                    <td class="num"><span class="rp-amount">${fmt(v.total)}</span></td>
+                                </tr>`;
                         });
                     } else {
-                        fechasBody.innerHTML = `<tr><td colspan="3" class="p-6 text-center text-slate-500">No hay ventas registradas en este período.</td></tr>`;
+                        fechasBody.innerHTML = `
+                            <tr><td colspan="3">
+                                <div class="rp-empty">
+                                    <svg class="rp-empty-icon" width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                                    </svg>
+                                    <p>No hay ventas en este período.</p>
+                                </div>
+                            </td></tr>`;
                     }
 
-                    // 2. Tabla Stock Bajo
+                    // ── Tabla stock ──
                     stockBody.innerHTML = '';
                     if (r.productosBajoStock && r.productosBajoStock.length > 0) {
                         r.productosBajoStock.forEach(p => {
                             stockBody.innerHTML += `
-                                <tr class="hover:bg-slate-900/40">
-                                    <td class="p-3.5 font-bold text-white">${p.nombre}</td>
-                                    <td class="p-3.5 text-slate-400">${p.categoriaNombre}</td>
-                                    <td class="p-3.5 text-right">
-                                        <span class="px-2.5 py-1 rounded-lg bg-rose-950/80 text-rose-300 font-bold border border-rose-600/40">
-                                            ${p.stock} uds.
-                                        </span>
-                                    </td>
-                                </tr>
-                            `;
+                                <tr>
+                                    <td><span class="rp-date-strong">${esc(p.nombre)}</span></td>
+                                    <td class="rp-muted">${esc(p.categoriaNombre)}</td>
+                                    <td class="num"><span class="adm-badge b-cancelado">${p.stock} uds.</span></td>
+                                </tr>`;
                         });
                     } else {
-                        stockBody.innerHTML = `<tr><td colspan="3" class="p-6 text-center text-emerald-400">Todos los productos cuentan con stock óptimo (> 5 uds).</td></tr>`;
+                        stockBody.innerHTML = `
+                            <tr><td colspan="3">
+                                <div class="rp-empty">
+                                    <svg class="rp-empty-icon--ok" width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                    <p class="rp-empty-text--ok">Todos los productos tienen stock óptimo.</p>
+                                </div>
+                            </td></tr>`;
                     }
                 }
             } catch (err) {
                 showToast('Error al cargar reporte: ' + err.message, 'error');
+            } finally {
+                btnFiltrar.disabled = false;
+                btnFiltrar.innerHTML = `
+                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z"/>
+                    </svg>
+                    Filtrar`;
             }
         }
     </script>

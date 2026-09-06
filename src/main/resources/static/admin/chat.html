@@ -1,110 +1,85 @@
 <!DOCTYPE html>
-<html lang="es" class="dark">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Atención al Cliente Chat — ELECTRONIX</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Chat Clientes — ELECTRONIX Admin</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 90%27%3E%3Crect width=%27100%27 height=%2790%27 rx=%2718%27 fill=%27%23171717%27/%3E%3Cpath d=%27M15 12h65c4 0 7 3 7 7s-3 7-7 7H38l-4 12h32c3 0 6 3 5 7l-4 10c-1 3-3 5-6 5H24l-6 18c-1 3-4 5-8 5s-6-3-5-7L15 12z%27 fill=%27%23e5e7eb%27/%3E%3Cpolygon points=%2768,28 48,50 62,50 42,75 50,56 36,56%27 fill=%27%231ca299%27/%3E%3C/svg%3E">
     <link rel="stylesheet" href="/assets/css/output.css">
+    <script>try{var t=localStorage.getItem("electronix_admin_theme");if(t==="dark"){document.documentElement.setAttribute("data-theme","dark");}}catch(e){}</script>
+    <link rel="stylesheet" href="/assets/css/admin.css">
     <!-- SockJS & StompJS -->
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased">
+<body class="adm">
 
     <header id="main-navbar"></header>
 
-    <div class="bg-slate-900/60 border-b border-slate-800 backdrop-blur-md sticky top-16 sm:top-20 z-30">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between overflow-x-auto py-3 space-x-6 text-sm">
-            <div class="flex items-center space-x-2">
-                <span class="px-2.5 py-1 rounded-lg bg-indigo-500/20 text-indigo-400 font-bold text-xs">ADMIN</span>
-                <span class="font-bold text-white">Centro de Mensajería</span>
-            </div>
-            <div class="flex items-center space-x-4">
-                <a href="/admin/dashboard.html" class="text-slate-400 hover:text-white transition-colors pb-1">Dashboard</a>
-                <a href="/admin/productos.html" class="text-slate-400 hover:text-white transition-colors pb-1">Productos</a>
-                <a href="/admin/categorias.html" class="text-slate-400 hover:text-white transition-colors pb-1">Categorías</a>
-                <a href="/admin/pedidos.html" class="text-slate-400 hover:text-white transition-colors pb-1">Pedidos</a>
-                <a href="/admin/reportes.html" class="text-slate-400 hover:text-white transition-colors pb-1">Reportes</a>
-                <a href="/admin/chat.html" class="text-indigo-400 font-semibold border-b-2 border-indigo-500 pb-1">Chat Clientes</a>
+    <main class="adm-main">
+
+        <div class="adm-pagehead">
+            <div>
+                <h1 class="adm-title">Chat con Clientes</h1>
+                <p class="adm-subtitle">Atiende en tiempo real las conversaciones vía WebSocket STOMP</p>
             </div>
         </div>
-    </div>
 
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full flex flex-col">
-        
-        <div class="mb-6">
-            <h1 class="text-2xl sm:text-3xl font-extrabold text-white">Atención al Cliente en Vivo</h1>
-            <p class="text-sm text-slate-400 mt-1">Comunícate en tiempo real con los usuarios vía WebSocket STOMP</p>
-        </div>
+        <div class="adm-card adm-chat">
 
-        <div class="flex-1 glass-panel rounded-3xl border border-slate-800 shadow-2xl flex flex-col md:flex-row overflow-hidden min-h-[550px]">
-            
-            <div class="w-full md:w-80 border-b md:border-b-0 md:border-r border-slate-800 bg-slate-900/60 flex flex-col">
-                <div class="p-4 border-b border-slate-800 flex justify-between items-center">
-                    <span class="text-xs font-bold text-slate-300 uppercase tracking-wider">Conversaciones Activas</span>
-                    <button id="btn-refrescar-convs" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors" title="Refrescar">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+            <aside class="adm-chat-side">
+                <div class="adm-chat-side-head">
+                    <span>Conversaciones</span>
+                    <button id="btn-refrescar-convs" class="adm-refresh" title="Refrescar lista">
+                        <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
                     </button>
                 </div>
-
-                <div id="conversaciones-lista" class="flex-1 overflow-y-auto divide-y divide-slate-800/50">
-                    <div class="p-6 text-center text-xs text-slate-500">Cargando conversaciones...</div>
+                <div id="conversaciones-lista" class="adm-convs">
+                    <div class="adm-msg-placeholder">Cargando conversaciones…</div>
                 </div>
-            </div>
+            </aside>
 
-            <div class="flex-1 flex flex-col bg-slate-950/40">
-                
-                <div id="chat-header" class="p-4 border-b border-slate-800 bg-slate-900/40 flex items-center justify-between">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-9 h-9 rounded-xl bg-indigo-600/30 text-indigo-400 border border-indigo-500/30 flex items-center justify-center font-bold text-sm">
-                            <span id="chat-cliente-avatar">?</span>
-                        </div>
-                        <div>
-                            <h3 id="chat-cliente-nombre" class="font-bold text-white text-sm">Selecciona una conversación</h3>
-                            <p id="chat-cliente-estado" class="text-[11px] text-slate-400">Canal en espera</p>
-                        </div>
+            <section class="adm-chat-main">
+                <div class="adm-chat-head">
+                    <span class="adm-avatar" id="chat-cliente-avatar">?</span>
+                    <div>
+                        <h3 id="chat-cliente-nombre">Selecciona una conversación</h3>
+                        <p id="chat-cliente-estado">Canal en espera</p>
                     </div>
                 </div>
 
-                <div id="admin-chat-messages" class="flex-1 p-6 overflow-y-auto space-y-4 text-sm">
-                    <div class="h-full flex items-center justify-center text-slate-500 text-xs">
-                        Selecciona un cliente de la lista para abrir la sesión de chat.
-                    </div>
+                <div id="admin-chat-messages" class="adm-msgs">
+                    <div class="adm-msg-placeholder">Selecciona un cliente de la lista para abrir la sesión de chat.</div>
                 </div>
 
-                <div class="p-4 border-t border-slate-800 bg-slate-900/60">
-                    <form id="admin-chat-form" class="flex items-center space-x-3">
-                        <input id="admin-chat-input" type="text" placeholder="Escribe una respuesta para el cliente..." disabled
-                               class="flex-1 bg-slate-900 border border-slate-700/80 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors disabled:opacity-50" autocomplete="off" />
-                        <button type="submit" id="admin-chat-send" disabled
-                                class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-5 py-2.5 rounded-xl shadow-md shadow-indigo-600/30 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+                <div class="adm-chat-foot">
+                    <form id="admin-chat-form" class="adm-chat-form">
+                        <input id="admin-chat-input" type="text" placeholder="Escribe una respuesta para el cliente…" disabled
+                               class="adm-input" autocomplete="off" />
+                        <button type="submit" id="admin-chat-send" disabled class="adm-btn adm-btn-primary">
                             Enviar
                         </button>
                     </form>
                 </div>
-
-            </div>
+            </section>
 
         </div>
 
     </main>
 
+    <footer class="adm-footer">
+        <p>© 2026 ELECTRONIX — Módulo de Administración.</p>
+    </footer>
+
     <script type="module">
         import { api } from '/assets/js/api.js';
         import { auth } from '/assets/js/auth.js';
         import { ChatClient } from '/assets/js/chat.js';
-        import { renderNavbar } from '/assets/js/ui/navbar.js';
+        import { renderAdminShell } from '/assets/js/ui/adminShell.js';
         import { showToast } from '/assets/js/ui/toast.js';
 
-        renderNavbar();
-
-        if (!auth.protegerRutaAdmin()) {
-            // Guard
-        } else {
-            initChatAdmin();
-        }
-
+        // NOTA: las referencias DOM van ANTES del init (evita TDZ: el módulo
+        // moriría si init tocara un const aún no inicializado).
         const convsLista = document.getElementById('conversaciones-lista');
         const btnRefrescar = document.getElementById('btn-refrescar-convs');
         const messagesContainer = document.getElementById('admin-chat-messages');
@@ -118,6 +93,22 @@
 
         let chatClient = null;
         let conversacionSeleccionada = null;
+        let autoRefreshTimer = null;
+
+        renderAdminShell('chat');
+
+        if (!auth.protegerRutaAdmin()) {
+            // Redirige al login
+        } else {
+            initChatAdmin();
+        }
+
+        function esc(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
 
         function initChatAdmin() {
             cargarConversaciones();
@@ -131,82 +122,132 @@
                 const texto = chatInput.value.trim();
                 if (!texto || !chatClient || !conversacionSeleccionada) return;
 
-                chatClient.enviarMensaje(texto);
-                chatInput.value = '';
+                if (chatClient.enviarMensaje(texto)) {
+                    chatInput.value = '';
+                }
             });
+
+            // Auto-refresca la lista cada 25 s sin perder la selección
+            autoRefreshTimer = setInterval(() => {
+                if (document.hidden) return;
+                cargarConversaciones(true);
+            }, 25000);
         }
 
-        async function cargarConversaciones() {
+        function pintarCargando() {
+            convsLista.innerHTML = '<div class="adm-msg-placeholder">Cargando conversaciones…</div>';
+        }
+
+        function pintarError(mensaje) {
+            convsLista.innerHTML = `
+                <div class="adm-msg-placeholder">
+                    <div style="color:#c2274b;font-weight:700;margin-bottom:6px;">No se pudo cargar el chat</div>
+                    <div style="margin-bottom:10px;">${esc(mensaje)}</div>
+                    <button id="btn-reintentar-convs" class="adm-btn adm-btn-primary adm-btn-sm">Reintentar</button>
+                </div>`;
+            const btn = document.getElementById('btn-reintentar-convs');
+            if (btn) btn.addEventListener('click', () => cargarConversaciones());
+        }
+
+        async function cargarConversaciones(silencioso = false) {
+            if (!silencioso) pintarCargando();
+
+            // Timeout: la lista nunca debe quedarse colgada en "Cargando"
+            const ctrl = new AbortController();
+            const timer = setTimeout(() => ctrl.abort(), 12000);
+
             try {
-                const res = await api.get('/api/chat/conversaciones');
+                console.info('[admin-chat] GET /api/chat/conversaciones');
+                const res = await api.request('/api/chat/conversaciones', { method: 'GET', signal: ctrl.signal });
+                console.info('[admin-chat] respuesta:', res && res.exito ? `${(res.datos || []).length} conversaciones` : res);
+
+                if (!res || !res.exito) {
+                    throw new Error((res && res.mensaje) || 'Respuesta inválida del servidor');
+                }
+
+                const lista = Array.isArray(res.datos) ? res.datos : [];
                 convsLista.innerHTML = '';
 
-                if (res.exito && res.datos && res.datos.length > 0) {
-                    res.datos.forEach(conv => {
-                        const item = document.createElement('div');
-                        item.className = `p-4 cursor-pointer hover:bg-slate-800/60 transition-colors flex items-center justify-between ${
-                            conversacionSeleccionada && conversacionSeleccionada.id === conv.id ? 'bg-indigo-950/40 border-l-4 border-indigo-500' : ''
-                        }`;
-
-                        item.innerHTML = `
-                            <div class="flex items-center space-x-3 truncate">
-                                <div class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-xs font-bold text-white">
-                                    ${conv.clienteNombre ? conv.clienteNombre.charAt(0).toUpperCase() : 'C'}
-                                </div>
-                                <div class="truncate">
-                                    <div class="text-xs font-bold text-white truncate">${conv.clienteNombre}</div>
-                                    <div class="text-[11px] text-slate-400 truncate">${conv.ultimoMensaje || 'Sin mensajes'}</div>
-                                </div>
-                            </div>
-                            <span class="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0"></span>
-                        `;
-
-                        item.addEventListener('click', () => {
-                            seleccionarConversacion(conv);
-                        });
-
-                        convsLista.appendChild(item);
-                    });
-                } else {
-                    convsLista.innerHTML = '<div class="p-6 text-center text-xs text-slate-500">No hay chats abiertos por clientes.</div>';
+                if (lista.length === 0) {
+                    convsLista.innerHTML = '<div class="adm-msg-placeholder">Aún no hay conversaciones.<br/>Aparecerán aquí cuando un cliente abra el chat.</div>';
+                    return;
                 }
+
+                lista.forEach(conv => {
+                    const item = document.createElement('div');
+                    const sel = conversacionSeleccionada && conversacionSeleccionada.id === conv.id;
+                    item.className = 'adm-conv' + (sel ? ' adm-sel' : '');
+                    item.dataset.convId = conv.id;
+                    item.innerHTML = `
+                        <span class="adm-conv-avatar">${esc(conv.clienteNombre ? conv.clienteNombre.charAt(0).toUpperCase() : 'C')}</span>
+                        <span class="adm-conv-body">
+                            <span class="adm-conv-name-row">
+                                <span class="adm-conv-name">${esc(conv.clienteNombre || 'Cliente')}</span>
+                                <span class="adm-conv-state">${esc(conv.estado || '')}</span>
+                            </span>
+                            <span class="adm-conv-prev">${esc(conv.ultimoMensaje || 'Sin mensajes')}</span>
+                        </span>
+                        ${(conv.mensajesNoLeidos && conv.mensajesNoLeidos > 0)
+                            ? `<span class="adm-conv-unread" title="${conv.mensajesNoLeidos} mensaje${conv.mensajesNoLeidos > 1 ? 's' : ''} sin leer">${conv.mensajesNoLeidos > 9 ? '9+' : conv.mensajesNoLeidos}</span>`
+                            : ''}
+                    `;
+                    item.addEventListener('click', () => seleccionarConversacion(conv));
+                    convsLista.appendChild(item);
+                });
             } catch (err) {
-                convsLista.innerHTML = `<div class="p-4 text-rose-400 text-xs">Error: ${err.message}</div>`;
+                console.error('[admin-chat] error cargando conversaciones:', err);
+                if (silencioso) return; // no pisar la lista en refrescos automáticos
+                const msg = err && err.name === 'AbortError'
+                    ? 'La petición tardó demasiado (timeout 12 s). Revisa tu conexión.'
+                    : (err.message || 'Error desconocido');
+                pintarError(msg);
+            } finally {
+                clearTimeout(timer);
             }
         }
 
         async function seleccionarConversacion(conv) {
             conversacionSeleccionada = conv;
-            clienteNombre.textContent = conv.clienteNombre;
+            clienteNombre.textContent = conv.clienteNombre || 'Cliente';
             clienteAvatar.textContent = conv.clienteNombre ? conv.clienteNombre.charAt(0).toUpperCase() : 'C';
-            clienteEstado.textContent = `Sala #${conv.id} — Conectado en tiempo real`;
+            clienteEstado.textContent = `Sala #${conv.id} — ${conv.estado || 'Activa'} · en tiempo real`;
+
+            document.querySelectorAll('#conversaciones-lista .adm-conv').forEach(el => {
+                el.classList.toggle('adm-sel', String(el.dataset.convId) === String(conv.id));
+            });
 
             chatInput.disabled = false;
             chatSend.disabled = false;
             chatInput.focus();
 
-            // Desconectar cliente STOMP previo si había
             if (chatClient) {
                 chatClient.desconectar();
+                chatClient = null;
             }
 
+            messagesContainer.innerHTML = '<div class="adm-msg-placeholder">Cargando historial…</div>';
+
             try {
-                // Cargar historial de la conversación
                 const resHistorial = await api.get(`/api/chat/conversaciones/${conv.id}/mensajes`);
                 messagesContainer.innerHTML = '';
 
-                if (resHistorial.exito && resHistorial.datos) {
-                    resHistorial.datos.forEach(m => agregarMensajeUI(m));
+                const historial = resHistorial && resHistorial.datos ? resHistorial.datos : [];
+                if (historial.length === 0) {
+                    messagesContainer.innerHTML = '<div class="adm-msg-placeholder">Sin mensajes todavía. ¡Saluda al cliente!</div>';
+                } else {
+                    historial.forEach(m => agregarMensajeUI(m));
                 }
 
-                // Conectar al canal STOMP de esta conversación
                 chatClient = new ChatClient();
                 await chatClient.conectar(conv.id, (nuevoMensaje) => {
                     agregarMensajeUI(nuevoMensaje);
                 });
 
+                // Refresca la lista para marcar la conversación como leída/seleccionada
+                cargarConversaciones(true);
             } catch (err) {
-                console.error('Error al conectar chat admin:', err);
+                console.error('[admin-chat] error abriendo conversación:', err);
+                messagesContainer.innerHTML = `<div class="adm-msg-placeholder" style="color:#c2274b;">Error al abrir la conversación: ${esc(err.message)}</div>`;
                 showToast('Error al conectar con la conversación', 'error');
             }
         }
@@ -216,21 +257,20 @@
             const esMio = user && m.remitenteId === user.id;
 
             const div = document.createElement('div');
-            div.className = `flex flex-col ${esMio ? 'items-end' : 'items-start'}`;
+            div.className = `adm-row ${esMio ? 'mine' : 'theirs'}`;
 
             const hora = m.fechaEnvio ? new Date(m.fechaEnvio).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+            const quien = m.remitenteNombre ? `${m.remitenteNombre}${m.remitenteRol ? ' · ' + m.remitenteRol : ''}` : '';
 
             div.innerHTML = `
-                <div class="text-[11px] text-slate-400 mb-1 px-1">${m.remitenteNombre} (${m.remitenteRol})</div>
-                <div class="max-w-[75%] rounded-2xl px-4 py-2.5 text-sm shadow-md ${
-                    esMio 
-                        ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-br-none' 
-                        : 'bg-slate-800 text-slate-200 border border-slate-700 rounded-bl-none'
-                }">
-                    ${m.contenido}
-                </div>
-                <div class="text-[10px] text-slate-500 mt-1 px-1">${hora}</div>
+                ${quien ? `<div class="adm-bubble-meta">${esc(quien)}</div>` : ''}
+                <div class="adm-bubble">${esc(m.contenido)}</div>
+                ${hora ? `<div class="adm-bubble-time">${esc(hora)}</div>` : ''}
             `;
+
+            // Quita el placeholder si existe
+            const ph = messagesContainer.querySelector('.adm-msg-placeholder');
+            if (ph) ph.remove();
 
             messagesContainer.appendChild(div);
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
@@ -238,3 +278,5 @@
     </script>
 </body>
 </html>
+
+

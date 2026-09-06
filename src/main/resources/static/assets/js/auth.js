@@ -20,7 +20,21 @@ export const auth = {
     },
 
     isAuthenticated() {
-        return !!api.getToken();
+        const token = api.getToken();
+        if (!token) return false;
+        // Valida expiración del JWT (exp en segundos). Si expiró, limpia sesión.
+        try {
+            const parts = token.split('.');
+            if (parts.length !== 3) return !!token;
+            const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+            if (payload.exp && Date.now() >= payload.exp * 1000) {
+                this.logout(false);
+                return false;
+            }
+            return true;
+        } catch {
+            return !!token;
+        }
     },
 
     isAdmin() {
@@ -49,9 +63,14 @@ export const auth = {
         }
     },
 
-    async registro(nombre, email, password) {
+    async registro(nombreOrDatos, email, password) {
+        // Nuevo: objeto {nombres, apellidoPaterno, apellidoMaterno, tipoDocumento,
+        // numeroDocumento, email, password}. Legado: (nombre, email, password).
+        const payload = (nombreOrDatos && typeof nombreOrDatos === 'object')
+            ? nombreOrDatos
+            : { nombre: nombreOrDatos, email, password };
         try {
-            const res = await api.post('/api/auth/registro', { nombre, email, password });
+            const res = await api.post('/api/auth/registro', payload);
             if (res.exito && res.datos) {
                 api.setToken(res.datos.token, true);
                 this.setUser({

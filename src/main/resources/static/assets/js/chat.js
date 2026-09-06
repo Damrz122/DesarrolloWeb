@@ -83,7 +83,9 @@ export class ChatClient {
     }
 }
 
-// Widget flotante para la experiencia de compra del cliente
+// Widget flotante para la experiencia de compra del cliente.
+// Usa solo clases elx-* (output.css): las utilidades Tailwind no están
+// compiladas en output.css y el CDN no carga en todas las páginas.
 export function initFloatingChat() {
     // Si ya existe el widget, no duplicar
     if (document.getElementById('floating-chat-container')) return;
@@ -93,36 +95,36 @@ export function initFloatingChat() {
     if (window.location.pathname.includes('/admin/')) return;
 
     const widgetHTML = `
-        <div id="floating-chat-container" class="fixed bottom-6 right-6 z-40">
-            <button id="chat-toggle-btn" class="w-14 h-14 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-xl flex items-center justify-center transition-all duration-300 transform hover:scale-110 focus:outline-none">
-                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div id="floating-chat-container" class="elx-chat-float">
+            <button id="chat-toggle-btn" class="elx-chat-toggle" aria-label="Abrir soporte en vivo">
+                <svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
                 </svg>
             </button>
 
-            <div id="chat-window" class="hidden absolute bottom-16 right-0 w-80 sm:w-96 h-[460px] bg-slate-900/95 backdrop-blur-xl border border-slate-700/70 rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-all duration-300">
-                <div class="bg-gradient-to-r from-indigo-600 to-purple-600 p-4 text-white flex items-center justify-between">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-3 h-3 bg-emerald-400 rounded-full animate-pulse"></div>
+            <div id="chat-window" class="elx-chat-window elx-hidden" role="dialog" aria-label="Soporte en vivo">
+                <div class="elx-chat-header">
+                    <div class="elx-chat-header-info">
+                        <div class="elx-chat-status-dot"></div>
                         <div>
-                            <h3 class="font-semibold text-sm">Soporte en Vivo</h3>
-                            <p class="text-xs text-indigo-100">Respondemos al instante</p>
+                            <h3 class="elx-chat-title">Soporte en Vivo</h3>
+                            <p class="elx-chat-subtitle">Respondemos al instante</p>
                         </div>
                     </div>
-                    <button id="chat-close-btn" class="text-white/80 hover:text-white">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    <button id="chat-close-btn" class="elx-chat-close" aria-label="Cerrar chat">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
 
-                <div id="chat-messages" class="flex-1 p-4 overflow-y-auto space-y-3 text-sm">
-                    <div class="text-center text-xs text-slate-400 my-2">Iniciando conversación...</div>
+                <div id="chat-messages" class="elx-chat-messages">
+                    <div class="elx-chat-hint">Iniciando conversación...</div>
                 </div>
 
-                <div class="p-3 border-t border-slate-800 bg-slate-950/60">
-                    <form id="chat-form" class="flex items-center space-x-2">
-                        <input id="chat-input" type="text" placeholder="Escribe tu mensaje..." class="flex-1 bg-slate-800/80 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors" autocomplete="off" />
-                        <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white p-2 rounded-xl transition-colors">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                <div class="elx-chat-footer">
+                    <form id="chat-form" class="elx-chat-form">
+                        <input id="chat-input" type="text" placeholder="Escribe tu mensaje..." class="elx-chat-input" autocomplete="off" />
+                        <button type="submit" class="elx-chat-send" aria-label="Enviar mensaje">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
                         </button>
                     </form>
                 </div>
@@ -151,7 +153,7 @@ export function initFloatingChat() {
             return;
         }
 
-        const isHidden = chatWindow.classList.toggle('hidden');
+        const isHidden = chatWindow.classList.toggle('elx-hidden');
         if (!isHidden && !chatClient) {
             try {
                 // Obtener o crear conversación con la API
@@ -174,13 +176,13 @@ export function initFloatingChat() {
                 }
             } catch (err) {
                 console.error('Error al abrir chat flotante:', err);
-                messagesContainer.innerHTML = '<div class="text-rose-400 text-xs text-center">No se pudo conectar al chat.</div>';
+                messagesContainer.innerHTML = '<div class="elx-chat-error">No se pudo conectar al chat.</div>';
             }
         }
     });
 
     closeBtn.addEventListener('click', () => {
-        chatWindow.classList.add('hidden');
+        chatWindow.classList.add('elx-hidden');
     });
 
     chatForm.addEventListener('submit', (e) => {
@@ -193,25 +195,28 @@ export function initFloatingChat() {
     });
 }
 
+function escapeChatHtml(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 function agregarBurbujaMensaje(mensaje, container) {
     const user = auth.getUser();
     const esMio = user && mensaje.remitenteId === user.id;
 
     const div = document.createElement('div');
-    div.className = `flex flex-col ${esMio ? 'items-end' : 'items-start'}`;
+    div.className = `elx-chat-row${esMio ? ' elx-mine' : ''}`;
 
     const hora = mensaje.fechaEnvio ? new Date(mensaje.fechaEnvio).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
 
     div.innerHTML = `
-        <div class="text-[11px] text-slate-400 mb-1 px-1">${mensaje.remitenteNombre}</div>
-        <div class="max-w-[80%] rounded-2xl px-3 py-2 text-sm shadow-md ${
-            esMio 
-                ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-br-none' 
-                : 'bg-slate-800 text-slate-200 border border-slate-700 rounded-bl-none'
-        }">
-            ${mensaje.contenido}
-        </div>
-        <div class="text-[10px] text-slate-500 mt-1 px-1">${hora}</div>
+        <div class="elx-chat-sender">${escapeChatHtml(mensaje.remitenteNombre)}</div>
+        <div class="elx-chat-bubble">${escapeChatHtml(mensaje.contenido)}</div>
+        <div class="elx-chat-time">${escapeChatHtml(hora)}</div>
     `;
 
     container.appendChild(div);

@@ -76,14 +76,20 @@ export const cart = {
     },
 
     actualizarBadge(cantidad) {
-        const badge = document.getElementById('cart-badge');
-        if (badge) {
-            badge.textContent = cantidad || '0';
+        // Soporta ambos ids usados en los HTML: cart-badge-top (header) y cart-badge (legacy)
+        const badges = [
+            ...document.querySelectorAll('#cart-badge-top'),
+            ...document.querySelectorAll('#cart-badge')
+        ];
+        const valor = cantidad || '0';
+        badges.forEach(badge => {
+            badge.textContent = valor;
             if (cantidad > 0) {
+                badge.style.display = '';
                 badge.classList.remove('hidden');
             } else {
-                badge.classList.add('hidden');
+                badge.style.display = 'none';
             }
-        }
+        });
     }
 };
