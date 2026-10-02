@@ -82,14 +82,20 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     @Transactional
-    public MensajeChatResponse procesarYGuardarMensaje(MensajeChatRequest request) {
+    public MensajeChatResponse procesarYGuardarMensaje(MensajeChatRequest request, Long remitenteAutenticadoId, boolean esAdmin) {
         ConversacionChat conversacion = conversacionRepository.findById(request.getConversacionId())
                 .orElseThrow(() -> new RecursoNoEncontradoException("Conversación no encontrada con id: " + request.getConversacionId()));
 
-        Usuario remitente = usuarioRepository.findById(request.getRemitenteId())
-                .orElseThrow(() -> new RecursoNoEncontradoException("Remitente no encontrado con id: " + request.getRemitenteId()));
+        // Seguridad WS: solo el dueno o un admin guardan mensajes
+        if (!esAdmin && !conversacion.getCliente().getId().equals(remitenteAutenticadoId)) {
+            throw new AccessDeniedException("No tienes permiso para escribir en esta conversación");
+        }
 
-        // Si quien responde es un administrador y la conversación no tenía admin asignado, asignarlo
+        // Seguridad WS: el remitente real es el autenticado, no el del payload
+        Usuario remitente = usuarioRepository.findById(remitenteAutenticadoId)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Remitente no encontrado con id: " + remitenteAutenticadoId));
+
+        // Si un admin responde y no habia admin asignado, se asigna
         if (remitente.getRol() == Rol.ADMIN && conversacion.getAdmin() == null) {
             conversacion.setAdmin(remitente);
             conversacionRepository.save(conversacion);

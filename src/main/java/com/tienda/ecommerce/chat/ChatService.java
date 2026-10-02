@@ -10,5 +10,5 @@ public interface ChatService {
     ConversacionResponse obtenerOCrearConversacionCliente(Long clienteId);
     List<ConversacionResponse> listarConversacionesAdmin();
     List<MensajeChatResponse> obtenerHistorial(Long conversacionId, Long usuarioId, boolean esAdmin);
-    MensajeChatResponse procesarYGuardarMensaje(MensajeChatRequest request);
+    MensajeChatResponse procesarYGuardarMensaje(MensajeChatRequest request, Long remitenteAutenticadoId, boolean esAdmin);
 }

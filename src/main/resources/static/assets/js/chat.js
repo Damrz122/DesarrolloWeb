@@ -1,4 +1,4 @@
-// chat.js - Cliente STOMP sobre SockJS para chat en tiempo real
+// chat.js: es para el cliente STOMP del chat en tiempo real
 
 import { api } from './api.js';
 import { auth } from './auth.js';
@@ -25,9 +25,13 @@ export class ChatClient {
 
             const socket = new SockJS('/ws-chat');
             this.stompClient = Stomp.over(socket);
-            this.stompClient.debug = null; // Silenciar logs excesivos en consola
+            this.stompClient.debug = null; // Silencia logs del socket
+            // Auth WS: envia el JWT para que el backend identifique al usuario
+            const headers = {};
+            const token = api.getToken();
+            if (token) headers['Authorization'] = 'Bearer ' + token;
 
-            this.stompClient.connect({}, (frame) => {
+            this.stompClient.connect(headers, (frame) => {
                 console.log('[WebSocket] Conectado exitosamente');
 
                 // Suscripción al canal de la conversación
@@ -83,9 +87,7 @@ export class ChatClient {
     }
 }
 
-// Widget flotante para la experiencia de compra del cliente.
-// Usa solo clases elx-* (output.css): las utilidades Tailwind no están
-// compiladas en output.css y el CDN no carga en todas las páginas.
+// widget chat: es para el soporte flotante del cliente
 export function initFloatingChat() {
     // Si ya existe el widget, no duplicar
     if (document.getElementById('floating-chat-container')) return;
@@ -154,6 +156,8 @@ export function initFloatingChat() {
         }
 
         const isHidden = chatWindow.classList.toggle('elx-hidden');
+        const container = document.getElementById('floating-chat-container');
+        if (container) container.classList.toggle('elx-chat-open', !isHidden);
         if (!isHidden && !chatClient) {
             try {
                 // Obtener o crear conversación con la API
@@ -183,6 +187,8 @@ export function initFloatingChat() {
 
     closeBtn.addEventListener('click', () => {
         chatWindow.classList.add('elx-hidden');
+        const container = document.getElementById('floating-chat-container');
+        if (container) container.classList.remove('elx-chat-open');
     });
 
     chatForm.addEventListener('submit', (e) => {
