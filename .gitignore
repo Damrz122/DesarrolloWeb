@@ -44,3 +44,6 @@ Thumbs.db
 *.log
 logs/
 
+### Uploads locales (fondos y PNG de apariencia) ###
+uploads/
+

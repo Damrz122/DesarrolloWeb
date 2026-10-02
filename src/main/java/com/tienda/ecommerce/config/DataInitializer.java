@@ -8,6 +8,7 @@ import com.tienda.ecommerce.usuario.Rol;
 import com.tienda.ecommerce.usuario.TipoDocumento;
 import com.tienda.ecommerce.usuario.Usuario;
 import com.tienda.ecommerce.usuario.UsuarioRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -19,6 +20,15 @@ import java.util.List;
 @Component
 @Order(1)
 public class DataInitializer implements CommandLineRunner {
+
+    @Value("${app.demo-seed.enabled:true}")
+    private boolean demoSeedEnabled;
+
+    @Value("${ADMIN_PASSWORD:admin123}")
+    private String adminPassword;
+
+    @Value("${CLIENTE_PASSWORD:cliente123}")
+    private String clientePassword;
 
     private final CategoriaRepository categoriaRepository;
     private final ProductoRepository productoRepository;
@@ -89,12 +99,16 @@ public class DataInitializer implements CommandLineRunner {
         }
 
         if (usuarioRepository.count() == 0) {
+            // Seed demo: solo si esta habilitado (desactivado en prod)
+            if (!demoSeedEnabled) {
+                return;
+            }
             Usuario admin = new Usuario(
                     null,
                     "Administrador", "Sistema", null,
                     TipoDocumento.DNI, "00000001",
                     "admin@tienda.com",
-                    passwordEncoder.encode("admin123"),
+                    passwordEncoder.encode(adminPassword),
                     Rol.ADMIN,
                     true
             );
@@ -104,7 +118,7 @@ public class DataInitializer implements CommandLineRunner {
                     "Cliente", "Demo", null,
                     TipoDocumento.DNI, "45678901",
                     "cliente@tienda.com",
-                    passwordEncoder.encode("cliente123"),
+                    passwordEncoder.encode(clientePassword),
                     Rol.CLIENTE,
                     true
             );

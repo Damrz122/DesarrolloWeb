@@ -253,9 +253,9 @@ public class DemoDataSeeder implements CommandLineRunner {
                 detalle.setPedido(pedido);
                 detalle.setProducto(p);
                 detalle.setCantidad(cantidad);
-                detalle.setPrecioUnitario(p.getPrecio());
+                detalle.setPrecioUnitario(p.getPrecioVigente());
                 pedido.getDetalles().add(detalle);
-                total = total.add(p.getPrecio().multiply(BigDecimal.valueOf(cantidad)));
+                total = total.add(p.getPrecioVigente().multiply(BigDecimal.valueOf(cantidad)));
             }
             pedido.setTotal(total);
 

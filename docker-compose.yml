@@ -34,6 +34,9 @@ services:
       SPRING_DATASOURCE_PASSWORD: postgrespassword
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       SPRING_JPA_SHOW_SQL: "false"
+      APP_UPLOAD_DIR: /app/uploads
+    volumes:
+      - electronix_uploads:/app/uploads
     ports:
       - "8090:8080"
 
@@ -48,3 +51,4 @@ services:
 
 volumes:
   electronix_postgres_data:
+  electronix_uploads:

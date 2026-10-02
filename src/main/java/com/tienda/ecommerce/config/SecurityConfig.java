@@ -1,6 +1,7 @@
 package com.tienda.ecommerce.config;
 
 import com.tienda.ecommerce.auth.JwtAuthFilter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -24,6 +25,9 @@ public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
 
+    @Value("${app.cors.allowed-origins:http://localhost:8080,http://localhost:3000}")
+    private String[] allowedOrigins;
+
     public SecurityConfig(JwtAuthFilter jwtAuthFilter) {
         this.jwtAuthFilter = jwtAuthFilter;
     }
@@ -45,6 +49,7 @@ public class SecurityConfig {
                                 "/mis-pedidos.html",
                                 "/login.html",
                                 "/registro.html",
+                                "/uploads/**",
                                 "/admin/**",
                                 "/assets/**",
                                 "/static/**",
@@ -59,6 +64,8 @@ public class SecurityConfig {
 
                         // Endpoints públicos de catálogo
                         .requestMatchers(HttpMethod.GET, "/api/categorias/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/sitio/publico").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/productos/admin").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/productos/**").permitAll()
 
@@ -80,7 +87,8 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of("*"));
+        // CORS restringido: solo origenes configurados
+        configuration.setAllowedOriginPatterns(List.of(allowedOrigins));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
