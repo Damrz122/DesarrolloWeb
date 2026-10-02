@@ -89,23 +89,47 @@ public class PedidoServiceImpl implements PedidoService {
             detalle.setPedido(pedido);
             detalle.setProducto(producto);
             detalle.setCantidad(item.getCantidad());
-            detalle.setPrecioUnitario(producto.getPrecio());
+            detalle.setPrecioUnitario(producto.getPrecioVigente());
             detalles.add(detalle);
 
-            BigDecimal subtotal = producto.getPrecio().multiply(BigDecimal.valueOf(item.getCantidad()));
+            BigDecimal subtotal = producto.getPrecioVigente().multiply(BigDecimal.valueOf(item.getCantidad()));
             total = total.add(subtotal);
         }
 
         pedido.setTotal(total);
         pedido.setDetalles(detalles);
 
-        // Crear registro de Pago asociado
+        // Método de pago elegido en el checkout (pasarela simulada).
+        // Si no llega o es inválido, se usa TARJETA_CREDITO por compatibilidad.
+        com.tienda.ecommerce.pago.MetodoPago metodoPago =
+                com.tienda.ecommerce.pago.MetodoPago.TARJETA_CREDITO;
+        if (request.getMetodoPago() != null && !request.getMetodoPago().isBlank()) {
+            try {
+                metodoPago = com.tienda.ecommerce.pago.MetodoPago
+                        .valueOf(request.getMetodoPago().trim().toUpperCase());
+            } catch (IllegalArgumentException ignored) {
+                // se mantiene el valor por defecto
+            }
+        }
+
+        // Crear registro de Pago asociado (simulado: todo se aprueba salvo contraentrega)
+        com.tienda.ecommerce.pago.EstadoPago estadoPago =
+                metodoPago == com.tienda.ecommerce.pago.MetodoPago.PAGO_CONTRAENTREGA
+                        ? com.tienda.ecommerce.pago.EstadoPago.PENDIENTE
+                        : com.tienda.ecommerce.pago.EstadoPago.APROBADO;
+        String prefijoTx = switch (metodoPago) {
+            case YAPE -> "YAPE-";
+            case PLIN -> "PLIN-";
+            case PAGO_CONTRAENTREGA -> "COD-";
+            case TRANSFERENCIA_BANCARIA -> "TRF-";
+            default -> "TX-";
+        };
         com.tienda.ecommerce.pago.Pago pago = new com.tienda.ecommerce.pago.Pago(
                 pedido,
-                com.tienda.ecommerce.pago.MetodoPago.TARJETA_CREDITO,
-                com.tienda.ecommerce.pago.EstadoPago.APROBADO,
+                metodoPago,
+                estadoPago,
                 total,
-                "TX-" + System.currentTimeMillis()
+                prefijoTx + System.currentTimeMillis()
         );
         pedido.setPago(pago);
 

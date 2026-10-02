@@ -27,4 +27,10 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
 
     @Query("SELECT CAST(p.fecha AS LocalDate), COALESCE(SUM(p.total), 0), COUNT(p) FROM Pedido p WHERE p.estado <> com.tienda.ecommerce.pedido.EstadoPedido.CANCELADO AND p.fecha BETWEEN :desde AND :hasta GROUP BY CAST(p.fecha AS LocalDate) ORDER BY CAST(p.fecha AS LocalDate) ASC")
     List<Object[]> agruparVentasPorFecha(@Param("desde") LocalDateTime desde, @Param("hasta") LocalDateTime hasta);
+
+    @Query("SELECT COUNT(p), COALESCE(SUM(p.total), 0) FROM Pedido p JOIN p.pago pag WHERE p.estado <> com.tienda.ecommerce.pedido.EstadoPedido.CANCELADO AND pag.estadoPago = com.tienda.ecommerce.pago.EstadoPago.APROBADO AND p.fecha BETWEEN :desde AND :hasta")
+    List<Object[]> calcularResumenVentasPagadas(@Param("desde") LocalDateTime desde, @Param("hasta") LocalDateTime hasta);
+
+    @Query("SELECT CAST(p.fecha AS LocalDate), COALESCE(SUM(p.total), 0), COUNT(p) FROM Pedido p JOIN p.pago pag WHERE p.estado <> com.tienda.ecommerce.pedido.EstadoPedido.CANCELADO AND pag.estadoPago = com.tienda.ecommerce.pago.EstadoPago.APROBADO AND p.fecha BETWEEN :desde AND :hasta GROUP BY CAST(p.fecha AS LocalDate) ORDER BY CAST(p.fecha AS LocalDate) ASC")
+    List<Object[]> agruparVentasPagadasPorFecha(@Param("desde") LocalDateTime desde, @Param("hasta") LocalDateTime hasta);
 }

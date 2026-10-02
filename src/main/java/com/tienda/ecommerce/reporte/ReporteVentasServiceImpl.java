@@ -14,6 +14,7 @@ import java.sql.Date;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,29 +32,47 @@ public class ReporteVentasServiceImpl implements ReporteVentasService {
     @Override
     @Transactional(readOnly = true)
     public ReporteVentasResponse generarReporteVentas(LocalDate desde, LocalDate hasta) {
-        LocalDate fechaInicio = (desde != null) ? desde : LocalDate.now().minusDays(30);
-        LocalDate fechaFin = (hasta != null) ? hasta : LocalDate.now();
+        // Sin filtros: mes calendario actual (día 1 a fin de mes). Con filtros: rango exacto.
+        LocalDate fechaInicio;
+        LocalDate fechaFin;
+        if (desde == null && hasta == null) {
+            YearMonth mesActual = YearMonth.now();
+            fechaInicio = mesActual.atDay(1);
+            fechaFin = mesActual.atEndOfMonth();
+        } else {
+            fechaInicio = (desde != null) ? desde : LocalDate.now().minusDays(30);
+            fechaFin = (hasta != null) ? hasta : LocalDate.now();
+        }
 
         LocalDateTime dtDesde = fechaInicio.atStartOfDay();
         LocalDateTime dtHasta = fechaFin.atTime(LocalTime.MAX);
 
-        // 1. Resumen global
-        List<Object[]> resumen = pedidoRepository.calcularResumenVentas(dtDesde, dtHasta);
+        // 1a. Total pedidos: todos menos CANCELADO (incluye PENDIENTE).
+        List<Object[]> resumenTotal = pedidoRepository.calcularResumenVentas(dtDesde, dtHasta);
         long totalPedidos = 0;
+
+        if (resumenTotal != null && !resumenTotal.isEmpty() && resumenTotal.get(0) != null) {
+            Object[] fila = resumenTotal.get(0);
+            totalPedidos = fila[0] != null ? ((Number) fila[0]).longValue() : 0L;
+        }
+
+        // 1b. Ventas: solo pedidos con pago APROBADO y estado distinto de CANCELADO.
+        List<Object[]> resumenPagado = pedidoRepository.calcularResumenVentasPagadas(dtDesde, dtHasta);
+        long pedidosPagados = 0;
         BigDecimal totalVentas = BigDecimal.ZERO;
 
-        if (resumen != null && !resumen.isEmpty() && resumen.get(0) != null) {
-            Object[] fila = resumen.get(0);
-            totalPedidos = fila[0] != null ? ((Number) fila[0]).longValue() : 0L;
+        if (resumenPagado != null && !resumenPagado.isEmpty() && resumenPagado.get(0) != null) {
+            Object[] fila = resumenPagado.get(0);
+            pedidosPagados = fila[0] != null ? ((Number) fila[0]).longValue() : 0L;
             totalVentas = fila[1] != null ? new BigDecimal(fila[1].toString()) : BigDecimal.ZERO;
         }
 
-        BigDecimal ticketPromedio = totalPedidos > 0
-                ? totalVentas.divide(BigDecimal.valueOf(totalPedidos), 2, RoundingMode.HALF_UP)
+        BigDecimal ticketPromedio = pedidosPagados > 0
+                ? totalVentas.divide(BigDecimal.valueOf(pedidosPagados), 2, RoundingMode.HALF_UP)
                 : BigDecimal.ZERO;
 
-        // 2. Ventas agrupadas por fecha
-        List<Object[]> filasFecha = pedidoRepository.agruparVentasPorFecha(dtDesde, dtHasta);
+        // 2. Ventas agrupadas por fecha (solo pagadas)
+        List<Object[]> filasFecha = pedidoRepository.agruparVentasPagadasPorFecha(dtDesde, dtHasta);
         List<VentaPorFechaDTO> ventasPorFecha = new ArrayList<>();
 
         if (filasFecha != null) {

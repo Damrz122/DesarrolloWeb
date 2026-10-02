@@ -150,7 +150,8 @@ public class CarritoServiceImpl implements CarritoService {
 
         if (carrito.getItems() != null) {
             for (ItemCarrito item : carrito.getItems()) {
-                BigDecimal subtotal = item.getProducto().getPrecio().multiply(BigDecimal.valueOf(item.getCantidad()));
+                BigDecimal precioVigente = item.getProducto().getPrecioVigente();
+                BigDecimal subtotal = precioVigente.multiply(BigDecimal.valueOf(item.getCantidad()));
                 total = total.add(subtotal);
                 cantidadTotal += item.getCantidad();
 
@@ -158,7 +159,7 @@ public class CarritoServiceImpl implements CarritoService {
                         item.getId(),
                         item.getProducto().getId(),
                         item.getProducto().getNombre(),
-                        item.getProducto().getPrecio(),
+                        precioVigente,
                         item.getCantidad(),
                         subtotal,
                         item.getProducto().getImagenUrl()
