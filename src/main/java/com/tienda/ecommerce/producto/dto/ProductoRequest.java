@@ -33,6 +33,18 @@ public class ProductoRequest {
     @NotNull(message = "La categoría es obligatoria")
     private Long categoriaId;
 
+    /**
+     * Etiqueta comercial: NUEVO, OFERTA, TENDENCIA o vacío (sin etiqueta).
+     */
+    private String etiqueta;
+
+    /**
+     * Precio rebajado. Obligatorio cuando etiqueta = OFERTA (debe ser
+     * menor al precio base); se ignora en cualquier otro caso.
+     */
+    @PositiveOrZero(message = "El precio de oferta no puede ser negativo")
+    private BigDecimal precioOferta;
+
     public ProductoRequest() {
     }
 
@@ -109,5 +121,21 @@ public class ProductoRequest {
 
     public void setCategoriaId(Long categoriaId) {
         this.categoriaId = categoriaId;
+    }
+
+    public String getEtiqueta() {
+        return etiqueta;
+    }
+
+    public void setEtiqueta(String etiqueta) {
+        this.etiqueta = etiqueta;
+    }
+
+    public BigDecimal getPrecioOferta() {
+        return precioOferta;
+    }
+
+    public void setPrecioOferta(BigDecimal precioOferta) {
+        this.precioOferta = precioOferta;
     }
 }

@@ -31,6 +31,7 @@ public class ProductoController {
             @RequestParam(required = false) Long categoriaId,
             @RequestParam(required = false) BigDecimal precioMin,
             @RequestParam(required = false) BigDecimal precioMax,
+            @RequestParam(required = false) String etiqueta,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "12") int size,
             @RequestParam(defaultValue = "fechaCreacion") String sortBy,
@@ -38,7 +39,7 @@ public class ProductoController {
     ) {
         Sort sort = direction.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(page, size, sort);
-        PaginaResponse<ProductoResponse> resultado = productoService.listarPublico(nombre, categoriaId, precioMin, precioMax, pageable);
+        PaginaResponse<ProductoResponse> resultado = productoService.listarPublico(nombre, categoriaId, precioMin, precioMax, etiqueta, pageable);
         return ResponseEntity.ok(ApiResponse.exito("Catálogo de productos obtenido", resultado));
     }
 

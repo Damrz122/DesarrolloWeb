@@ -16,6 +16,9 @@ public class ProductoResponse {
     private List<String> imagenes;
     private Long categoriaId;
     private String categoriaNombre;
+    private String etiqueta;
+    /** Precio rebajado (solo cuando etiqueta = OFERTA). */
+    private BigDecimal precioOferta;
     private boolean activo;
     private LocalDateTime fechaCreacion;
 
@@ -112,6 +115,22 @@ public class ProductoResponse {
 
     public void setCategoriaNombre(String categoriaNombre) {
         this.categoriaNombre = categoriaNombre;
+    }
+
+    public String getEtiqueta() {
+        return etiqueta;
+    }
+
+    public void setEtiqueta(String etiqueta) {
+        this.etiqueta = etiqueta;
+    }
+
+    public BigDecimal getPrecioOferta() {
+        return precioOferta;
+    }
+
+    public void setPrecioOferta(BigDecimal precioOferta) {
+        this.precioOferta = precioOferta;
     }
 
     public boolean isActivo() {

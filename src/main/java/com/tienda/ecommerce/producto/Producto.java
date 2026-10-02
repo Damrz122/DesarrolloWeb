@@ -56,6 +56,19 @@ public class Producto {
     @JoinColumn(name = "categoria_id", nullable = false)
     private Categoria categoria;
 
+    /**
+     * Etiqueta comercial visible en la tarjeta: NUEVO, OFERTA, TENDENCIA o null (sin etiqueta).
+     */
+    @Column(length = 20)
+    private String etiqueta;
+
+    /**
+     * Precio rebajado. Solo tiene efecto cuando etiqueta = OFERTA;
+     * en cualquier otro caso se guarda NULL.
+     */
+    @Column(name = "precio_oferta", precision = 10, scale = 2)
+    private BigDecimal precioOferta;
+
     @Column(nullable = false)
     private boolean activo = true;
 
@@ -131,6 +144,34 @@ public class Producto {
 
     public void setCategoria(Categoria categoria) {
         this.categoria = categoria;
+    }
+
+    public String getEtiqueta() {
+        return etiqueta;
+    }
+
+    public void setEtiqueta(String etiqueta) {
+        this.etiqueta = etiqueta;
+    }
+
+    public BigDecimal getPrecioOferta() {
+        return precioOferta;
+    }
+
+    public void setPrecioOferta(BigDecimal precioOferta) {
+        this.precioOferta = precioOferta;
+    }
+
+    /**
+     * Precio que realmente paga el cliente: el de oferta cuando la
+     * etiqueta es OFERTA y hay precio rebajado, si no el precio base.
+     */
+    @Transient
+    public BigDecimal getPrecioVigente() {
+        if ("OFERTA".equals(etiqueta) && precioOferta != null) {
+            return precioOferta;
+        }
+        return precio;
     }
 
     public boolean isActivo() {

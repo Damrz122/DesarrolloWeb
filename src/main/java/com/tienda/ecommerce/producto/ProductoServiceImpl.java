@@ -1,5 +1,6 @@
 package com.tienda.ecommerce.producto;
 
+import com.tienda.ecommerce.common.BadRequestException;
 import com.tienda.ecommerce.common.PaginaResponse;
 import com.tienda.ecommerce.common.RecursoNoEncontradoException;
 import com.tienda.ecommerce.producto.dto.ProductoRequest;
@@ -27,9 +28,10 @@ public class ProductoServiceImpl implements ProductoService {
 
     @Override
     @Transactional(readOnly = true)
-    public PaginaResponse<ProductoResponse> listarPublico(String nombre, Long categoriaId, BigDecimal precioMin, BigDecimal precioMax, Pageable pageable) {
+    public PaginaResponse<ProductoResponse> listarPublico(String nombre, Long categoriaId, BigDecimal precioMin, BigDecimal precioMax, String etiqueta, Pageable pageable) {
         String nombreFiltro = (nombre != null && !nombre.trim().isEmpty()) ? nombre.trim() : null;
-        Page<Producto> pagina = productoRepository.buscarActivosConFiltros(nombreFiltro, categoriaId, precioMin, precioMax, pageable);
+        String etiquetaFiltro = normalizarEtiqueta(etiqueta);
+        Page<Producto> pagina = productoRepository.buscarActivosConFiltros(nombreFiltro, categoriaId, precioMin, precioMax, etiquetaFiltro, pageable);
         List<ProductoResponse> contenido = pagina.getContent().stream().map(this::mapearADto).toList();
         return PaginaResponse.de(pagina, contenido);
     }
@@ -74,6 +76,9 @@ public class ProductoServiceImpl implements ProductoService {
         producto.setImagenUrl(galeria.isEmpty() ? null : galeria.get(0));
         producto.reemplazarImagenes(galeria);
         producto.setCategoria(categoria);
+        String etiqueta = normalizarEtiqueta(request.getEtiqueta());
+        producto.setEtiqueta(etiqueta);
+        producto.setPrecioOferta(validarPrecioOferta(etiqueta, request.getPrecio(), request.getPrecioOferta()));
         producto.setActivo(true);
 
         Producto guardado = productoRepository.save(producto);
@@ -95,8 +100,18 @@ public class ProductoServiceImpl implements ProductoService {
         producto.setStock(request.getStock());
         List<String> galeria = resolverGaleria(request);
         producto.setImagenUrl(galeria.isEmpty() ? null : galeria.get(0));
-        producto.reemplazarImagenes(galeria);
+        // Borra primero y fuerza el DELETE antes de insertar: si no, el INSERT
+        // de las mismas URLs choca con uk_producto_imagen_url (producto_id, url).
+        producto.getImagenes().clear();
+        productoRepository.saveAndFlush(producto);
+        int orden = 0;
+        for (String url : galeria) {
+            producto.agregarImagen(url, orden++);
+        }
         producto.setCategoria(categoria);
+        String etiqueta = normalizarEtiqueta(request.getEtiqueta());
+        producto.setEtiqueta(etiqueta);
+        producto.setPrecioOferta(validarPrecioOferta(etiqueta, request.getPrecio(), request.getPrecioOferta()));
 
         Producto actualizado = productoRepository.save(producto);
         return mapearADto(actualizado);
@@ -143,7 +158,7 @@ public class ProductoServiceImpl implements ProductoService {
             galeria = List.of(p.getImagenUrl());
         }
         String portada = galeria.isEmpty() ? p.getImagenUrl() : galeria.get(0);
-        return new ProductoResponse(
+        ProductoResponse dto = new ProductoResponse(
                 p.getId(),
                 p.getNombre(),
                 p.getDescripcion(),
@@ -156,6 +171,43 @@ public class ProductoServiceImpl implements ProductoService {
                 p.isActivo(),
                 p.getFechaCreacion()
         );
+        dto.setEtiqueta(p.getEtiqueta());
+        dto.setPrecioOferta(p.getPrecioOferta());
+        return dto;
+    }
+
+    /**
+     * OFERTA exige precio rebajado mayor a 0 y menor al precio base;
+     * con cualquier otra etiqueta el precio de oferta se descarta (NULL).
+     */
+    private BigDecimal validarPrecioOferta(String etiqueta, BigDecimal precio, BigDecimal precioOferta) {
+        if (!"OFERTA".equals(etiqueta)) {
+            return null;
+        }
+        if (precioOferta == null) {
+            throw new BadRequestException("La etiqueta OFERTA requiere un precio de oferta");
+        }
+        if (precioOferta.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new BadRequestException("El precio de oferta debe ser mayor a 0");
+        }
+        if (precio != null && precioOferta.compareTo(precio) >= 0) {
+            throw new BadRequestException("El precio de oferta debe ser menor al precio base");
+        }
+        return precioOferta;
+    }
+
+    /**
+     * Solo acepta NUEVO, OFERTA o TENDENCIA; cualquier otro valor queda sin etiqueta.
+     */
+    private String normalizarEtiqueta(String etiqueta) {
+        if (etiqueta == null) {
+            return null;
+        }
+        String valor = etiqueta.trim().toUpperCase();
+        if (valor.equals("NUEVO") || valor.equals("OFERTA") || valor.equals("TENDENCIA")) {
+            return valor;
+        }
+        return null;
     }
 
     /**

@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public interface ProductoService {
-    PaginaResponse<ProductoResponse> listarPublico(String nombre, Long categoriaId, BigDecimal precioMin, BigDecimal precioMax, Pageable pageable);
+    PaginaResponse<ProductoResponse> listarPublico(String nombre, Long categoriaId, BigDecimal precioMin, BigDecimal precioMax, String etiqueta, Pageable pageable);
     ProductoResponse obtenerPorIdPublico(Long id);
     PaginaResponse<ProductoResponse> listarParaAdmin(String nombre, Long categoriaId, Boolean activo, Pageable pageable);
     ProductoResponse obtenerPorId(Long id);

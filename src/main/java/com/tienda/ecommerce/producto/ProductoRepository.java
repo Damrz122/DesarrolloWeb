@@ -20,12 +20,14 @@ public interface ProductoRepository extends JpaRepository<Producto, Long> {
           AND (:categoriaId IS NULL OR p.categoria.id = :categoriaId)
           AND (:precioMin IS NULL OR p.precio >= :precioMin)
           AND (:precioMax IS NULL OR p.precio <= :precioMax)
+          AND (CAST(:etiqueta AS string) IS NULL OR p.etiqueta = CAST(:etiqueta AS string))
     """)
     Page<Producto> buscarActivosConFiltros(
             @Param("nombre") String nombre,
             @Param("categoriaId") Long categoriaId,
             @Param("precioMin") BigDecimal precioMin,
             @Param("precioMax") BigDecimal precioMax,
+            @Param("etiqueta") String etiqueta,
             Pageable pageable
     );
 
