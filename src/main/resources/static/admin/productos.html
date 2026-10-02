@@ -1,13 +1,15 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Productos — ELECTRONIX Admin</title>
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 90%27%3E%3Crect width=%27100%27 height=%2790%27 rx=%2718%27 fill=%27%23171717%27/%3E%3Cpath d=%27M15 12h65c4 0 7 3 7 7s-3 7-7 7H38l-4 12h32c3 0 6 3 5 7l-4 10c-1 3-3 5-6 5H24l-6 18c-1 3-4 5-8 5s-6-3-5-7L15 12z%27 fill=%27%23e5e7eb%27/%3E%3Cpolygon points=%2768,28 48,50 62,50 42,75 50,56 36,56%27 fill=%27%231ca299%27/%3E%3C/svg%3E">
+    <link rel="icon" type="image/svg+xml" href="/assets/img/logo.svg">
     <link rel="stylesheet" href="/assets/css/output.css">
-    <script>try{var t=localStorage.getItem("electronix_admin_theme");if(t==="dark"){document.documentElement.setAttribute("data-theme","dark");}}catch(e){}</script>
-    <link rel="stylesheet" href="/assets/css/admin.css">
+    <script src="/assets/js/admin-theme.js"></script>
+    <link rel="stylesheet" href="/assets/css/admin.css?v=2">
+    <link rel="stylesheet" href="/assets/css/admin/productos.css?v=2">
+    <link rel="stylesheet" href="/assets/css/ui/ui-inline.css?v=2">
 </head>
 <body class="adm">
 
@@ -22,7 +24,6 @@
             </div>
             <div class="adm-actions">
                 <button id="btn-nuevo-producto" class="adm-btn adm-btn-primary">
-                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                     <span>Nuevo producto</span>
                 </button>
             </div>
@@ -37,22 +38,24 @@
                             <th>Categoría</th>
                             <th>Precio</th>
                             <th>Stock</th>
+                            <th>Etiqueta</th>
                             <th>Estado</th>
                             <th class="num">Acciones</th>
                         </tr>
                     </thead>
-                    <tbody id="productos-table-body">
+                    <tbody id="productos-table-body" class="adm-fade">
                         <tr>
-                            <td colspan="6" class="adm-empty">Cargando inventario…</td>
+                            <td colspan="7" class="adm-empty">Cargando inventario…</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
+            <div id="productos-pager" class="adm-pager" hidden></div>
         </div>
 
     </main>
 
-    <!-- Modal Crear / Editar Producto -->
+    <!-- modal: es para crear y editar productos -->
     <div id="producto-modal" class="adm-modal-backdrop hidden">
         <div class="adm-modal">
             <div class="adm-modal-head">
@@ -65,37 +68,81 @@
             <form id="producto-form">
                 <input type="hidden" id="prod-id" />
 
-                <div style="margin-bottom:12px;">
+                <div class="adm-campo">
                     <label class="adm-label" for="prod-nombre">Nombre del producto *</label>
-                    <input id="prod-nombre" type="text" required class="adm-input" />
+                    <input id="prod-nombre" type="text" required class="adm-input" placeholder="Ej. Laptop HP Pavilion 15" />
                 </div>
 
-                <div style="margin-bottom:12px;">
+                <div class="adm-campo">
                     <label class="adm-label" for="prod-categoria">Categoría *</label>
                     <select id="prod-categoria" required class="adm-select">
                         <option value="">Selecciona una categoría</option>
                     </select>
                 </div>
 
-                <div class="adm-form-row" style="margin-bottom:12px;">
+                <div class="adm-form-row adm-campo">
                     <div>
                         <label class="adm-label" for="prod-precio">Precio (S/) *</label>
-                        <input id="prod-precio" type="number" step="0.01" min="0.1" required class="adm-input" />
+                        <input id="prod-precio" type="number" step="0.01" min="0.1" required class="adm-input" placeholder="Ej. 2499.99" />
                     </div>
                     <div>
                         <label class="adm-label" for="prod-stock">Stock disponible *</label>
-                        <input id="prod-stock" type="number" min="0" required class="adm-input" />
+                        <input id="prod-stock" type="number" min="0" required class="adm-input" placeholder="Ej. 25" />
                     </div>
                 </div>
 
-                <div style="margin-bottom:12px;">
-                    <label class="adm-label" for="prod-imagen">URL de imagen</label>
-                    <input id="prod-imagen" type="url" placeholder="https://…" class="adm-input" />
+                <div class="adm-form-row adm-campo">
+                    <div>
+                        <label class="adm-label" for="prod-etiqueta">Etiqueta</label>
+                        <select id="prod-etiqueta" class="adm-select">
+                            <option value="">Sin etiqueta</option>
+                            <option value="NUEVO">Nuevo</option>
+                            <option value="OFERTA">Oferta</option>
+                            <option value="TENDENCIA">Tendencia</option>
+                        </select>
+                    </div>
+                    <div id="prod-oferta-wrap" hidden>
+                        <label class="adm-label" for="prod-precio-oferta">Precio oferta (S/) *</label>
+                        <input id="prod-precio-oferta" type="number" step="0.01" min="0.01" class="adm-input" placeholder="Ej. 1999.99" />
+                    </div>
                 </div>
 
-                <div style="margin-bottom:4px;">
+                <div class="adm-campo">
+                    <label class="adm-label">Imagen del producto</label>
+                    <div class="ap-media">
+                        <button type="button" id="prod-img-tile" class="ap-media-tile ap-media--marco" aria-haspopup="dialog" title="Cambiar imagen">
+                            <img id="prod-img-prev" alt="" hidden />
+                            <span id="prod-img-vacio" class="ap-media-vacio">Sin imagen</span>
+                            <span class="ap-media-overlay">Cambiar imagen</span>
+                        </button>
+                        <input type="hidden" id="prod-imagen" />
+                        <div id="prod-img-picker" class="ap-picker" role="dialog" aria-label="Imagen del producto" hidden>
+                            <div class="ap-picker-tabs" role="tablist" aria-label="Origen de la imagen">
+                                <button type="button" class="ap-picker-tab is-active" data-ptab="url" role="tab">Enlace</button>
+                                <button type="button" class="ap-picker-tab" data-ptab="pc" role="tab">Mi equipo</button>
+                            </div>
+                            <div data-ppanel="url">
+                                <input id="prod-img-url" class="adm-input" placeholder="https://… o /uploads/xxx.png" inputmode="url" />
+                                <button type="button" id="prod-img-usar" class="adm-btn adm-btn-primary adm-btn-sm ap-picker-usar">Usar enlace</button>
+                            </div>
+                            <div data-ppanel="pc" hidden>
+                                <label id="prod-img-drop" class="ap-drop">
+                                    <input id="prod-img-file" type="file" accept="image/png,image/jpeg,image/webp" hidden />
+                                    <span>Arrastra aquí o <b>elige de tu PC</b><br /><small>PNG · JPG · WEBP · máx 5MB</small></span>
+                                </label>
+                                <span id="prod-img-estado" class="adm-sub"></span>
+                            </div>
+                            <div class="ap-picker-foot">
+                                <button type="button" id="prod-img-quitar" class="adm-btn adm-btn-ghost adm-btn-sm">Quitar imagen</button>
+                                <button type="button" id="prod-img-listo" class="adm-btn adm-btn-primary adm-btn-sm">Listo</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="adm-campo--ajustado">
                     <label class="adm-label" for="prod-descripcion">Descripción</label>
-                    <textarea id="prod-descripcion" rows="3" class="adm-textarea"></textarea>
+                    <textarea id="prod-descripcion" rows="3" class="adm-textarea" placeholder="Ej. Laptop con 16 GB de RAM y SSD de 512 GB…"></textarea>
                 </div>
 
                 <div class="adm-modal-foot">
@@ -114,192 +161,7 @@
         <p>© 2026 ELECTRONIX — Módulo de Administración.</p>
     </footer>
 
-    <script type="module">
-        import { api } from '/assets/js/api.js';
-        import { auth } from '/assets/js/auth.js';
-        import { renderAdminShell } from '/assets/js/ui/adminShell.js';
-        import { showToast } from '/assets/js/ui/toast.js';
-
-        // NOTA: referencias DOM primero (evita TDZ si init las toca antes del await).
-        const tbody = document.getElementById('productos-table-body');
-        const modal = document.getElementById('producto-modal');
-        const modalClose = document.getElementById('modal-close');
-        const btnCancelar = document.getElementById('btn-cancelar-modal');
-        const btnNuevo = document.getElementById('btn-nuevo-producto');
-        const form = document.getElementById('producto-form');
-        const selectCat = document.getElementById('prod-categoria');
-        const modalTitle = document.getElementById('modal-title');
-
-        let listaCategorias = [];
-
-        renderAdminShell('productos');
-
-        if (!auth.protegerRutaAdmin()) {
-            // Guard
-        } else {
-            initProductosAdmin();
-        }
-
-        function esc(value) {
-            return String(value ?? '')
-                .replace(/&/g, '&amp;').replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;').replace(/"/g, '&quot;')
-                .replace(/'/g, '&#39;');
-        }
-
-        async function initProductosAdmin() {
-            await cargarCategoriasSelect();
-            await cargarTablaProductos();
-
-            btnNuevo.addEventListener('click', () => {
-                abrirModalCrear();
-            });
-
-            modalClose.addEventListener('click', () => modal.classList.add('hidden'));
-            btnCancelar.addEventListener('click', () => modal.classList.add('hidden'));
-
-            form.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                await guardarProducto();
-            });
-        }
-
-        async function cargarCategoriasSelect() {
-            try {
-                const res = await api.get('/api/categorias');
-                if (res.exito && res.datos) {
-                    listaCategorias = res.datos;
-                    selectCat.innerHTML = '<option value="">Selecciona una categoría</option>';
-                    listaCategorias.forEach(c => {
-                        const opt = document.createElement('option');
-                        opt.value = c.id;
-                        opt.textContent = c.nombre;
-                        selectCat.appendChild(opt);
-                    });
-                }
-            } catch (err) {
-                console.error(err);
-            }
-        }
-
-        async function cargarTablaProductos() {
-            try {
-                const res = await api.get('/api/productos/admin?size=50');
-                tbody.innerHTML = '';
-
-                if (res.exito && res.datos && res.datos.contenido.length > 0) {
-                    res.datos.contenido.forEach(p => {
-                        const precio = new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(p.precio);
-                        const fallback = 'https://images.unsplash.com/photo-1526738549149-8e07eca6c147?w=600&auto=format&fit=crop&q=80';
-
-                        const tr = document.createElement('tr');
-                        tr.innerHTML = `
-                            <td>
-                                <div class="adm-prod">
-                                    <img src="${esc(p.imagenUrl) || fallback}" alt="" onerror="this.src='${fallback}'" />
-                                    <div>
-                                        <div class="adm-strong">${esc(p.nombre)}</div>
-                                        <div class="adm-sub">ID: #${p.id}</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>${esc(p.categoriaNombre) || 'Sin categoría'}</td>
-                            <td class="adm-strong">${precio}</td>
-                            <td>
-                                <span class="${p.stock <= 5 ? 'adm-stock-low' : 'adm-strong'}">
-                                    ${p.stock} uds.
-                                </span>
-                            </td>
-                            <td>
-                                <span class="adm-badge ${p.activo ? 'b-ok' : 'b-off'}">
-                                    ${p.activo ? 'Activo' : 'Inactivo'}
-                                </span>
-                            </td>
-                            <td class="num" style="white-space:nowrap;">
-                                <button class="adm-btn adm-btn-edit adm-btn-sm btn-editar">Editar</button>
-                                ${p.activo ? `<button class="adm-btn adm-btn-del adm-btn-sm btn-eliminar">Desactivar</button>` : ''}
-                            </td>
-                        `;
-
-                        tr.querySelector('.btn-editar').addEventListener('click', () => abrirModalEditar(p));
-                        const btnElim = tr.querySelector('.btn-eliminar');
-                        if (btnElim) {
-                            btnElim.addEventListener('click', () => desactivarProducto(p.id, p.nombre));
-                        }
-
-                        tbody.appendChild(tr);
-                    });
-                } else {
-                    tbody.innerHTML = `<tr><td colspan="6" class="adm-empty">No hay productos registrados.</td></tr>`;
-                }
-            } catch (err) {
-                tbody.innerHTML = `<tr><td colspan="6" class="adm-err">Error: ${esc(err.message)}</td></tr>`;
-            }
-        }
-
-        function abrirModalCrear() {
-            modalTitle.textContent = 'Nuevo producto';
-            document.getElementById('prod-id').value = '';
-            document.getElementById('prod-nombre').value = '';
-            document.getElementById('prod-categoria').value = '';
-            document.getElementById('prod-precio').value = '';
-            document.getElementById('prod-stock').value = '';
-            document.getElementById('prod-imagen').value = '';
-            document.getElementById('prod-descripcion').value = '';
-            modal.classList.remove('hidden');
-        }
-
-        function abrirModalEditar(p) {
-            modalTitle.textContent = 'Editar producto #' + p.id;
-            document.getElementById('prod-id').value = p.id;
-            document.getElementById('prod-nombre').value = p.nombre;
-            document.getElementById('prod-categoria').value = p.categoriaId;
-            document.getElementById('prod-precio').value = p.precio;
-            document.getElementById('prod-stock').value = p.stock;
-            document.getElementById('prod-imagen').value = p.imagenUrl || '';
-            document.getElementById('prod-descripcion').value = p.descripcion || '';
-            modal.classList.remove('hidden');
-        }
-
-        async function guardarProducto() {
-            const id = document.getElementById('prod-id').value;
-            const payload = {
-                nombre: document.getElementById('prod-nombre').value.trim(),
-                categoriaId: parseInt(document.getElementById('prod-categoria').value),
-                precio: parseFloat(document.getElementById('prod-precio').value),
-                stock: parseInt(document.getElementById('prod-stock').value),
-                imagenUrl: document.getElementById('prod-imagen').value.trim(),
-                descripcion: document.getElementById('prod-descripcion').value.trim()
-            };
-
-            try {
-                if (id) {
-                    await api.put(`/api/productos/${id}`, payload);
-                    showToast('Producto actualizado exitosamente', 'success');
-                } else {
-                    await api.post('/api/productos', payload);
-                    showToast('Producto creado exitosamente', 'success');
-                }
-                modal.classList.add('hidden');
-                cargarTablaProductos();
-            } catch (err) {
-                showToast(err.message, 'error');
-            }
-        }
-
-        async function desactivarProducto(id, nombre) {
-            if (!confirm(`¿Estás seguro de desactivar el producto "${nombre}"? No aparecerá en el catálogo público.`)) {
-                return;
-            }
-            try {
-                await api.delete(`/api/productos/${id}`);
-                showToast('Producto desactivado correctamente', 'info');
-                cargarTablaProductos();
-            } catch (err) {
-                showToast(err.message, 'error');
-            }
-        }
-    </script>
+    <script type="module" src="/assets/js/admin/productos.js?v=2"></script>
 </body>
 </html>
 

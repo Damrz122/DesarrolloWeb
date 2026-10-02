@@ -3,92 +3,139 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="/assets/img/logo.svg">
     <title>Detalle de Producto — ELECTRONIX</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/assets/css/output.css">
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+    <link rel="stylesheet" href="/assets/css/ui/ui-inline.css">
+    <link rel="stylesheet" href="/assets/css/pages/figma-home.css">
 </head>
-<body class="bg-[#eaebed] text-neutral-800 min-h-screen flex flex-col antialiased">
+<body class="bg-[#ededed] text-neutral-800 min-h-screen flex flex-col antialiased">
 
-    <header id="main-navbar" class="elx-header">
-        <div class="elx-topbar">
-            <div class="elx-container elx-topbar-inner">
-                <span class="elx-brand-tag">ELECTRONIX</span>
-                <span class="elx-topbar-promo">ENVIO GRATIS POR COMPRA MAYOR A S/ 199</span>
-                <div class="elx-topbar-actions">
-                    <div class="elx-country-badge">
-                        <span class="elx-per-flag">
-                            <span class="red"></span><span class="white"></span><span class="red"></span>
-                        </span>
-                        <span>PER</span>
+    <!-- header nuevo estilo: franja azul + navbar blanca estilo Apple -->
+    <header id="main-navbar">
+        <div class="fx-topbar">
+            <a href="/index.html" class="fx-brand" title="ELECTRONIX">
+                <img src="/assets/img/logo.svg" alt="Electronix" class="fx-brand-logo">
+                <span>ELECTRONIX</span>
+            </a>
+        </div>
+
+        <nav class="fx-navbar">
+            <div class="fx-container fx-navbar-inner">
+                <div class="fx-nav-left"></div>
+
+                <div class="fx-nav-center">
+                    <div class="fx-dropdown-wrapper" id="nav-cat-wrap">
+                        <button type="button" id="nav-cat-trigger" class="fx-nav-link fx-dropdown-trigger" aria-haspopup="true" aria-expanded="false">
+                            <span>Categorías</span>
+                            <svg class="fx-chevron" width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
                     </div>
-                    <a href="/carrito.html" class="elx-cart-icon-btn" title="Ver carrito">
-                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                        </svg>
-                        <span id="cart-badge-top" class="elx-badge-count" style="display: none;">0</span>
-                    </a>
+                    <a href="/productos.html?ofertas=true" class="fx-nav-link">Ofertas</a>
+                    <a href="/productos.html" class="fx-nav-link">Productos</a>
                 </div>
-            </div>
-        </div>
-        <div class="elx-mainbar">
-            <div class="elx-container elx-mainbar-inner">
-                <a href="/index.html" class="elx-logo-link" title="ELECTRONIX">
-                    <svg class="elx-logo-svg" viewBox="0 0 100 90" fill="currentColor">
-                        <path d="M15 12h65c4 0 7 3 7 7s-3 7-7 7H38l-4 12h32c3 0 6 3 5 7l-4 10c-1 3-3 5-6 5H24l-6 18c-1 3-4 5-8 5s-6-3-5-7L15 12z" />
-                        <polygon points="68,28 48,50 62,50 42,75 50,56 36,56" fill="#1ca299" />
-                        <circle cx="42" cy="82" r="6" fill="#1ca299" />
-                        <circle cx="68" cy="82" r="6" fill="#1ca299" />
-                    </svg>
-                </a>
-                <form id="nav-search-form" class="elx-search-form" action="/index.html" method="GET">
-                    <span class="elx-search-icon">
-                        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                    </span>
-                    <input id="nav-search-input" type="text" name="q" placeholder="Buscar en Electronix" class="elx-search-input" />
-                </form>
-                <div id="nav-auth-container" class="elx-auth-action">
-                    <a href="/login.html" id="nav-login-btn" class="elx-login-btn">
-                        <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-                        <span>INICIAR SESIÓN</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-        <div class="elx-subnav">
-            <div class="elx-container elx-subnav-inner">
-                <a href="/index.html" class="elx-subnav-link">
-                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-                    <span>TODO</span>
-                </a>
-                <div class="elx-dropdown-wrapper">
-                    <button class="elx-dropdown-trigger">
-                        <span>CATEGORIAS</span>
-                        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+
+                <div class="fx-nav-right">
+                    <button type="button" id="nav-search-toggle" class="fx-search-btn" title="Buscar" aria-label="Buscar">
+                        <img src="/assets/img/busquedaicon.svg" alt="Buscar">
                     </button>
-                    <div id="nav-categories-dropdown" class="elx-dropdown">
-                        <a href="/index.html">Todas las categorías</a>
+
+                    <a href="/carrito.html" class="fx-cart-btn" title="Ver carrito" aria-label="Ver carrito">
+                        <img src="/assets/img/carritoicon.svg" alt="Carrito">
+                        <span id="cart-badge-top" class="fx-cart-count is-hidden">0</span>
+                    </a>
+
+                    <div class="fx-country" id="nav-country">
+                        <button type="button" id="nav-country-btn" aria-haspopup="true" aria-expanded="false" title="Perú">
+                            <img id="nav-country-flag" src="https://flagcdn.com/pe.svg" alt="Perú">
+                            <span id="nav-country-code">PE</span>
+                        </button>
+                        <div id="nav-country-menu" role="menu" aria-label="Seleccionar país"></div>
+                    </div>
+
+                    <span id="nav-auth-container">
+                        <a href="/login.html" id="nav-login-btn" class="fx-login">Ingresar</a>
+                    </span>
+                </div>
+            </div>
+
+            <div id="nav-mega" class="fx-mega" aria-hidden="true">
+                <div class="fx-container fx-mega-inner">
+                    <div class="fx-mega-col">
+                        <p class="fx-mega-kicker">Explorar</p>
+                        <div id="nav-categories-dropdown" class="fx-mega-biglinks">
+                            <a href="/index.html">Todas las categorías</a>
+                            <a href="/productos.html?categoria=Televisores">Televisores</a>
+                            <a href="/productos.html?categoria=Smartphones">Smartphones</a>
+                            <a href="/productos.html?categoria=Laptops">Portátiles</a>
+                            <a href="/productos.html?categoria=Audio">Equipo de Sonido</a>
+                            <a href="/productos.html?categoria=Accesorios">Accesorios y PC</a>
+                        </div>
+                        <div class="fx-mega-foot">
+                            <a href="/productos.html">Ver todos los productos</a>
+                            <a href="/productos.html?ofertas=true">Ofertas de hoy</a>
+                        </div>
+                    </div>
+                    <div class="fx-mega-col">
+                        <p class="fx-mega-kicker">Más de Electronix</p>
+                        <div class="fx-mega-smalllinks">
+                            <a href="/productos.html?ofertas=true">Ofertas</a>
+                            <a href="/productos.html">Más vendidos</a>
+                            <a href="/productos.html">Recomendados</a>
+                            <a href="/productos.html">Nuestras tiendas</a>
+                            <a href="/productos.html">Soporte</a>
+                        </div>
                     </div>
                 </div>
-                <a href="/index.html?ofertas=true" class="elx-subnav-link">OFERTAS</a>
             </div>
-        </div>
+
+            <div id="nav-search-panel" class="fx-search-panel" aria-hidden="true">
+                <div class="fx-container fx-search-panel-inner">
+                    <form id="nav-search-form" action="/productos.html" method="GET" role="search">
+                        <img src="/assets/img/busquedaicon.svg" alt="" aria-hidden="true">
+                        <input id="nav-search-input" type="text" name="q" placeholder="Buscar en Electronix"
+                            autocomplete="off" aria-label="Buscar en Electronix">
+                        <button type="button" id="nav-search-close" title="Cerrar" aria-label="Cerrar búsqueda">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </form>
+                    <p class="fx-mega-kicker">Enlaces rápidos</p>
+                    <div class="fx-quick">
+                        <a href="/productos.html?ofertas=true"><span aria-hidden="true">→</span> Ofertas</a>
+                        <a href="/productos.html?categoria=Televisores"><span aria-hidden="true">→</span> Televisores</a>
+                        <a href="/productos.html?categoria=Smartphones"><span aria-hidden="true">→</span> Smartphones</a>
+                        <a href="/productos.html?categoria=Laptops"><span aria-hidden="true">→</span> Portátiles</a>
+                        <a href="/productos.html?categoria=Audio"><span aria-hidden="true">→</span> Equipo de Sonido</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+        <div id="nav-backdrop" class="fx-backdrop"></div>
     </header>
 
     <main class="max-w-7xl mx-auto px-4 sm:px-8 py-8 flex-1 w-full">
         
         <nav class="flex items-center space-x-2 text-xs text-neutral-500 mb-6 font-semibold">
-            <a href="/index.html" class="hover:text-[#14635c] transition-colors">Inicio</a>
+            <a href="/index.html" class="hover:text-[#3564C9] transition-colors">Inicio</a>
             <span>/</span>
-            <a href="/index.html#catalogo" class="hover:text-[#14635c] transition-colors">Catálogo</a>
+            <a href="/productos.html" class="hover:text-[#3564C9] transition-colors">Catálogo</a>
             <span>/</span>
             <span id="breadcrumb-title" class="text-neutral-800 truncate max-w-xs">Cargando...</span>
         </nav>
 
         <div id="product-detail-container" class="bg-white rounded-2xl p-6 sm:p-10 border border-neutral-200 shadow-md">
             <div class="py-20 text-center text-neutral-400">
-                <div class="w-10 h-10 border-4 border-[#14635c]/30 border-t-[#14635c] rounded-full animate-spin mx-auto mb-4"></div>
+                <div class="w-10 h-10 border-4 border-[#3564C9]/30 border-t-[#3564C9] rounded-full animate-spin mx-auto mb-4"></div>
                 <p class="text-sm">Cargando detalles del producto...</p>
             </div>
         </div>
@@ -99,179 +146,7 @@
         <p>© 2026 ELECTRONIX. Todos los derechos reservados.</p>
     </footer>
 
-    <script type="module">
-        import { api } from '/assets/js/api.js';
-        import { cart } from '/assets/js/cart.js';
-        import { renderNavbar } from '/assets/js/ui/navbar.js';
-        import { showToast } from '/assets/js/ui/toast.js';
-
-        renderNavbar();
-
-        const urlParams = new URLSearchParams(window.location.search);
-        const productId = urlParams.get('id');
-        const container = document.getElementById('product-detail-container');
-        const breadcrumbTitle = document.getElementById('breadcrumb-title');
-
-        if (!productId) {
-            container.innerHTML = `
-                <div class="text-center py-12 text-rose-600">
-                    <p class="text-lg font-bold">No se especificó un producto válido.</p>
-                    <a href="/index.html" class="mt-4 inline-block text-[#14635c] font-bold hover:underline text-sm">Volver al catálogo</a>
-                </div>
-            `;
-        } else {
-            cargarDetalle(productId);
-        }
-
-        async function cargarDetalle(id) {
-            try {
-                const res = await api.get(`/api/productos/${id}`);
-                if (!res.exito || !res.datos) {
-                    throw new Error(res.mensaje || 'Producto no disponible');
-                }
-
-                const p = res.datos;
-                breadcrumbTitle.textContent = p.nombre;
-                document.title = `${p.nombre} — ELECTRONIX`;
-
-                const precioFormateado = new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(p.precio);
-                const tieneStock = p.stock > 0;
-                const esEnvioGratis = p.precio >= 199;
-                const imagenFallback = 'https://images.unsplash.com/photo-1526738549149-8e07eca6c147?w=600&auto=format&fit=crop&q=80';
-
-                container.innerHTML = `
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14">
-                        
-                        <!-- Columna Imagen -->
-                        <div class="relative bg-neutral-50 rounded-2xl overflow-hidden border border-neutral-200 flex items-center justify-center p-8 min-h-[380px] lg:min-h-[460px]">
-                            <img 
-                                src="${p.imagenUrl || imagenFallback}" 
-                                alt="${p.nombre}"
-                                class="w-full max-h-[400px] object-contain rounded-xl hover:scale-105 transition-transform duration-300"
-                                onerror="this.src='${imagenFallback}'"
-                            />
-                            <span class="absolute top-4 left-4 bg-neutral-900 text-white text-xs font-bold px-3 py-1 rounded">
-                                ${p.categoriaNombre || 'Tecnología'}
-                            </span>
-                        </div>
-
-                        <!-- Columna Información y Compra -->
-                        <div class="flex flex-col justify-between space-y-6">
-                            
-                            <div>
-                                <div class="flex items-center space-x-3 mb-3">
-                                    <span class="text-xs font-bold px-3 py-1 rounded ${
-                                        p.stock > 5 
-                                            ? 'bg-emerald-100 text-emerald-800' 
-                                            : p.stock > 0 
-                                                ? 'bg-amber-100 text-amber-800'
-                                                : 'bg-rose-100 text-rose-800'
-                                    }">
-                                        ${p.stock > 0 ? `En Stock (${p.stock} unidades)` : 'Agotado Temporalmente'}
-                                    </span>
-                                    <span class="text-xs text-neutral-400 font-semibold">SKU: #${p.id}</span>
-                                </div>
-
-                                <h1 class="text-2xl sm:text-4xl font-black text-neutral-900 leading-tight">
-                                    ${p.nombre}
-                                </h1>
-
-                                <div class="mt-4 flex items-baseline space-x-3">
-                                    <span class="text-3xl sm:text-4xl font-black text-neutral-900">${precioFormateado}</span>
-                                    <span class="text-xs text-neutral-500 font-semibold">Incluye IGV</span>
-                                </div>
-
-                                ${esEnvioGratis ? `
-                                    <div class="mt-2 inline-flex items-center space-x-1.5 text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded text-xs font-bold">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
-                                        <span>Llega gratis mañana a todo el Perú</span>
-                                    </div>
-                                ` : ''}
-
-                                <div class="mt-6 border-t border-neutral-200 pt-6">
-                                    <h3 class="text-xs font-bold text-neutral-700 uppercase tracking-wider mb-2">Descripción del Producto</h3>
-                                    <p class="text-sm text-neutral-600 leading-relaxed whitespace-pre-line">
-                                        ${p.descripcion || 'Sin descripción detallada disponible.'}
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div class="border-t border-neutral-200 pt-6">
-                                ${tieneStock ? `
-                                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
-                                        <div class="flex items-center border border-neutral-300 bg-neutral-50 rounded-xl p-1 w-full sm:w-auto justify-between sm:justify-start">
-                                            <button id="btn-minus" class="w-10 h-10 rounded-lg bg-white hover:bg-neutral-200 text-neutral-800 font-black flex items-center justify-center transition-colors shadow-sm">
-                                                -
-                                            </button>
-                                            <input id="cant-input" type="number" value="1" min="1" max="${p.stock}" class="w-14 bg-transparent text-center text-sm font-bold text-neutral-900 focus:outline-none" readonly />
-                                            <button id="btn-plus" class="w-10 h-10 rounded-lg bg-white hover:bg-neutral-200 text-neutral-800 font-black flex items-center justify-center transition-colors shadow-sm">
-                                                +
-                                            </button>
-                                        </div>
-
-                                        <button id="btn-add-cart" class="flex-1 bg-[#14635c] hover:bg-[#1ca299] text-white font-bold py-3.5 px-6 rounded-xl shadow-lg transition-all flex items-center justify-center space-x-2">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                                            </svg>
-                                            <span>Agregar al Carrito</span>
-                                        </button>
-                                    </div>
-                                ` : `
-                                    <div class="p-4 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-sm text-center font-bold">
-                                        Este producto se encuentra temporalmente agotado.
-                                    </div>
-                                `}
-
-                                <div class="grid grid-cols-2 gap-3 mt-6 text-xs text-neutral-600 font-semibold">
-                                    <div class="flex items-center space-x-2 p-3 bg-neutral-50 rounded-xl border border-neutral-200">
-                                        <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                        <span>Garantía Oficial 12 Meses</span>
-                                    </div>
-                                    <div class="flex items-center space-x-2 p-3 bg-neutral-50 rounded-xl border border-neutral-200">
-                                        <svg class="w-4 h-4 text-[#14635c]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                                        <span>Despacho Inmediato</span>
-                                    </div>
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-                `;
-
-                if (tieneStock) {
-                    const btnMinus = document.getElementById('btn-minus');
-                    const btnPlus = document.getElementById('btn-plus');
-                    const cantInput = document.getElementById('cant-input');
-                    const btnAddCart = document.getElementById('btn-add-cart');
-
-                    btnMinus.addEventListener('click', () => {
-                        let val = parseInt(cantInput.value);
-                        if (val > 1) cantInput.value = val - 1;
-                    });
-
-                    btnPlus.addEventListener('click', () => {
-                        let val = parseInt(cantInput.value);
-                        if (val < p.stock) cantInput.value = val + 1;
-                        else showToast(`Stock máximo alcanzado (${p.stock})`, 'warning');
-                    });
-
-                    btnAddCart.addEventListener('click', async () => {
-                        const cant = parseInt(cantInput.value);
-                        await cart.agregarItem(p.id, cant);
-                    });
-                }
-
-            } catch (err) {
-                container.innerHTML = `
-                    <div class="text-center py-12 text-rose-600">
-                        <p class="text-base font-bold">Error al cargar producto: ${err.message}</p>
-                        <a href="/index.html" class="mt-4 inline-block text-[#14635c] font-bold hover:underline text-sm">Volver al catálogo</a>
-                    </div>
-                `;
-            }
-        }
-    </script>
+    <script src="/assets/js/ui/fx-header.js"></script>
+    <script type="module" src="/assets/js/pages/producto.js"></script>
 </body>
 </html>

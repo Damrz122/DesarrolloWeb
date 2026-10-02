@@ -1,403 +1,17 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard — ELECTRONIX Admin</title>
     <meta name="description" content="Panel de control administrativo de ELECTRONIX: estadísticas de ventas, pedidos recientes y acciones rápidas en tiempo real.">
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 90%27%3E%3Crect width=%27100%27 height=%2790%27 rx=%2718%27 fill=%27%23171717%27/%3E%3Cpath d=%27M15 12h65c4 0 7 3 7 7s-3 7-7 7H38l-4 12h32c3 0 6 3 5 7l-4 10c-1 3-3 5-6 5H24l-6 18c-1 3-4 5-8 5s-6-3-5-7L15 12z%27 fill=%27%23e5e7eb%27/%3E%3Cpolygon points=%2768,28 48,50 62,50 42,75 50,56 36,56%27 fill=%27%231ca299%27/%3E%3C/svg%3E">
+    <link rel="icon" type="image/svg+xml" href="/assets/img/logo.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="stylesheet" href="/assets/css/output.css">
-    <script>try{var t=localStorage.getItem("electronix_admin_theme");if(t==="dark"){document.documentElement.setAttribute("data-theme","dark");}}catch(e){}</script>
-    <link rel="stylesheet" href="/assets/css/admin.css">
-    <style>
-        /* ══════════════════════════════════════════════════════════
-           DASHBOARD v3 — Soft UI Dark  (inspirado en Soft UI Dashboard)
-           Tarjetas con fondos de color sólido, indicadores de cambio,
-           tabla compacta, sparkline SVG integrado, sidebar de acciones.
-           ══════════════════════════════════════════════════════════ */
-
-        /* ── Grid de KPI cards ─────────────────────────────────── */
-        .db-kpi-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 18px;
-            margin-bottom: 22px;
-        }
-        @media (max-width: 1100px) { .db-kpi-grid { grid-template-columns: repeat(2,1fr); } }
-        @media (max-width: 640px)  { .db-kpi-grid { grid-template-columns: 1fr; } }
-
-        /* ── Tarjeta KPI ───────────────────────────────────────── */
-        .db-kpi {
-            border-radius: 14px;
-            padding: 20px 20px 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-            position: relative;
-            overflow: hidden;
-            transition: transform 0.18s ease, box-shadow 0.18s ease;
-            cursor: default;
-        }
-        .db-kpi:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 20px 48px rgba(0,0,0,0.55);
-        }
-
-        /* Variantes de color sólido */
-        .db-kpi--teal   { background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%); }
-        .db-kpi--violet { background: linear-gradient(135deg, #4c1d95 0%, #7c3aed 100%); }
-        .db-kpi--dark   { background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%); border: 1px solid #333; }
-        .db-kpi--rose   { background: linear-gradient(135deg, #9f1239 0%, #e11d48 100%); }
-
-        /* Icono flotante (arriba a la derecha) */
-        .db-kpi-icon {
-            position: absolute;
-            top: 16px;
-            right: 16px;
-            width: 42px;
-            height: 42px;
-            border-radius: 10px;
-            background: rgba(255,255,255,0.15);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: rgba(255,255,255,0.9);
-            backdrop-filter: blur(4px);
-        }
-
-        .db-kpi-body { flex: 1; }
-
-        .db-kpi-label {
-            font-size: 0.7rem;
-            font-weight: 700;
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
-            color: rgba(255,255,255,0.65);
-            margin: 0 0 6px;
-        }
-
-        .db-kpi-value {
-            font-size: 2rem;
-            font-weight: 900;
-            color: #fff;
-            letter-spacing: -0.02em;
-            line-height: 1;
-            font-family: "Poppins", system-ui, sans-serif;
-        }
-
-        /* Pie de la tarjeta: separador + delta */
-        .db-kpi-foot {
-            border-top: 1px solid rgba(255,255,255,0.12);
-            padding-top: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 8px;
-        }
-
-        .db-kpi-sub {
-            font-size: 0.72rem;
-            color: rgba(255,255,255,0.6);
-        }
-
-        .db-kpi-delta {
-            display: inline-flex;
-            align-items: center;
-            gap: 3px;
-            font-size: 0.72rem;
-            font-weight: 800;
-            color: #fff;
-            background: rgba(255,255,255,0.15);
-            padding: 3px 8px;
-            border-radius: 20px;
-        }
-        .db-kpi-delta--up   { background: rgba(34,197,94,0.25);  color: #86efac; }
-        .db-kpi-delta--down { background: rgba(244,63,94,0.25);  color: #fda4af; }
-        .db-kpi-delta--warn { background: rgba(245,158,11,0.25); color: #fcd34d; }
-
-        /* ── Mini sparkline SVG en tarjeta --dark ──────────────── */
-        .db-sparkline-svg {
-            width: 100%;
-            height: 36px;
-            margin: -4px 0 4px;
-        }
-        .db-sparkline-svg polyline {
-            stroke: rgba(45,212,191,0.7);
-            stroke-width: 2;
-            fill: none;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-        }
-        .db-sparkline-svg polygon {
-            fill: rgba(45,212,191,0.08);
-        }
-
-        /* ── Layout principal: tabla | sidebar ─────────────────── */
-        .db-main-grid {
-            display: grid;
-            grid-template-columns: 1fr 320px;
-            gap: 18px;
-            align-items: start;
-        }
-        @media (max-width: 1024px) { .db-main-grid { grid-template-columns: 1fr; } }
-
-        /* ── Panel de tabla ────────────────────────────────────── */
-        .db-panel {
-            background: #1a1a1a;
-            border: 1px solid #272727;
-            border-radius: 14px;
-            overflow: hidden;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-            transition: box-shadow 0.2s;
-        }
-        .db-panel:hover { box-shadow: 0 14px 36px rgba(0,0,0,0.55); }
-
-        .db-panel-head {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 16px 20px 14px;
-            border-bottom: 1px solid #272727;
-        }
-
-        .db-panel-title {
-            font-size: 0.9rem;
-            font-weight: 800;
-            color: #f0f0f0;
-            margin: 0;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-family: "Poppins", system-ui, sans-serif;
-        }
-
-        .db-panel-count {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 22px;
-            height: 22px;
-            padding: 0 6px;
-            background: rgba(45,212,191,0.12);
-            color: #2dd4bf;
-            border: 1px solid rgba(45,212,191,0.25);
-            border-radius: 20px;
-            font-size: 0.65rem;
-            font-weight: 900;
-        }
-
-        /* Tabla rediseñada */
-        .db-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.8rem;
-            font-variant-numeric: tabular-nums;
-        }
-        .db-table thead th {
-            text-align: left;
-            font-size: 0.62rem;
-            font-weight: 900;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            color: #5a5a5a;
-            background: #141414;
-            padding: 10px 18px;
-            border-bottom: 1px solid #272727;
-            white-space: nowrap;
-        }
-        .db-table thead th.num { text-align: right; }
-        .db-table tbody td {
-            padding: 13px 18px;
-            border-bottom: 1px solid #1f1f1f;
-            vertical-align: middle;
-            color: #d0d0d0;
-        }
-        .db-table tbody tr:last-child td { border-bottom: none; }
-        .db-table tbody tr {
-            transition: background 0.12s;
-        }
-        .db-table tbody tr:hover {
-            background: #1e1e1e;
-            box-shadow: inset 3px 0 0 rgba(45,212,191,0.4);
-        }
-        .db-table tbody tr:hover .db-row-actions { opacity: 1; }
-
-        /* Acciones de fila */
-        .db-row-actions {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            opacity: 0;
-            transition: opacity 0.15s;
-        }
-        .db-row-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 3px;
-            font-size: 0.67rem;
-            font-weight: 700;
-            padding: 4px 8px;
-            border-radius: 6px;
-            border: 1px solid transparent;
-            cursor: pointer;
-            background: none;
-            font-family: inherit;
-            text-decoration: none;
-            transition: all 0.12s;
-        }
-        .db-row-btn--view {
-            background: rgba(45,212,191,0.08);
-            color: #2dd4bf;
-            border-color: rgba(45,212,191,0.2);
-        }
-        .db-row-btn--view:hover { background: rgba(45,212,191,0.16); }
-        .db-row-btn--estado {
-            background: rgba(148,163,184,0.08);
-            color: #94a3b8;
-            border-color: rgba(148,163,184,0.18);
-        }
-        .db-row-btn--estado:hover { background: rgba(148,163,184,0.16); color: #f0f0f0; }
-
-        /* ID de orden */
-        .db-order-id {
-            font-weight: 900;
-            color: #f0f0f0;
-            font-size: 0.78rem;
-        }
-        .db-client-name { font-weight: 700; color: #e0e0e0; }
-        .db-amount { font-weight: 800; color: #f0f0f0; }
-        .db-date-cell { color: #5a5a5a; font-size: 0.75rem; }
-
-        /* Empty state */
-        .db-empty {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-            padding: 44px 20px;
-            color: #3a3a3a;
-        }
-        .db-empty p { font-size: 0.8rem; margin: 0; }
-
-        /* ── Sidebar de acciones ───────────────────────────────── */
-        .db-sidebar { display: flex; flex-direction: column; gap: 12px; }
-
-        /* Card de actividad rápida */
-        .db-activity {
-            background: #1a1a1a;
-            border: 1px solid #272727;
-            border-radius: 14px;
-            padding: 0;
-            overflow: hidden;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.35);
-        }
-
-        .db-activity-head {
-            padding: 14px 18px 12px;
-            border-bottom: 1px solid #272727;
-        }
-
-        .db-activity-title {
-            font-size: 0.88rem;
-            font-weight: 800;
-            color: #f0f0f0;
-            margin: 0;
-            font-family: "Poppins", system-ui, sans-serif;
-        }
-
-        .db-action-list { padding: 8px; }
-
-        .db-action-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 11px 12px;
-            border-radius: 10px;
-            border: 1px solid transparent;
-            text-decoration: none;
-            color: #d0d0d0;
-            font-size: 0.82rem;
-            font-weight: 600;
-            transition: all 0.15s ease;
-            cursor: pointer;
-        }
-        .db-action-item:hover {
-            background: #212121;
-            border-color: #333;
-            color: #f0f0f0;
-            transform: translateX(2px);
-        }
-        .db-action-item--urgent {
-            border-color: rgba(244,63,94,0.2);
-            background: rgba(244,63,94,0.04);
-        }
-        .db-action-item--urgent:hover {
-            background: rgba(244,63,94,0.09);
-            border-color: rgba(244,63,94,0.4);
-        }
-
-        .db-action-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 9px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-        .db-action-icon--teal    { background: rgba(45,212,191,0.12);  color: #2dd4bf; }
-        .db-action-icon--blue    { background: rgba(96,165,250,0.12);  color: #60a5fa; }
-        .db-action-icon--violet  { background: rgba(139,92,246,0.12); color: #a78bfa; }
-        .db-action-icon--crit    { background: rgba(244,63,94,0.12);   color: #f43f5e; }
-        .db-action-icon--neutral { background: rgba(148,163,184,0.12); color: #94a3b8; }
-
-        .db-action-info { flex: 1; min-width: 0; }
-        .db-action-label { font-size: 0.8rem; font-weight: 700; color: #d0d0d0; display: block; }
-        .db-action-sub   { font-size: 0.68rem; color: #555; margin-top: 1px; display: block; }
-
-        .db-action-right {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            flex-shrink: 0;
-        }
-
-        .db-urgent-badge {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 18px;
-            height: 18px;
-            padding: 0 5px;
-            border-radius: 9px;
-            font-size: 0.6rem;
-            font-weight: 900;
-            background: #f43f5e;
-            color: #fff;
-            animation: adm-pulse 1.6s ease-in-out infinite;
-        }
-
-        .db-arrow {
-            color: #3a3a3a;
-            flex-shrink: 0;
-            transition: color 0.12s, transform 0.12s;
-        }
-        .db-action-item:hover .db-arrow {
-            color: #888;
-            transform: translateX(2px);
-        }
-
-        /* ── Separador de sección ──────────────────────────────── */
-        .db-section-title {
-            font-size: 0.65rem;
-            font-weight: 900;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            color: #3a3a3a;
-            margin: 20px 0 10px;
-        }
-    </style>
+    <script src="/assets/js/admin-theme.js"></script>
+    <link rel="stylesheet" href="/assets/css/admin.css?v=2">
+    <link rel="stylesheet" href="/assets/css/admin/dashboard.css?v=2">
+    <link rel="stylesheet" href="/assets/css/ui/ui-inline.css?v=2">
 </head>
 <body class="adm">
 
@@ -405,7 +19,7 @@
 
     <main class="adm-main">
 
-        <!-- ── Encabezado ─────────────────────────────────────────── -->
+        <!-- encabezado: es para el titulo del panel -->
         <div class="adm-pagehead">
             <div>
                 <h1 class="adm-title">Panel de Control</h1>
@@ -413,10 +27,10 @@
             </div>
         </div>
 
-        <!-- ── KPI Cards ──────────────────────────────────────────── -->
+        <!-- kpis: es para las tarjetas de ventas y pedidos -->
         <div class="db-kpi-grid">
 
-            <!-- Ventas del mes (teal) -->
+            <!-- kpi ventas: es para el total del mes -->
             <div class="db-kpi db-kpi--teal">
                 <div class="db-kpi-icon" aria-hidden="true">
                     <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -429,15 +43,15 @@
                     <div id="stat-ventas" class="db-kpi-value">S/ 0.00</div>
                 </div>
                 <div class="db-kpi-foot">
-                    <span class="db-kpi-sub">Total acumulado activo</span>
-                    <span class="db-kpi-delta db-kpi-delta--up" id="delta-ventas" style="display:none;">
+                    <span class="db-kpi-sub">Solo pago aprobado · mes actual</span>
+                    <span class="db-kpi-delta db-kpi-delta--up" id="delta-ventas" hidden>
                         <svg width="10" height="10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 10l7-7 7 7"/></svg>
                         <span id="delta-ventas-val">—</span>
                     </span>
                 </div>
             </div>
 
-            <!-- Total pedidos (violet) -->
+            <!-- kpi pedidos: es para el total de pedidos -->
             <div class="db-kpi db-kpi--violet">
                 <div class="db-kpi-icon" aria-hidden="true">
                     <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -450,15 +64,15 @@
                     <div id="stat-pedidos" class="db-kpi-value">0</div>
                 </div>
                 <div class="db-kpi-foot">
-                    <span class="db-kpi-sub">Órdenes generadas</span>
-                    <span class="db-kpi-delta" id="delta-pedidos" style="display:none;">
+                    <span class="db-kpi-sub">Excluye cancelados</span>
+                    <span class="db-kpi-delta" id="delta-pedidos" hidden>
                         <svg width="10" height="10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 10l7-7 7 7"/></svg>
                         <span id="delta-pedidos-val">—</span>
                     </span>
                 </div>
             </div>
 
-            <!-- Ticket promedio (dark con sparkline) -->
+            <!-- kpi ticket: es para el promedio por pedido -->
             <div class="db-kpi db-kpi--dark">
                 <div class="db-kpi-icon" aria-hidden="true">
                     <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -469,7 +83,7 @@
                 <div class="db-kpi-body">
                     <p class="db-kpi-label">Ticket promedio</p>
                     <div id="stat-ticket" class="db-kpi-value">S/ 0.00</div>
-                    <!-- Sparkline SVG (se rellena vía JS) -->
+                    <!-- sparkline: es para la mini grafica -->
                     <svg id="sparkline-svg" class="db-sparkline-svg" viewBox="0 0 120 36"
                          preserveAspectRatio="none" aria-label="Tendencia de ticket promedio">
                         <polygon id="sparkline-fill" points=""/>
@@ -477,15 +91,15 @@
                     </svg>
                 </div>
                 <div class="db-kpi-foot">
-                    <span class="db-kpi-sub">Promedio por cliente</span>
-                    <span class="db-kpi-delta db-kpi-delta--up" id="delta-ticket" style="display:none;">
+                    <span class="db-kpi-sub">Sobre pedidos pagados</span>
+                    <span class="db-kpi-delta db-kpi-delta--up" id="delta-ticket" hidden>
                         <svg width="10" height="10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 10l7-7 7 7"/></svg>
                         <span id="delta-ticket-val">—</span>
                     </span>
                 </div>
             </div>
 
-            <!-- Stock crítico (rose) -->
+            <!-- kpi stock: es para productos con stock bajo -->
             <div class="db-kpi db-kpi--rose">
                 <div class="db-kpi-icon" aria-hidden="true">
                     <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -499,7 +113,7 @@
                 </div>
                 <div class="db-kpi-foot">
                     <span class="db-kpi-sub">Productos con ≤ 5 uds.</span>
-                    <span class="db-kpi-delta db-kpi-delta--down" id="delta-stock" style="display:none;">
+                    <span class="db-kpi-delta db-kpi-delta--down" id="delta-stock" hidden>
                         <svg width="10" height="10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 14l7 7 7-7"/></svg>
                         <span id="delta-stock-val">—</span>
                     </span>
@@ -508,10 +122,10 @@
 
         </div>
 
-        <!-- ── Grid principal ─────────────────────────────────────── -->
+        <!-- principal: es para tabla y accesos -->
         <div class="db-main-grid">
 
-            <!-- Tabla de últimas órdenes -->
+            <!-- tabla ordenes: es para los ultimos pedidos -->
             <div class="db-panel">
                 <div class="db-panel-head">
                     <h2 class="db-panel-title">
@@ -520,7 +134,7 @@
                     </h2>
                     <a href="/admin/pedidos.html" class="adm-link" id="link-ver-todas">Ver todas →</a>
                 </div>
-                <div style="overflow-x:auto;">
+                <div class="db-tabla-scroll">
                     <table class="db-table" aria-label="Últimas órdenes registradas">
                         <thead>
                             <tr>
@@ -529,13 +143,13 @@
                                 <th scope="col" class="num">Total</th>
                                 <th scope="col">Estado</th>
                                 <th scope="col">Fecha</th>
-                                <th scope="col" style="min-width:130px;"></th>
+                                <th scope="col" class="db-th-acciones"></th>
                             </tr>
                         </thead>
                         <tbody id="table-pedidos-body">
                             <tr><td colspan="6">
                                 <div class="db-empty">
-                                    <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="opacity:.25">
+                                    <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24" class="db-vacio-icono">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                                     </svg>
                                     <p>Cargando órdenes recientes…</p>
@@ -546,7 +160,7 @@
                 </div>
             </div>
 
-            <!-- Sidebar acciones frecuentes -->
+            <!-- accesos: es para ir a modulos rapido -->
             <aside class="db-sidebar">
                 <div class="db-activity">
                     <div class="db-activity-head">
@@ -554,7 +168,7 @@
                     </div>
                     <div class="db-action-list">
 
-                        <!-- Chat: urgente si hay sin responder -->
+                        <!-- alerta chat: es para avisos sin responder -->
                         <a href="/admin/chat.html" class="db-action-item db-action-item--urgent" id="action-chat">
                             <span class="db-action-icon db-action-icon--crit" aria-hidden="true">
                                 <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -567,7 +181,7 @@
                                 <span class="db-action-sub">Chat en vivo</span>
                             </span>
                             <span class="db-action-right">
-                                <span class="db-urgent-badge" id="chat-badge" style="display:none;">0</span>
+                                <span class="db-urgent-badge" id="chat-badge" hidden>0</span>
                                 <svg class="db-arrow" width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                                 </svg>
@@ -650,180 +264,6 @@
         <p>© 2026 ELECTRONIX — Módulo de Administración.</p>
     </footer>
 
-    <script type="module">
-        import { api } from '/assets/js/api.js';
-        import { auth } from '/assets/js/auth.js';
-        import { renderAdminShell } from '/assets/js/ui/adminShell.js';
-        import { showToast } from '/assets/js/ui/toast.js';
-
-        renderAdminShell('dashboard');
-
-        if (!auth.protegerRutaAdmin()) {
-            // redirige
-        } else {
-            cargarDashboard();
-        }
-
-        const fmt = v => new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(v);
-        const fmtFecha = iso => new Date(iso).toLocaleString('es-PE', {
-            month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
-        });
-        function esc(v) {
-            return String(v ?? '')
-                .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-                .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-        }
-
-        async function cargarDashboard() {
-            try {
-                // 1. Estadísticas de reporte
-                const repRes = await api.get('/api/reportes/ventas');
-                if (repRes.exito && repRes.datos) {
-                    const r = repRes.datos;
-                    document.getElementById('stat-ventas').textContent  = fmt(r.totalVentas);
-                    document.getElementById('stat-pedidos').textContent = r.totalPedidos;
-                    document.getElementById('stat-ticket').textContent  = fmt(r.ticketPromedio);
-                    document.getElementById('stat-stock-bajo').textContent =
-                        r.productosBajoStock ? r.productosBajoStock.length : 0;
-
-                    // Sparkline en tarjeta de ticket
-                    if (r.ventasPorDia && r.ventasPorDia.length > 0) {
-                        renderSparklineSvg(r.ventasPorDia);
-                    }
-                }
-
-                // 2. Últimas órdenes (máx. 5)
-                const pedRes = await api.get('/api/pedidos?size=5');
-                const tbody = document.getElementById('table-pedidos-body');
-
-                if (pedRes.exito && pedRes.datos && pedRes.datos.contenido.length > 0) {
-                    const items = pedRes.datos.contenido;
-                    document.getElementById('orders-count').textContent = items.length;
-                    tbody.innerHTML = '';
-                    items.forEach(p => {
-                        tbody.innerHTML += `
-                            <tr>
-                                <td><span class="db-order-id">#${esc(p.id)}</span></td>
-                                <td><span class="db-client-name">${esc(p.usuarioNombre) || 'Cliente'}</span></td>
-                                <td class="num"><span class="db-amount">${fmt(p.total)}</span></td>
-                                <td>${badge(p.estado)}</td>
-                                <td class="db-date-cell">${fmtFecha(p.fecha)}</td>
-                                <td>
-                                    <div class="db-row-actions">
-                                        <a href="/admin/pedidos.html?id=${esc(p.id)}"
-                                           class="db-row-btn db-row-btn--view" title="Ver detalle">
-                                            <svg width="10" height="10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                            </svg>
-                                            Ver
-                                        </a>
-                                        <a href="/admin/pedidos.html?id=${esc(p.id)}&accion=estado"
-                                           class="db-row-btn db-row-btn--estado" title="Cambiar estado">
-                                            <svg width="10" height="10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                                            </svg>
-                                            Estado
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                        `;
-                    });
-                } else {
-                    tbody.innerHTML = `
-                        <tr><td colspan="6">
-                            <div class="db-empty">
-                                <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="opacity:.2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                                </svg>
-                                <p>No hay órdenes registradas aún.</p>
-                            </div>
-                        </td></tr>
-                    `;
-                }
-
-                // 3. Chats activos con mensajes de clientes sin atender
-                try {
-                    const chatRes = await api.get('/api/chat/conversaciones');
-                    if (chatRes.exito && chatRes.datos) {
-                        // Solo cuenta conversaciones donde hay mensajes de clientes sin leer
-                        const conMensajesCliente = chatRes.datos.filter(c =>
-                            // El API puede retornar mensajesNoLeidos, o ultimoRemitenteRol === 'CLIENTE'
-                            (c.mensajesNoLeidos && c.mensajesNoLeidos > 0) ||
-                            (c.ultimoRemitenteRol && c.ultimoRemitenteRol === 'CLIENTE' && !c.respondido)
-                        );
-                        const totalNoLeidos = chatRes.datos.reduce((sum, c) =>
-                            sum + (c.mensajesNoLeidos || 0), 0);
-
-                        const badge  = document.getElementById('chat-badge');
-                        const action = document.getElementById('action-chat');
-                        const icon   = action.querySelector('.db-action-icon');
-
-                        if (conMensajesCliente.length > 0 || totalNoLeidos > 0) {
-                            const n = totalNoLeidos > 0 ? totalNoLeidos : conMensajesCliente.length;
-                            badge.textContent = n > 9 ? '9+' : n;
-                            badge.style.display = 'inline-flex';
-                        } else {
-                            // Sin urgencia: quitar estilo crítico
-                            const action = document.getElementById('action-chat');
-                            action.classList.remove('db-action-item--urgent');
-                            const icon = action.querySelector('.db-action-icon');
-                            icon.className = 'db-action-icon db-action-icon--teal';
-                        }
-                    }
-                } catch (_) {
-                    document.getElementById('action-chat').classList.remove('db-action-item--urgent');
-                }
-
-            } catch (err) {
-                console.error('Error cargando dashboard:', err);
-                showToast('Error cargando datos del dashboard', 'error');
-            }
-        }
-
-        /**
-         * Dibuja el sparkline SVG en la tarjeta de ticket promedio.
-         * @param {Array<{fecha:string, total:number}>} datos
-         */
-        function renderSparklineSvg(datos) {
-            const W = 120, H = 36;
-            const vals = datos.map(d => d.total);
-            const max  = Math.max(...vals, 1);
-            const step = W / Math.max(vals.length - 1, 1);
-
-            const pts = vals.map((v, i) => {
-                const x = i * step;
-                const y = H - (v / max) * (H - 4) - 2;
-                return `${x.toFixed(1)},${y.toFixed(1)}`;
-            }).join(' ');
-
-            const firstPt = `0,${H}`;
-            const lastPt  = `${W},${H}`;
-            const fillPts = `${firstPt} ${pts} ${lastPt}`;
-
-            document.getElementById('sparkline-line').setAttribute('points', pts);
-            document.getElementById('sparkline-fill').setAttribute('points', fillPts);
-        }
-
-        /**
-         * Badge de estado de pedido.
-         */
-        function badge(estado) {
-            const map = {
-                'PENDIENTE':  ['adm-badge b-pendiente', 'Pendiente'],
-                'EN_PROCESO': ['adm-badge b-proceso',   'En proceso'],
-                'ENVIADO':    ['adm-badge b-enviado',   'Enviado'],
-                'ENTREGADO':  ['adm-badge b-entregado', 'Entregado'],
-                'CANCELADO':  ['adm-badge b-cancelado', 'Cancelado'],
-            };
-            const [cls, label] = map[estado] ?? ['adm-badge b-off', esc(estado)];
-            return `<span class="${cls}" aria-label="Estado: ${label}">${label}</span>`;
-        }
-    </script>
+    <script type="module" src="/assets/js/admin/dashboard.js?v=2"></script>
 </body>
 </html>

@@ -84,12 +84,8 @@ export const cart = {
         const valor = cantidad || '0';
         badges.forEach(badge => {
             badge.textContent = valor;
-            if (cantidad > 0) {
-                badge.style.display = '';
-                badge.classList.remove('hidden');
-            } else {
-                badge.style.display = 'none';
-            }
+            badge.classList.toggle('hidden', !(cantidad > 0));
+            badge.classList.toggle('is-hidden', !(cantidad > 0));
         });
     }
 };

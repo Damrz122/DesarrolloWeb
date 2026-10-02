@@ -3,46 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="/assets/img/logo.svg">
     <title>Crear Cuenta — ELECTRONIX</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="/assets/css/output.css">
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+    <link rel="stylesheet" href="/assets/css/ui/ui-inline.css">
+    <link rel="stylesheet" href="/assets/css/pages/figma-home.css">
 </head>
-<body class="bg-[#eaebed] text-neutral-800 min-h-screen flex flex-col antialiased">
+<body class="bg-[#ededed] text-neutral-800 min-h-screen flex flex-col antialiased">
 
-    <header id="main-navbar" class="elx-header">
-        <div class="elx-topbar">
-            <div class="elx-container elx-topbar-inner">
-                <span class="elx-brand-tag">ELECTRONIX</span>
-                <span class="elx-topbar-promo">ENVIO GRATIS POR COMPRA MAYOR A S/ 199</span>
-                <div class="elx-topbar-actions">
-                    <div class="elx-country-badge">
-                        <span class="elx-per-flag"><span class="red"></span><span class="white"></span><span class="red"></span></span>
-                        <span>PER</span>
+    <!-- header nuevo estilo: franja azul + navbar blanca estilo Apple -->
+    <header id="main-navbar">
+        <div class="fx-topbar">
+            <a href="/index.html" class="fx-brand" title="ELECTRONIX">
+                <img src="/assets/img/logo.svg" alt="Electronix" class="fx-brand-logo">
+                <span>ELECTRONIX</span>
+            </a>
+        </div>
+
+        <nav class="fx-navbar">
+            <div class="fx-container fx-navbar-inner">
+                <div class="fx-nav-left"></div>
+
+                <div class="fx-nav-center">
+                    <div class="fx-dropdown-wrapper" id="nav-cat-wrap">
+                        <button type="button" id="nav-cat-trigger" class="fx-nav-link fx-dropdown-trigger" aria-haspopup="true" aria-expanded="false">
+                            <span>Categorías</span>
+                            <svg class="fx-chevron" width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <a href="/productos.html?ofertas=true" class="fx-nav-link">Ofertas</a>
+                    <a href="/productos.html" class="fx-nav-link">Productos</a>
+                </div>
+
+                <div class="fx-nav-right">
+                    <button type="button" id="nav-search-toggle" class="fx-search-btn" title="Buscar" aria-label="Buscar">
+                        <img src="/assets/img/busquedaicon.svg" alt="Buscar">
+                    </button>
+
+                    <a href="/carrito.html" class="fx-cart-btn" title="Ver carrito" aria-label="Ver carrito">
+                        <img src="/assets/img/carritoicon.svg" alt="Carrito">
+                        <span id="cart-badge-top" class="fx-cart-count is-hidden">0</span>
+                    </a>
+
+                    <div class="fx-country" id="nav-country">
+                        <button type="button" id="nav-country-btn" aria-haspopup="true" aria-expanded="false" title="Perú">
+                            <img id="nav-country-flag" src="https://flagcdn.com/pe.svg" alt="Perú">
+                            <span id="nav-country-code">PE</span>
+                        </button>
+                        <div id="nav-country-menu" role="menu" aria-label="Seleccionar país"></div>
+                    </div>
+
+                    <span id="nav-auth-container">
+                        <a href="/login.html" id="nav-login-btn" class="fx-login">Ingresar</a>
+                    </span>
+                </div>
+            </div>
+
+            <div id="nav-mega" class="fx-mega" aria-hidden="true">
+                <div class="fx-container fx-mega-inner">
+                    <div class="fx-mega-col">
+                        <p class="fx-mega-kicker">Explorar</p>
+                        <div id="nav-categories-dropdown" class="fx-mega-biglinks">
+                            <a href="/index.html">Todas las categorías</a>
+                            <a href="/productos.html?categoria=Televisores">Televisores</a>
+                            <a href="/productos.html?categoria=Smartphones">Smartphones</a>
+                            <a href="/productos.html?categoria=Laptops">Portátiles</a>
+                            <a href="/productos.html?categoria=Audio">Equipo de Sonido</a>
+                            <a href="/productos.html?categoria=Accesorios">Accesorios y PC</a>
+                        </div>
+                        <div class="fx-mega-foot">
+                            <a href="/productos.html">Ver todos los productos</a>
+                            <a href="/productos.html?ofertas=true">Ofertas de hoy</a>
+                        </div>
+                    </div>
+                    <div class="fx-mega-col">
+                        <p class="fx-mega-kicker">Más de Electronix</p>
+                        <div class="fx-mega-smalllinks">
+                            <a href="/productos.html?ofertas=true">Ofertas</a>
+                            <a href="/productos.html">Más vendidos</a>
+                            <a href="/productos.html">Recomendados</a>
+                            <a href="/productos.html">Nuestras tiendas</a>
+                            <a href="/productos.html">Soporte</a>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="elx-mainbar">
-            <div class="elx-container elx-mainbar-inner">
-                <a href="/index.html" class="elx-logo-link" title="ELECTRONIX">
-                    <svg class="elx-logo-svg" viewBox="0 0 100 90" fill="currentColor">
-                        <path d="M15 12h65c4 0 7 3 7 7s-3 7-7 7H38l-4 12h32c3 0 6 3 5 7l-4 10c-1 3-3 5-6 5H24l-6 18c-1 3-4 5-8 5s-6-3-5-7L15 12z" />
-                        <polygon points="68,28 48,50 62,50 42,75 50,56 36,56" fill="#1ca299" />
-                        <circle cx="42" cy="82" r="6" fill="#1ca299" />
-                        <circle cx="68" cy="82" r="6" fill="#1ca299" />
-                    </svg>
-                </a>
+
+            <div id="nav-search-panel" class="fx-search-panel" aria-hidden="true">
+                <div class="fx-container fx-search-panel-inner">
+                    <form id="nav-search-form" action="/productos.html" method="GET" role="search">
+                        <img src="/assets/img/busquedaicon.svg" alt="" aria-hidden="true">
+                        <input id="nav-search-input" type="text" name="q" placeholder="Buscar en Electronix"
+                            autocomplete="off" aria-label="Buscar en Electronix">
+                        <button type="button" id="nav-search-close" title="Cerrar" aria-label="Cerrar búsqueda">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </form>
+                    <p class="fx-mega-kicker">Enlaces rápidos</p>
+                    <div class="fx-quick">
+                        <a href="/productos.html?ofertas=true"><span aria-hidden="true">→</span> Ofertas</a>
+                        <a href="/productos.html?categoria=Televisores"><span aria-hidden="true">→</span> Televisores</a>
+                        <a href="/productos.html?categoria=Smartphones"><span aria-hidden="true">→</span> Smartphones</a>
+                        <a href="/productos.html?categoria=Laptops"><span aria-hidden="true">→</span> Portátiles</a>
+                        <a href="/productos.html?categoria=Audio"><span aria-hidden="true">→</span> Equipo de Sonido</a>
+                    </div>
+                </div>
             </div>
-        </div>
+        </nav>
+        <div id="nav-backdrop" class="fx-backdrop"></div>
     </header>
 
     <main class="flex-1 flex items-center justify-center p-4 sm:p-6 w-full my-8">
         <div class="bg-white w-full max-w-md p-6 sm:p-8 rounded-2xl border border-neutral-200 shadow-xl space-y-6">
             
             <div class="text-center">
-                <div class="w-12 h-12 rounded-xl bg-[#0b2e2b] text-[#1ca299] flex items-center justify-center mx-auto mb-3 shadow-md">
+                <div class="w-12 h-12 rounded-xl bg-[#3564C9] text-white flex items-center justify-center mx-auto mb-3 shadow-md">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
                 </div>
                 <h1 class="text-2xl font-black text-neutral-900 tracking-tight uppercase">Crea tu Cuenta</h1>
@@ -53,19 +135,19 @@
                 <div>
                     <label class="block text-xs font-bold text-neutral-700 mb-1.5">Nombres</label>
                     <input id="reg-nombres" type="text" placeholder="Ej. Ana María" required minlength="2" maxlength="100"
-                           class="w-full bg-neutral-50 border border-neutral-300 rounded-xl px-4 py-2.5 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:border-[#14635c] transition-colors" />
+                           class="w-full bg-neutral-50 border border-neutral-300 rounded-lg px-4 py-2 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:border-[#3564C9] transition-colors" />
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-bold text-neutral-700 mb-1.5">Apellido Paterno</label>
                         <input id="reg-paterno" type="text" placeholder="Ej. Morales" required minlength="2" maxlength="100"
-                               class="w-full bg-neutral-50 border border-neutral-300 rounded-xl px-4 py-2.5 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:border-[#14635c] transition-colors" />
+                               class="w-full bg-neutral-50 border border-neutral-300 rounded-lg px-4 py-2 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:border-[#3564C9] transition-colors" />
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-neutral-700 mb-1.5">Apellido Materno</label>
                         <input id="reg-materno" type="text" placeholder="Ej. Quispe (opcional)" maxlength="100"
-                               class="w-full bg-neutral-50 border border-neutral-300 rounded-xl px-4 py-2.5 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:border-[#14635c] transition-colors" />
+                               class="w-full bg-neutral-50 border border-neutral-300 rounded-lg px-4 py-2 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:border-[#3564C9] transition-colors" />
                     </div>
                 </div>
 
@@ -73,12 +155,12 @@
                     <label class="block text-xs font-bold text-neutral-700 mb-1.5">Tipo de documento</label>
                     <div class="grid grid-cols-[110px_1fr] gap-2">
                         <select id="reg-tipodoc"
-                                class="bg-neutral-50 border border-neutral-300 rounded-xl px-2 py-2.5 text-sm text-neutral-900 focus:outline-none focus:border-[#14635c] transition-colors">
+                                class="bg-neutral-50 border border-neutral-300 rounded-lg px-2 py-2 text-sm text-neutral-900 focus:outline-none focus:border-[#3564C9] transition-colors">
                             <option value="DNI" selected>DNI</option>
                             <option value="CE">CE</option>
                         </select>
                         <input id="reg-numdoc" type="text" placeholder="N° de documento" required maxlength="12"
-                               class="w-full bg-neutral-50 border border-neutral-300 rounded-xl px-4 py-2.5 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:border-[#14635c] transition-colors" />
+                               class="w-full bg-neutral-50 border border-neutral-300 rounded-lg px-4 py-2 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:border-[#3564C9] transition-colors" />
                     </div>
                     <p class="text-[11px] text-neutral-400 mt-1">DNI: 8 dígitos. CE (carné de extranjería): 9 caracteres.</p>
                 </div>
@@ -86,23 +168,23 @@
                 <div>
                     <label class="block text-xs font-bold text-neutral-700 mb-1.5">Correo Electrónico</label>
                     <input id="reg-email" type="email" placeholder="ana@ejemplo.com" required
-                           class="w-full bg-neutral-50 border border-neutral-300 rounded-xl px-4 py-2.5 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:border-[#14635c] transition-colors" />
+                           class="w-full bg-neutral-50 border border-neutral-300 rounded-lg px-4 py-2 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:border-[#3564C9] transition-colors" />
                 </div>
 
                 <div>
                     <label class="block text-xs font-bold text-neutral-700 mb-1.5">Contraseña</label>
                     <input id="reg-pass" type="password" placeholder="Mínimo 6 caracteres" minlength="6" required
-                           class="w-full bg-neutral-50 border border-neutral-300 rounded-xl px-4 py-2.5 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:border-[#14635c] transition-colors" />
+                           class="w-full bg-neutral-50 border border-neutral-300 rounded-lg px-4 py-2 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:border-[#3564C9] transition-colors" />
                 </div>
 
-                <button type="submit" id="btn-submit-reg" class="w-full bg-[#14635c] hover:bg-[#1ca299] text-white font-bold py-3 px-6 rounded-xl shadow-md transition-all flex items-center justify-center space-x-2">
+                <button type="submit" id="btn-submit-reg" class="w-full bg-[#3564C9] hover:bg-[#2A51A5] text-white font-bold py-3 px-6 rounded-xl shadow-md transition-all flex items-center justify-center space-x-2">
                     <span>Registrarse</span>
                 </button>
             </form>
 
             <div class="text-center text-xs text-neutral-500 pt-2 border-t border-neutral-100">
                 ¿Ya tienes una cuenta? 
-                <a href="/login.html" class="text-[#14635c] font-bold hover:underline">Inicia sesión</a>
+                <a href="/login.html" class="text-[#3564C9] font-bold hover:underline">Inicia sesión</a>
             </div>
 
         </div>
@@ -112,52 +194,7 @@
         <p>© 2026 ELECTRONIX. Todos los derechos reservados.</p>
     </footer>
 
-    <script type="module">
-        import { auth } from '/assets/js/auth.js';
-        import { renderNavbar } from '/assets/js/ui/navbar.js';
-
-        renderNavbar();
-
-        const form = document.getElementById('register-form');
-        const nombresInput = document.getElementById('reg-nombres');
-        const paternoInput = document.getElementById('reg-paterno');
-        const maternoInput = document.getElementById('reg-materno');
-        const tipoDocInput = document.getElementById('reg-tipodoc');
-        const numDocInput = document.getElementById('reg-numdoc');
-        const emailInput = document.getElementById('reg-email');
-        const passInput = document.getElementById('reg-pass');
-        const submitBtn = document.getElementById('btn-submit-reg');
-
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = `
-                <div class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                <span>Creando cuenta...</span>
-            `;
-
-            try {
-                const datos = {
-                    nombres: nombresInput.value.trim(),
-                    apellidoPaterno: paternoInput.value.trim(),
-                    apellidoMaterno: maternoInput.value.trim() || null,
-                    tipoDocumento: tipoDocInput.value,
-                    numeroDocumento: numDocInput.value.trim(),
-                    email: emailInput.value.trim(),
-                    password: passInput.value
-                };
-
-                await auth.registro(datos);
-
-                setTimeout(() => {
-                    window.location.href = '/index.html';
-                }, 800);
-
-            } catch (err) {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = `<span>Registrarse</span>`;
-            }
-        });
-    </script>
+    <script src="/assets/js/ui/fx-header.js"></script>
+    <script type="module" src="/assets/js/pages/registro.js"></script>
 </body>
 </html>

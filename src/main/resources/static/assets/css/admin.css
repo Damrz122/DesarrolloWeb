@@ -1,10 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Poppins:wght@500;600;700;800&display=swap');
-/* ==========================================================================
-   ELECTRONIX — Tema claro del Módulo de Administración
-   Inspirado en paneles modernos (estilo FINNOVA): fondo lavanda claro,
-   tarjetas blancas, píldoras de navegación y acento teal de la marca.
-   Autocontenido: no depende del CDN Tailwind.
-   ========================================================================== */
+/* diseno admin: es para el tema claro del panel */
 
 :root {
     --adm-bg: #eef1f7;
@@ -24,7 +19,11 @@
     display: none !important;
 }
 
-/* ---------- Base ---------- */
+[hidden] {
+    display: none !important;
+}
+
+/* diseno base: es para el apartado de base */
 
 body.adm {
     background: var(--adm-bg);
@@ -41,7 +40,7 @@ body.adm a {
     text-decoration: none;
 }
 
-/* ---------- Barra superior ---------- */
+/* diseno barra superior: es para el apartado de barra superior */
 
 .adm-topbar-wrap {
     padding: 18px 28px 0;
@@ -50,9 +49,11 @@ body.adm a {
 .adm-topbar {
     max-width: 1240px;
     margin: 0 auto;
-    background: var(--adm-card);
-    border: 1px solid var(--adm-line);
-    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.8);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    backdrop-filter: blur(18px) saturate(160%);
+    border: none;
+    border-radius: 10px;
     box-shadow: var(--adm-shadow);
     padding: 10px 12px 10px 20px;
     display: flex;
@@ -71,11 +72,28 @@ body.adm a {
     width: 38px;
     height: 38px;
     border-radius: 6px;
-    background: linear-gradient(135deg, #171717 0%, #2b2b2b 100%);
+    background: transparent;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    box-shadow: none;
+}
+
+.adm-brand-logo-img {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+    display: block;
+}
+span.adm-brand-logo-img {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+span.adm-brand-logo-img svg {
+    width: 100%;
+    height: 100%;
 }
 
 .adm-brand-name {
@@ -91,7 +109,7 @@ body.adm a {
     font-weight: 700;
     letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: var(--adm-teal);
+    color: #111318;
 }
 
 .adm-nav {
@@ -108,23 +126,28 @@ body.adm a {
     font-weight: 600;
     color: var(--adm-muted);
     padding: 8px 14px;
-    border-radius: 6px;
+    border-radius: 10px;
     white-space: nowrap;
     transition: background 0.15s, color 0.15s;
     display: inline-flex;
     align-items: center;
     gap: 6px;
+    border: none;
 }
 
 .adm-nav a:hover {
-    background: #f1f4fa;
+    background: rgba(17, 19, 24, 0.06);
     color: var(--adm-ink);
 }
 
 .adm-nav a.adm-active {
-    background: var(--adm-teal);
+    background: linear-gradient(135deg, rgba(58,63,75,0.95) 0%, rgba(107,114,128,0.95) 100%);
+    -webkit-backdrop-filter: blur(12px) saturate(1.4);
+    backdrop-filter: blur(12px) saturate(1.4);
     color: #ffffff;
     font-weight: 700;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 4px 14px rgba(0, 0, 0, 0.18);
+    border: none;
 }
 
 .adm-user {
@@ -142,9 +165,9 @@ body.adm a {
     font-weight: 700;
     color: var(--adm-ink);
     background: #f1f4fa;
-    border: 1px solid var(--adm-line);
+    border: none;
     padding: 6px 12px 6px 6px;
-    border-radius: 6px;
+    border-radius: 10px;
     max-width: 190px;
 }
 
@@ -189,7 +212,7 @@ body.adm a {
 
 @media (max-width: 900px) {
     .adm-topbar {
-        border-radius: 6px;
+        border-radius: 10px;
         flex-wrap: wrap;
     }
     .adm-nav {
@@ -199,7 +222,7 @@ body.adm a {
     }
 }
 
-/* ---------- Contenido ---------- */
+/* diseno contenido: es para el apartado de contenido */
 
 .adm-main {
     max-width: 1240px;
@@ -240,7 +263,7 @@ body.adm a {
     flex-wrap: wrap;
 }
 
-/* ---------- Tarjetas de métricas ---------- */
+/* diseno tarjetas de métricas: es para el apartado de tarjetas de métricas */
 
 .adm-grid-stats {
     display: grid;
@@ -337,7 +360,7 @@ body.adm a {
 .adm-stat-cap.blue { color: #2f5bd7; }
 .adm-stat-cap.violet { color: #6a55e8; }
 
-/* ---------- Paneles y tablas ---------- */
+/* diseno paneles y tablas: es para el apartado de paneles y tablas */
 
 .adm-grid-2 {
     display: grid;
@@ -354,7 +377,7 @@ body.adm a {
 
 .adm-card {
     background: var(--adm-card);
-    border: 1px solid var(--adm-line);
+    border: none;
     border-radius: 6px;
     box-shadow: var(--adm-shadow);
     overflow: hidden;
@@ -463,50 +486,47 @@ table.adm-table tbody tr:hover {
     color: #c2274b;
 }
 
-/* ---------- Badges — sistema de 5 estados + fallback ---------- */
+/* diseno badges: es para los estados del pedido */
 
 .adm-badge {
     display: inline-flex;
     align-items: center;
     gap: 5px;
     font-size: 0.67rem;
-    font-weight: 800;
-    letter-spacing: 0.04em;
-    padding: 3px 10px 3px 8px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #fff;
+    padding: 4px 11px;
     border-radius: 20px;         /* pill completo */
     border: 1px solid transparent;
     white-space: nowrap;
+    box-shadow: none;
 }
 
 .adm-badge::before {
-    content: "";
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    flex-shrink: 0;
-    background: currentColor;
-    opacity: 0.75;
+    content: none;
 }
 
-/* Light mode */
-.b-pendiente { background: #fef9ec; color: #92500e; border-color: #fde5b0; }
-.b-proceso   { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
-.b-enviado   { background: #f5f3ff; color: #5b21b6; border-color: #ddd6fe; }
-.b-entregado { background: #ecfdf5; color: #065f46; border-color: #a7f3d0; }
-.b-cancelado { background: #fff1f2; color: #be123c; border-color: #fecdd3; }
-.b-ok  { background: #ecfdf5; color: #065f46; border-color: #a7f3d0; }
-.b-off { background: #f1f5f9; color: #475569;  border-color: #cbd5e1; }
-.b-low { background: #fff1f2; color: #be123c;  border-color: #fecdd3; }
+/* Light mode: fondos sólidos, texto blanco, borde sutil más oscuro */
+.b-pendiente { background: #d97706; color: #fff; border-color: #b45309; }
+.b-proceso   { background: #2563eb; color: #fff; border-color: #1d4ed8; }
+.b-enviado   { background: #64748b; color: #fff; border-color: #475569; }
+.b-entregado { background: #059669; color: #fff; border-color: #047857; }
+.b-cancelado { background: #e11d48; color: #fff; border-color: #be123c; }
+.b-ok  { background: #059669; color: #fff; border-color: #047857; }
+.b-off { background: #64748b; color: #fff;  border-color: #475569; }
+.b-low { background: #e11d48; color: #fff;  border-color: #be123c; }
 
-/* ---------- Botones ---------- */
+/* diseno botones: es para el apartado de botones */
 
 .adm-btn {
     display: inline-flex;
     align-items: center;
     gap: 8px;
     font-size: 0.8rem;
-    font-weight: 800;
-    border-radius: 6px;
+    font-weight: 600;
+    border-radius: 8px;
     padding: 10px 18px;
     cursor: pointer;
     border: 1px solid transparent;
@@ -515,13 +535,17 @@ table.adm-table tbody tr:hover {
 }
 
 .adm-btn-primary {
-    background: var(--adm-teal);
+    background: linear-gradient(135deg, rgba(58,63,75,0.95) 0%, rgba(107,114,128,0.85) 100%);
+    -webkit-backdrop-filter: blur(12px) saturate(1.4);
+    backdrop-filter: blur(12px) saturate(1.4);
     color: #fff;
-    box-shadow: 0 8px 18px rgba(20, 99, 92, 0.28);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 
 .adm-btn-primary:hover {
-    background: var(--adm-teal-bright);
+    background: linear-gradient(135deg, rgba(75,81,95,0.95) 0%, rgba(128,135,150,0.9) 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .adm-btn-ghost {
@@ -537,7 +561,7 @@ table.adm-table tbody tr:hover {
 .adm-btn-sm {
     padding: 7px 13px;
     font-size: 0.72rem;
-    border-radius: 6px;
+    border-radius: 8px;
 }
 
 .adm-btn-edit {
@@ -560,7 +584,7 @@ table.adm-table tbody tr:hover {
     background: #fde3e9;
 }
 
-/* ---------- Formularios ---------- */
+/* diseno formularios: es para el apartado de formularios */
 
 .adm-label {
     display: block;
@@ -577,22 +601,33 @@ table.adm-table tbody tr:hover {
 .adm-textarea {
     width: 100%;
     box-sizing: border-box;
-    background: #f7f9fd;
-    border: 1px solid var(--adm-line);
-    border-radius: 6px;
+    background: #eef1f7;
+    border: 1px solid transparent;
+    border-radius: 8px;
     padding: 10px 13px;
     font-size: 0.82rem;
     color: var(--adm-ink);
     outline: none;
-    transition: border-color 0.15s, box-shadow 0.15s;
+    transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
     font-family: inherit;
+}
+
+.adm-input::placeholder,
+.adm-textarea::placeholder {
+    color: var(--adm-faint);
+    opacity: 1;
+}
+
+.adm-select option {
+    background: #ffffff;
+    color: #1b2340;
 }
 
 .adm-input:focus,
 .adm-select:focus,
 .adm-textarea:focus {
-    border-color: var(--adm-teal-bright);
-    box-shadow: 0 0 0 3px rgba(28, 162, 153, 0.15);
+    border-color: rgba(107, 114, 128, 0.55);
+    box-shadow: 0 0 0 3px rgba(107, 114, 128, 0.15);
     background: #fff;
 }
 
@@ -615,26 +650,31 @@ table.adm-table tbody tr:hover {
     flex-wrap: wrap;
 }
 
-/* ---------- Modal ---------- */
+/* diseno modal: es para el apartado de modal */
 
 .adm-modal-backdrop {
     position: fixed;
     inset: 0;
-    z-index: 60;
+    z-index: 150;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 18px;
-    background: rgba(27, 35, 64, 0.45);
+    background: rgba(0, 0, 0, 0.55);
+    -webkit-backdrop-filter: blur(10px) saturate(140%);
+    backdrop-filter: blur(10px) saturate(140%);
 }
 
 .adm-modal {
-    background: #fff;
+    background: rgba(255, 255, 255, 0.92);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.5);
     width: 100%;
-    max-width: 540px;
-    border-radius: 6px;
-    box-shadow: 0 30px 70px rgba(27, 35, 64, 0.3);
-    padding: 24px;
+    max-width: 420px;
+    border-radius: 12px;
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.7), 0 30px 70px rgba(27, 35, 64, 0.3);
+    padding: 22px;
     max-height: 90vh;
     overflow-y: auto;
 }
@@ -682,7 +722,112 @@ table.adm-table tbody tr:hover {
     margin-top: 18px;
 }
 
-/* ---------- Acciones frecuentes ---------- */
+/* picker visual de imagen (compartido: apariencia + productos):
+   cuadrito con overlay "Cambiar" + cuadrito de origen URL / Mi equipo */
+.ap-media { position: relative; }
+.ap-media-tile {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 150px;
+    border: 1px solid var(--adm-line);
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--adm-card);
+    cursor: pointer;
+    padding: 0;
+    font-family: inherit;
+}
+.ap-media-tile img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ap-media--producto {
+    height: 130px;
+    background: repeating-conic-gradient(rgba(128,128,128,.18) 0% 25%, transparent 0% 50%) 0 0/18px 18px, var(--adm-card);
+}
+.ap-media--producto img { object-fit: contain; padding: 8px; }
+/* Variante simple (modal productos): sin fondo cuadriculado, solo bordecito y más alta */
+.ap-media--marco {
+    height: 170px;
+    background: transparent;
+    border: 1px solid var(--adm-line);
+}
+.ap-media--marco img { object-fit: contain; padding: 6px; }
+.ap-media-vacio {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 0 16px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--adm-faint);
+    border: 2px dashed var(--adm-line);
+    border-radius: 10px;
+    margin: 0;
+}
+.ap-media-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(10,14,28,.55);
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+.ap-media-tile:hover .ap-media-overlay, .ap-media-tile:focus-visible .ap-media-overlay { opacity: 1; }
+.ap-picker {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    z-index: 20;
+    background: var(--adm-card);
+    border: 1px solid var(--adm-line);
+    border-radius: 12px;
+    box-shadow: 0 18px 44px rgba(0,0,0,.28);
+    padding: 12px;
+}
+.ap-picker-tabs { display: flex; gap: 6px; margin-bottom: 10px; }
+.ap-picker-tab {
+    flex: 1;
+    border: 1px solid var(--adm-line);
+    background: transparent;
+    color: var(--adm-muted);
+    border-radius: 8px;
+    padding: 7px 0;
+    font-size: 0.75rem;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+}
+.ap-picker-tab.is-active { background: rgba(128,128,128,.16); color: var(--adm-ink); }
+.ap-picker-usar { margin-top: 8px; width: 100%; }
+.ap-drop {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border: 2px dashed var(--adm-line);
+    border-radius: 10px;
+    padding: 22px 12px;
+    font-size: 0.78rem;
+    color: var(--adm-muted);
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+}
+.ap-drop:hover, .ap-drop.is-drag { border-color: #6b7280; background: rgba(128,128,128,.1); }
+.ap-drop b { color: var(--adm-ink); }
+.ap-picker-foot { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
+@media (max-width: 560px) {
+    .ap-media-tile { height: 130px; }
+    .ap-media--producto { height: 120px; }
+}
+
+/* diseno acciones frecuentes: es para el apartado de acciones frecuentes */
 
 .adm-actions-list {
     display: flex;
@@ -721,7 +866,7 @@ table.adm-table tbody tr:hover {
     flex-shrink: 0;
 }
 
-/* ---------- Productos ---------- */
+/* diseno productos: es para el apartado de productos */
 
 .adm-prod {
     display: flex;
@@ -758,7 +903,7 @@ table.adm-table tbody tr:hover {
     50% { opacity: 0.3; }
 }
 
-/* ---------- Chat admin ---------- */
+/* diseno chat admin: es para el apartado de chat admin */
 
 .adm-chat {
     display: flex;
@@ -884,7 +1029,7 @@ table.adm-table tbody tr:hover {
     white-space: nowrap;  /* nunca rompe a nueva línea */
 }
 
-/* ── Fila de nombre + estado en la misma línea ── */
+/* diseno fila chat: es para nombre y estado */
 .adm-conv-name-row {
     display: flex;
     align-items: center;
@@ -906,7 +1051,7 @@ table.adm-table tbody tr:hover {
     position: static;
 }
 
-/* ── Badge de mensajes no leídos por conversación ── */
+/* diseno badge chat: es para no leidos */
 .adm-conv-unread {
     display: inline-flex;
     align-items: center;
@@ -1053,7 +1198,7 @@ table.adm-table tbody tr:hover {
     }
 }
 
-/* ---------- Detalle de pedido (modal) ---------- */
+/* diseno detalle pedido: es para el modal del pedido */
 
 .adm-detail-row {
     display: flex;
@@ -1066,7 +1211,7 @@ table.adm-table tbody tr:hover {
     border-radius: 6px;
 }
 
-/* ---------- Footer ---------- */
+/* diseno footer: es para el apartado de footer */
 
 .adm-footer {
     border-top: 1px solid var(--adm-line);
@@ -1077,9 +1222,7 @@ table.adm-table tbody tr:hover {
     color: var(--adm-faint);
 }
 
-/* ==========================================================================
-   6. MENÚ DE PERFIL (clic en el chip de usuario: Apariencia + Salir)
-   ========================================================================== */
+/* diseno admin: es para el tema claro del panel */
 
 .adm-profile-wrap {
     position: relative;
@@ -1091,7 +1234,7 @@ button.adm-user-chip {
 }
 
 button.adm-user-chip:hover {
-    border-color: var(--adm-teal-bright);
+    background: #e5e9f2;
 }
 
 .adm-user-chev {
@@ -1104,22 +1247,28 @@ button.adm-user-chip:hover {
     right: 0;
     top: calc(100% + 8px);
     min-width: 230px;
-    background: var(--adm-card);
-    border: 1px solid var(--adm-line);
-    border-radius: 6px;
-    box-shadow: 0 18px 45px rgba(27, 35, 64, 0.18);
+    background: rgba(255, 255, 255, 0.85);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 10px;
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.7), 0 16px 40px rgba(0, 0, 0, 0.18);
     padding: 6px;
     display: none;
-    z-index: 80;
+    z-index: 60;
 }
 
 .adm-profile-menu.adm-open {
     display: block;
 }
 
+body > .adm-profile-menu {
+    position: fixed;
+}
+
 .adm-profile-mail {
     padding: 9px 12px;
-    border-bottom: 1px solid var(--adm-line);
+    border-bottom: 1px solid rgba(128, 128, 128, 0.2);
     font-size: 0.7rem;
     color: var(--adm-muted);
     line-height: 1.5;
@@ -1144,14 +1293,14 @@ button.adm-user-chip:hover {
     color: var(--adm-ink);
     background: none;
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     cursor: pointer;
     font-family: inherit;
     text-align: left;
 }
 
 .adm-menu-btn:hover {
-    background: #f1f4fa;
+    background: rgba(17, 19, 24, 0.06);
 }
 
 .adm-menu-btn.danger {
@@ -1170,32 +1319,28 @@ button.adm-user-chip:hover {
     letter-spacing: 0.06em;
 }
 
-/* ==========================================================================
-   7. MODO OSCURO estilo YouTube (grafito #0f0f0f / #212121, grises,
-   acento teal de marca; sin azul ni morado)
-   Se activa con <html data-theme="dark">. Preferencia en localStorage.
-   ========================================================================== */
+/* diseno admin: es para el tema claro del panel */
 
 html[data-theme="dark"] body.adm {
-    /* ── Fondos ── */
+    /* diseno fondos: es para fondos */
     --adm-bg: #0a0a0a;
     --adm-surface: #111111;
     --adm-card: #1a1a1a;
     --adm-card-hover: #212121;
-    /* ── Texto (todos ≥4.5:1 sobre --adm-card) ── */
+    /* diseno texto: es para contraste del panel */
     --adm-ink: #f0f0f0;          /* 14.3:1 */
     --adm-muted: #a8a8a8;        /* 5.1:1 ✓ WCAG AA */
     --adm-faint: #737373;        /* 4.6:1 ✓ WCAG AA */
-    /* ── Estructura ── */
+    /* diseno estructura: es para estructura */
     --adm-line: #272727;
     --adm-line-strong: #333333;
     --adm-shadow: 0 12px 32px rgba(0,0,0,0.6);
-    /* ── Acento de marca ── */
+    /* diseno acento de marca: es para acento de marca */
     --adm-teal: #2dd4bf;
     --adm-teal-bright: #5eead4;
     --adm-teal-soft: #0a2826;
     --adm-teal-dim: rgba(45,212,191,0.10);
-    /* ── Paleta semántica ── */
+    /* diseno paleta semántica: es para paleta semántica */
     --s-pos:        #10b981;               /* positivo / entregado */
     --s-pos-bg:     rgba(16,185,129,0.11);
     --s-pos-border: rgba(16,185,129,0.25);
@@ -1232,17 +1377,28 @@ html[data-theme="dark"] body.adm ::-webkit-scrollbar-track {
     background: transparent;
 }
 
-/* ---------- Topbar ---------- */
+/* diseno topbar: es para el apartado de topbar */
 
 html[data-theme="dark"] body.adm .adm-topbar {
-    background: #212121;
-    border-color: #3d3d3d;
+    background: rgba(30, 30, 32, 0.8);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    backdrop-filter: blur(18px) saturate(160%);
+    border: none;
+    border-radius: 10px;
     box-shadow: 0 10px 26px rgba(0, 0, 0, 0.5);
 }
 
+html[data-theme="dark"] body.adm .adm-brand-sub {
+    color: #fff;
+}
+
 html[data-theme="dark"] body.adm .adm-brand-logo {
-    background: #0f0f0f;
-    box-shadow: inset 0 0 0 1px #3d3d3d;
+    background: transparent;
+    box-shadow: none;
+}
+
+html[data-theme="dark"] body.adm .adm-brand-logo-img {
+    filter: brightness(0) invert(1);
 }
 
 html[data-theme="dark"] body.adm .adm-nav a {
@@ -1250,23 +1406,29 @@ html[data-theme="dark"] body.adm .adm-nav a {
 }
 
 html[data-theme="dark"] body.adm .adm-nav a:hover {
-    background: #3d3d3d;
+    background: rgba(255, 255, 255, 0.08);
     color: #fff;
 }
 
 html[data-theme="dark"] body.adm .adm-nav a.adm-active {
-    background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%);
+    background: linear-gradient(135deg, rgba(82,82,82,0.95) 0%, rgba(163,163,163,0.55) 100%);
+    -webkit-backdrop-filter: blur(12px) saturate(1.4);
+    backdrop-filter: blur(12px) saturate(1.4);
     color: #fff;
-    box-shadow: 0 6px 18px rgba(20, 184, 166, 0.35);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 4px 14px rgba(0, 0, 0, 0.45);
+    border: none;
 }
 
 html[data-theme="dark"] body.adm .adm-user-chip {
-    background: #0f0f0f;
-    border-color: #3d3d3d;
+    background: rgba(255, 255, 255, 0.08);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    border: none;
+    border-radius: 10px;
 }
 
 html[data-theme="dark"] body.adm .adm-user-chip:hover {
-    border-color: var(--adm-teal);
+    background: rgba(255, 255, 255, 0.14);
 }
 
 html[data-theme="dark"] body.adm .adm-avatar {
@@ -1274,18 +1436,20 @@ html[data-theme="dark"] body.adm .adm-avatar {
 }
 
 html[data-theme="dark"] body.adm .adm-profile-menu {
-    background: #212121;
-    border-color: #3d3d3d;
-    box-shadow: 0 22px 55px rgba(0, 0, 0, 0.7);
+    background: linear-gradient(135deg, rgba(45, 45, 48, 0.92) 0%, rgba(24, 24, 27, 0.92) 100%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.15), inset 0 -1px 0 rgba(0, 0, 0, 0.25), 0 22px 55px rgba(0, 0, 0, 0.7);
 }
 
 html[data-theme="dark"] body.adm .adm-menu-btn:hover {
-    background: #3d3d3d;
+    background: rgba(255, 255, 255, 0.08);
 }
 
-/* ---------- Tarjetas y paneles ---------- */
+/* diseno tarjetas y paneles: es para el apartado de tarjetas y paneles */
 
-html[data-theme="dark"] body.adm .adm-topbar,
 html[data-theme="dark"] body.adm .adm-stat,
 html[data-theme="dark"] body.adm .adm-card,
 html[data-theme="dark"] body.adm .adm-modal,
@@ -1298,7 +1462,7 @@ html[data-theme="dark"] body.adm .adm-footer {
     background: #0f0f0f;
 }
 
-/* ── Línea de acento semántica: ligada al significado, no al orden ── */
+/* diseno acento: es para la linea lateral */
 html[data-theme="dark"] body.adm .adm-stat {
     position: relative;
     overflow: hidden;
@@ -1363,7 +1527,7 @@ html[data-theme="dark"] body.adm .adm-stat-value.rose {
     color: var(--s-crit);
 }
 
-/* ── Chips de icono — patrón unificado, color semántico ── */
+/* diseno chips: es para iconos de accion */
 /* Todos comparten la misma forma; solo el color semántico varía */
 html[data-theme="dark"] body.adm .adm-icon-chip {
     border-radius: 8px;
@@ -1402,7 +1566,7 @@ html[data-theme="dark"] body.adm .adm-icon-chip.violet { background: var(--s-neu
 html[data-theme="dark"] body.adm .adm-icon-chip.rose   { background: var(--s-crit-bg);   color: var(--s-crit);   }
 html[data-theme="dark"] body.adm .adm-icon-chip.amber  { background: var(--s-warn-bg);   color: var(--s-warn);   }
 
-/* ── Subtexto de stat: siempre muted, nunca acento ── */
+/* diseno subtexto: es para stats en muted */
 html[data-theme="dark"] body.adm .adm-stat-cap {
     color: var(--adm-muted);
 }
@@ -1414,7 +1578,7 @@ html[data-theme="dark"] body.adm .adm-stat-cap.violet {
     color: var(--adm-muted);
 }
 
-/* ---------- Tablas ---------- */
+/* diseno tablas: es para el apartado de tablas */
 
 html[data-theme="dark"] body.adm table.adm-table thead th {
     background: #1a1a1a;
@@ -1430,15 +1594,19 @@ html[data-theme="dark"] body.adm table.adm-table tbody tr:hover {
     background: #2a2a2a;
 }
 
-/* ---------- Botones ---------- */
+/* diseno botones: es para el apartado de botones */
 
 html[data-theme="dark"] body.adm .adm-btn-primary {
-    background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%);
-    box-shadow: 0 8px 20px rgba(20, 184, 166, 0.35);
+    background: linear-gradient(135deg, rgba(82,82,82,0.9) 0%, rgba(163,163,163,0.45) 100%);
+    -webkit-backdrop-filter: blur(12px) saturate(1.4);
+    backdrop-filter: blur(12px) saturate(1.4);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 
 html[data-theme="dark"] body.adm .adm-btn-primary:hover {
-    background: linear-gradient(135deg, #14b8a6 0%, #2dd4bf 100%);
+    background: linear-gradient(135deg, rgba(100,100,100,0.95) 0%, rgba(180,180,180,0.55) 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 html[data-theme="dark"] body.adm .adm-btn-ghost {
@@ -1477,29 +1645,40 @@ html[data-theme="dark"] body.adm .adm-link {
     color: #5eead4;
 }
 
-/* ---------- Formularios ---------- */
+/* diseno formularios: es para el apartado de formularios */
 
 html[data-theme="dark"] body.adm .adm-input,
 html[data-theme="dark"] body.adm .adm-select,
 html[data-theme="dark"] body.adm .adm-textarea {
-    background: #0f0f0f;
-    border-color: #3d3d3d;
+    background: rgba(255, 255, 255, 0.06);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    border: 1px solid transparent;
+    border-radius: 8px;
     color: var(--adm-ink);
+    color-scheme: dark;
+}
+
+html[data-theme="dark"] body.adm .adm-input::placeholder,
+html[data-theme="dark"] body.adm .adm-textarea::placeholder {
+    color: var(--adm-faint);
+    opacity: 1;
 }
 
 html[data-theme="dark"] body.adm .adm-input:focus,
 html[data-theme="dark"] body.adm .adm-select:focus,
 html[data-theme="dark"] body.adm .adm-textarea:focus {
-    background: #0f0f0f;
-    border-color: #2dd4bf;
-    box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.16);
+    background: rgba(255, 255, 255, 0.09);
+    border-color: rgba(255, 255, 255, 0.22);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 0 0 3px rgba(255, 255, 255, 0.08);
 }
 
 html[data-theme="dark"] body.adm .adm-select option {
-    background: #212121;
+    background: #232327;
+    color: #f0f0f0;
 }
 
-/* ---------- Acciones frecuentes ---------- */
+/* diseno acciones frecuentes: es para el apartado de acciones frecuentes */
 
 html[data-theme="dark"] body.adm .adm-action {
     background: #1a1a1a;
@@ -1511,17 +1690,26 @@ html[data-theme="dark"] body.adm .adm-action:hover {
     transform: translateY(-1px);
 }
 
-/* ---------- Modal ---------- */
+/* diseno modal: es para el apartado de modal */
 
 html[data-theme="dark"] body.adm .adm-modal-backdrop {
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(0, 0, 0, 0.6);
+    -webkit-backdrop-filter: blur(10px) saturate(140%);
+    backdrop-filter: blur(10px) saturate(140%);
+}
+
+html[data-theme="dark"] body.adm .adm-modal {
+    background: linear-gradient(135deg, rgba(45, 45, 48, 0.94) 0%, rgba(24, 24, 27, 0.94) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.15), 0 30px 70px rgba(0, 0, 0, 0.6);
 }
 
 html[data-theme="dark"] body.adm .adm-detail-row {
     background: #1a1a1a !important;
 }
 
-/* ---------- Chat ---------- */
+/* diseno chat: es para el apartado de chat */
 
 html[data-theme="dark"] body.adm .adm-chat-side {
     background: #1a1a1a;
@@ -1567,63 +1755,72 @@ html[data-theme="dark"] body.adm .adm-prod img {
     background: #0f0f0f;
 }
 
-/* ── Badges dark mode — paleta semántica coherente ── */
+/* diseno badges dark: mismo estilo sólido global, texto blanco, sin sombra */
+html[data-theme="dark"] body.adm .adm-badge {
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #fff;
+    box-shadow: none;
+}
+
+html[data-theme="dark"] body.adm .adm-badge::before {
+    content: none;
+}
+
 html[data-theme="dark"] body.adm .b-pendiente {
-    background: var(--s-warn-bg);
-    color: #fbbf24;
-    border-color: var(--s-warn-border);
+    background: #d97706;
+    color: #fff;
+    border-color: #b45309;
 }
 
 html[data-theme="dark"] body.adm .b-proceso {
-    background: var(--s-info-bg);
-    color: var(--s-info);
-    border-color: var(--s-info-border);
+    background: #2563eb;
+    color: #fff;
+    border-color: #1d4ed8;
 }
 
 html[data-theme="dark"] body.adm .b-enviado {
-    background: var(--s-neutral-bg);
-    color: var(--s-neutral);
-    border-color: var(--s-neutral-border);
+    background: #64748b;
+    color: #fff;
+    border-color: #475569;
 }
 
 html[data-theme="dark"] body.adm .b-entregado {
-    background: var(--s-pos-bg);
-    color: var(--s-pos);
-    border-color: var(--s-pos-border);
+    background: #059669;
+    color: #fff;
+    border-color: #047857;
 }
 
 html[data-theme="dark"] body.adm .b-cancelado {
-    background: var(--s-crit-bg);
-    color: var(--s-crit);
-    border-color: var(--s-crit-border);
+    background: #e11d48;
+    color: #fff;
+    border-color: #be123c;
 }
 
 html[data-theme="dark"] body.adm .b-ok {
-    background: var(--s-pos-bg);
-    color: var(--s-pos);
-    border-color: var(--s-pos-border);
+    background: #059669;
+    color: #fff;
+    border-color: #047857;
 }
 
 html[data-theme="dark"] body.adm .b-low {
-    background: var(--s-crit-bg);
-    color: var(--s-crit);
-    border-color: var(--s-crit-border);
+    background: #e11d48;
+    color: #fff;
+    border-color: #be123c;
 }
 
 html[data-theme="dark"] body.adm .b-off {
-    background: rgba(148,163,184,0.08);
-    color: var(--adm-muted);
-    border-color: var(--adm-line);
+    background: #64748b;
+    color: #fff;
+    border-color: #475569;
 }
 
 html[data-theme="dark"] body.adm .adm-theme-state {
     color: var(--adm-teal-bright);
 }
 
-/* ==========================================================================
-   8. REFINAMIENTOS (radio 6px, tablas aireadas, formularios delgados,
-   dropdown siempre visible, tipografías Poppins + Montserrat)
-   ========================================================================== */
+/* diseno admin: es para el tema claro del panel */
 
 body.adm {
     font-family: "Montserrat", "Segoe UI", system-ui, -apple-system, sans-serif;
@@ -1644,19 +1841,19 @@ body.adm {
     letter-spacing: -0.02em;
 }
 
-/* El menú de perfil flota por encima de todo el contenido */
+/* El menú de perfil flota por encima del contenido, bajo el modal */
 .adm-topbar-wrap {
     position: relative;
-    z-index: 200;
+    z-index: 40;
 }
 
 .adm-topbar {
     position: relative;
-    z-index: 200;
+    z-index: 40;
 }
 
 .adm-profile-menu {
-    z-index: 300;
+    z-index: 60;
 }
 
 /* Tablas: más aire, números tabulares, encabezado sobrio */
@@ -1701,9 +1898,7 @@ table.adm-table tbody tr {
     padding: 20px;
 }
 
-/* ==========================================================================
-   9. MEJORAS DE DASHBOARD v2 — hover de tabla con borde acento, card hover
-   ========================================================================== */
+/* diseno admin: es para el tema claro del panel */
 
 /* Hover de fila: borde izquierdo sutil de marca */
 html[data-theme="dark"] body.adm table.adm-table tbody tr:hover {
@@ -1755,11 +1950,9 @@ html[data-theme="dark"] body.adm table.adm-table thead th {
     color: #1e293b;
 }
 
-/* ==========================================================================
-   10. PÁGINA REPORTES — Soft UI Dark
-   ========================================================================== */
+/* diseno admin: es para el tema claro del panel */
 
-/* ── KPI grid ── */
+/* diseno kpi grid: es para kpi grid */
 .rp-kpi-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -1769,7 +1962,7 @@ html[data-theme="dark"] body.adm table.adm-table thead th {
 @media (max-width: 900px) { .rp-kpi-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 560px)  { .rp-kpi-grid { grid-template-columns: 1fr; } }
 
-/* ── KPI card ── */
+/* diseno kpi card: es para kpi card */
 .rp-kpi {
     border-radius: 14px;
     padding: 20px 20px 16px;
@@ -1835,7 +2028,7 @@ html[data-theme="dark"] body.adm table.adm-table thead th {
     color: rgba(255, 255, 255, 0.6);
 }
 
-/* ── Barra de filtro de fechas ── */
+/* diseno barra de filtro de fechas: es para barra de filtro de fechas */
 .rp-filter-bar {
     display: flex;
     align-items: flex-end;
@@ -1885,23 +2078,25 @@ html[data-theme="dark"] body.adm table.adm-table thead th {
     align-items: center;
     gap: 7px;
     padding: 9px 18px;
-    background: linear-gradient(135deg, #0f766e, #14b8a6);
+    background: linear-gradient(135deg, rgba(82,82,82,0.9) 0%, rgba(163,163,163,0.45) 100%);
+    -webkit-backdrop-filter: blur(12px) saturate(1.4);
+    backdrop-filter: blur(12px) saturate(1.4);
     color: #fff;
-    border: none;
+    border: 1px solid rgba(255, 255, 255, 0.18);
     border-radius: 8px;
     font-size: 0.8rem;
-    font-weight: 800;
+    font-weight: 600;
     font-family: inherit;
     cursor: pointer;
     transition: all 0.15s;
-    box-shadow: 0 6px 18px rgba(20, 184, 166, 0.3);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 .rp-filter-btn:hover {
-    box-shadow: 0 8px 24px rgba(20, 184, 166, 0.45);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
     transform: translateY(-1px);
 }
 
-/* ── Grid principal ── */
+/* diseno grid principal: es para grid principal */
 .rp-main-grid {
     display: grid;
     grid-template-columns: 1fr 340px;
@@ -1910,10 +2105,10 @@ html[data-theme="dark"] body.adm table.adm-table thead th {
 }
 @media (max-width: 1024px) { .rp-main-grid { grid-template-columns: 1fr; } }
 
-/* ── Paneles ── */
+/* diseno paneles: es para paneles */
 .rp-panel {
     background: #1a1a1a;
-    border: 1px solid #272727;
+    border: none;
     border-radius: 14px;
     overflow: hidden;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
@@ -1957,7 +2152,7 @@ html[data-theme="dark"] body.adm table.adm-table thead th {
     flex-shrink: 0;
 }
 
-/* ── Tabla de reportes ── */
+/* diseno tabla de reportes: es para tabla de reportes */
 .rp-table {
     width: 100%;
     border-collapse: collapse;
@@ -1995,7 +2190,7 @@ html[data-theme="dark"] body.adm table.adm-table thead th {
 .rp-muted       { color: #5a5a5a; }
 .rp-sub-text    { font-size: 0.72rem; color: #5a5a5a; }
 
-/* ── Empty state ── */
+/* diseno empty state: es para empty state */
 .rp-empty {
     display: flex;
     flex-direction: column;
@@ -2009,7 +2204,7 @@ html[data-theme="dark"] body.adm table.adm-table thead th {
 .rp-empty-icon--ok      { color: #10b981; opacity: 0.5; }
 .rp-empty-text--ok      { color: #10b981; }
 
-/* ── Badge de reponer ── */
+/* diseno badge de reponer: es para badge de reponer */
 .rp-reponer-badge {
     display: inline-flex;
     align-items: center;
@@ -2021,4 +2216,71 @@ html[data-theme="dark"] body.adm table.adm-table thead th {
     background: rgba(244, 63, 94, 0.12);
     color: #f43f5e;
     border: 1px solid rgba(244, 63, 94, 0.25);
+}
+
+/* diseno tablas: sin borde exterior, solo sombra */
+html[data-theme="dark"] body.adm .adm-card {
+    border: none;
+}
+
+/* diseno fundido de tabla: es para que el cambio de pagina no se vea brusco */
+.adm-fade {
+    transition: opacity 0.17s ease;
+}
+.adm-fade.is-fading {
+    opacity: 0;
+}
+
+/* diseno paginador: es para < 1 2 3 ... > */
+.adm-pager {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 14px 16px;
+}
+.adm-pager-btn {
+    min-width: 32px;
+    height: 32px;
+    padding: 0 10px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--adm-muted);
+    font-size: 0.78rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    line-height: 1;
+}
+.adm-pager-btn:hover:not(:disabled):not(.is-active) {
+    background: rgba(17, 19, 24, 0.06);
+    color: var(--adm-ink);
+}
+.adm-pager-btn.is-active {
+    background: linear-gradient(135deg, rgba(58,63,75,0.95) 0%, rgba(107,114,128,0.85) 100%);
+    color: #fff;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    cursor: default;
+}
+.adm-pager-btn:disabled {
+    opacity: 0.35;
+    cursor: default;
+}
+.adm-pager-dots {
+    color: var(--adm-faint);
+    font-size: 0.78rem;
+    padding: 0 2px;
+    user-select: none;
+}
+
+html[data-theme="dark"] body.adm .adm-pager-btn:hover:not(:disabled):not(.is-active) {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+}
+html[data-theme="dark"] body.adm .adm-pager-btn.is-active {
+    background: linear-gradient(135deg, rgba(82,82,82,0.9) 0%, rgba(163,163,163,0.45) 100%);
+    color: #fff;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }

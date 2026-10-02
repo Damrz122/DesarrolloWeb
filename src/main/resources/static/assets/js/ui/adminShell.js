@@ -1,19 +1,15 @@
-// adminShell.js - Barra superior compartida del Módulo de Administración.
+﻿// adminShell.js - Barra superior compartida del Módulo de Administración.
 // Inyecta topbar clara con logo ELECTRONIX + navegación + perfil con menú
 // (Apariencia claro/oscuro + Salir). Tema persistido en localStorage.
-// Uso: renderAdminShell('dashboard' | 'productos' | 'categorias' | 'pedidos' | 'reportes' | 'chat')
+// shell admin: es para pintar el menu segun el modulo
 
 import { auth } from '../auth.js';
+import { obtenerSitio, pintarLogo } from '../sitio.js?v=4';
 
 export const ADMIN_THEME_KEY = 'electronix_admin_theme';
 
 const LOGO_SVG = `
-    <svg width="26" height="24" viewBox="0 0 100 90" fill="currentColor" aria-hidden="true">
-        <path d="M15 12h65c4 0 7 3 7 7s-3 7-7 7H38l-4 12h32c3 0 6 3 5 7l-4 10c-1 3-3 5-6 5H24l-6 18c-1 3-4 5-8 5s-6-3-5-7L15 12z" />
-        <polygon points="68,28 48,50 62,50 42,75 50,56 36,56" fill="#1ca299" />
-        <circle cx="42" cy="82" r="6" fill="#1ca299" />
-        <circle cx="68" cy="82" r="6" fill="#1ca299" />
-    </svg>`;
+    <img src="/assets/img/logo.svg" alt="Electronix" width="28" height="28" class="adm-brand-logo-img" aria-hidden="true">`;
 
 const SUN_SVG = `
     <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>`;
@@ -26,6 +22,7 @@ const LINKS = [
     { id: 'productos', href: '/admin/productos.html', label: 'Productos' },
     { id: 'categorias', href: '/admin/categorias.html', label: 'Categorías' },
     { id: 'pedidos', href: '/admin/pedidos.html', label: 'Pedidos' },
+    { id: 'usuarios', href: '/admin/usuarios.html', label: 'Usuarios' },
     { id: 'reportes', href: '/admin/reportes.html', label: 'Reportes' },
     { id: 'chat', href: '/admin/chat.html', label: 'Chat Clientes', dot: true }
 ];
@@ -94,9 +91,10 @@ export function renderAdminShell(active) {
                         </button>
                         <div id="adm-profile-menu" class="adm-profile-menu" role="menu">
                             <div class="adm-profile-mail">Conectado como<br/><strong>${escapeHtml(email || nombre)}</strong></div>
+                            <a href="/index.html" class="adm-menu-btn" role="menuitem">Ir a página</a>
+                            <a href="/admin/apariencia.html" class="adm-menu-btn" role="menuitem">Ajustes Página</a>
                             <button id="adm-theme-btn" class="adm-menu-btn" role="menuitem">
-                                <span style="display:flex;align-items:center;gap:8px;">
-                                    <span id="adm-theme-icon">${theme === 'dark' ? SUN_SVG : MOON_SVG}</span>
+                                <span class="adm-shell-fila">
                                     <span>Apariencia</span>
                                 </span>
                                 <span id="adm-theme-state" class="adm-theme-state">${theme === 'dark' ? 'Oscuro' : 'Claro'}</span>
@@ -112,23 +110,46 @@ export function renderAdminShell(active) {
     const profileBtn = document.getElementById('adm-profile-btn');
     const menu = document.getElementById('adm-profile-menu');
 
+    // portal menu: se mueve al body para que su blur no lo bloquee el blur del nav
+    if (menu && menu.parentElement !== document.body) {
+        document.body.appendChild(menu);
+        menu.style.position = 'fixed';
+    }
+
+    function posicionarMenu() {
+        if (!profileBtn || !menu) return;
+        const r = profileBtn.getBoundingClientRect();
+        menu.style.top = (r.bottom + 8) + 'px';
+        menu.style.right = Math.max(12, window.innerWidth - r.right) + 'px';
+        menu.style.left = 'auto';
+        menu.style.minWidth = Math.max(230, r.width) + 'px';
+    }
+
+    function cerrarMenu() {
+        if (!menu || !profileBtn) return;
+        menu.classList.remove('adm-open');
+        profileBtn.setAttribute('aria-expanded', 'false');
+    }
+
     if (profileBtn && menu) {
         profileBtn.addEventListener('click', (e) => {
             e.stopPropagation();
+            posicionarMenu();
             const open = menu.classList.toggle('adm-open');
             profileBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
         });
         document.addEventListener('click', (e) => {
-            if (wrap && !wrap.contains(e.target)) {
-                menu.classList.remove('adm-open');
-                profileBtn.setAttribute('aria-expanded', 'false');
-            }
+            if (wrap && (wrap.contains(e.target) || menu.contains(e.target))) return;
+            cerrarMenu();
         });
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                menu.classList.remove('adm-open');
-                profileBtn.setAttribute('aria-expanded', 'false');
-            }
+            if (e.key === 'Escape') cerrarMenu();
+        });
+        window.addEventListener('scroll', () => {
+            if (menu.classList.contains('adm-open')) posicionarMenu();
+        }, true);
+        window.addEventListener('resize', () => {
+            if (menu.classList.contains('adm-open')) posicionarMenu();
         });
     }
 
@@ -143,4 +164,19 @@ export function renderAdminShell(active) {
     if (logoutBtn) {
         logoutBtn.addEventListener('click', () => auth.logout(true));
     }
+
+    // marca editable: logo y nombre desde la config del sitio (no bloquea nada)
+    obtenerSitio().then(cfg => {
+        if (!cfg) return;
+        const logo = String(cfg['site.logo'] || '').trim();
+        const nombre = String(cfg['site.nombre'] || '').trim();
+        if (logo) {
+            const img = header.querySelector('.adm-brand-logo-img');
+            if (img) pintarLogo(img, logo, nombre || 'Electronix');
+        }
+        if (nombre) {
+            const name = header.querySelector('.adm-brand-name');
+            if (name) name.textContent = nombre;
+        }
+    }).catch(() => {});
 }

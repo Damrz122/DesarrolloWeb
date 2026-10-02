@@ -1,13 +1,15 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pedidos — ELECTRONIX Admin</title>
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 90%27%3E%3Crect width=%27100%27 height=%2790%27 rx=%2718%27 fill=%27%23171717%27/%3E%3Cpath d=%27M15 12h65c4 0 7 3 7 7s-3 7-7 7H38l-4 12h32c3 0 6 3 5 7l-4 10c-1 3-3 5-6 5H24l-6 18c-1 3-4 5-8 5s-6-3-5-7L15 12z%27 fill=%27%23e5e7eb%27/%3E%3Cpolygon points=%2768,28 48,50 62,50 42,75 50,56 36,56%27 fill=%27%231ca299%27/%3E%3C/svg%3E">
+    <link rel="icon" type="image/svg+xml" href="/assets/img/logo.svg">
     <link rel="stylesheet" href="/assets/css/output.css">
-    <script>try{var t=localStorage.getItem("electronix_admin_theme");if(t==="dark"){document.documentElement.setAttribute("data-theme","dark");}}catch(e){}</script>
-    <link rel="stylesheet" href="/assets/css/admin.css">
+    <script src="/assets/js/admin-theme.js"></script>
+    <link rel="stylesheet" href="/assets/css/admin.css?v=2">
+    <link rel="stylesheet" href="/assets/css/admin/pedidos.css?v=2">
+    <link rel="stylesheet" href="/assets/css/ui/ui-inline.css?v=2">
 </head>
 <body class="adm">
 
@@ -22,8 +24,8 @@
             </div>
             <div class="adm-actions">
                 <div>
-                    <label class="adm-label" for="filtro-estado" style="margin-bottom:4px;">Estado</label>
-                    <select id="filtro-estado" class="adm-select" style="width:auto;min-width:180px;">
+                    <label class="adm-label adm-etiqueta-ajustada" for="filtro-estado">Estado</label>
+                    <select id="filtro-estado" class="adm-select adm-select--filtro">
                         <option value="">Todos los estados</option>
                         <option value="PENDIENTE">Pendientes</option>
                         <option value="EN_PROCESO">En proceso</option>
@@ -49,20 +51,21 @@
                             <th class="num">Detalle</th>
                         </tr>
                     </thead>
-                    <tbody id="pedidos-table-body">
+                    <tbody id="pedidos-table-body" class="adm-fade">
                         <tr>
                             <td colspan="7" class="adm-empty">Cargando órdenes…</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
+            <div id="pedidos-pager" class="adm-pager" hidden></div>
         </div>
 
     </main>
 
-    <!-- Modal Detalle Pedido Admin -->
+    <!-- modal: es para ver el detalle del pedido -->
     <div id="modal-pedido" class="adm-modal-backdrop hidden">
-        <div class="adm-modal" style="max-width:600px;">
+        <div class="adm-modal adm-modal--ancho">
             <div class="adm-modal-head">
                 <h3 id="modal-ped-title" class="adm-modal-title">Detalle de pedido</h3>
                 <button id="modal-ped-close" class="adm-close" aria-label="Cerrar">
@@ -77,154 +80,7 @@
         <p>© 2026 ELECTRONIX — Módulo de Administración.</p>
     </footer>
 
-    <script type="module">
-        import { api } from '/assets/js/api.js';
-        import { auth } from '/assets/js/auth.js';
-        import { renderAdminShell } from '/assets/js/ui/adminShell.js';
-        import { showToast } from '/assets/js/ui/toast.js';
-
-        // NOTA: referencias DOM primero (evita TDZ si init las toca antes del await).
-        const tbody = document.getElementById('pedidos-table-body');
-        const filtroEstado = document.getElementById('filtro-estado');
-        const modal = document.getElementById('modal-pedido');
-        const modalClose = document.getElementById('modal-ped-close');
-        const modalTitle = document.getElementById('modal-ped-title');
-        const modalContent = document.getElementById('modal-ped-content');
-
-        renderAdminShell('pedidos');
-
-        if (!auth.protegerRutaAdmin()) {
-            // Redirige
-        } else {
-            initPedidosAdmin();
-        }
-
-        modalClose.addEventListener('click', () => modal.classList.add('hidden'));
-
-        function esc(value) {
-            return String(value ?? '')
-                .replace(/&/g, '&amp;').replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;').replace(/"/g, '&quot;')
-                .replace(/'/g, '&#39;');
-        }
-
-        function initPedidosAdmin() {
-            cargarPedidosAdmin();
-            filtroEstado.addEventListener('change', () => {
-                cargarPedidosAdmin();
-            });
-        }
-
-        async function cargarPedidosAdmin() {
-            const estado = filtroEstado.value;
-            let url = '/api/pedidos?size=50';
-            if (estado) url += `&estado=${estado}`;
-
-            try {
-                const res = await api.get(url);
-                tbody.innerHTML = '';
-
-                if (res.exito && res.datos && res.datos.contenido.length > 0) {
-                    res.datos.contenido.forEach(p => {
-                        const total = new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(p.total);
-                        const fecha = new Date(p.fecha).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-
-                        const tr = document.createElement('tr');
-                        tr.innerHTML = `
-                            <td>
-                                <span class="adm-id">#${p.id}</span>
-                                <div class="adm-sub">${fecha}</div>
-                            </td>
-                            <td>
-                                <div class="adm-strong">${esc(p.usuarioNombre) || 'Cliente'}</div>
-                                <div class="adm-sub">${esc(p.usuarioEmail) || ''}</div>
-                            </td>
-                            <td class="adm-strong" style="color:var(--adm-teal);">${total}</td>
-                            <td>
-                                <div>${esc(p.direccionEnvio) || '—'}</div>
-                                <div class="adm-sub">Tel: ${esc(p.telefono) || '—'}</div>
-                            </td>
-                            <td>${obtenerBadge(p.estado)}</td>
-                            <td>
-                                <select class="adm-select select-cambiar-estado" style="width:auto;font-size:0.72rem;padding:7px 10px;">
-                                    <option value="PENDIENTE" ${p.estado === 'PENDIENTE' ? 'selected' : ''}>Pendiente</option>
-                                    <option value="EN_PROCESO" ${p.estado === 'EN_PROCESO' ? 'selected' : ''}>En proceso</option>
-                                    <option value="ENVIADO" ${p.estado === 'ENVIADO' ? 'selected' : ''}>Enviado</option>
-                                    <option value="ENTREGADO" ${p.estado === 'ENTREGADO' ? 'selected' : ''}>Entregado</option>
-                                    <option value="CANCELADO" ${p.estado === 'CANCELADO' ? 'selected' : ''}>Cancelado</option>
-                                </select>
-                            </td>
-                            <td class="num">
-                                <button class="adm-btn adm-btn-ghost adm-btn-sm btn-ver-detalle">Artículos</button>
-                            </td>
-                        `;
-
-                        tr.querySelector('.select-cambiar-estado').addEventListener('change', async (e) => {
-                            const nuevoEstado = e.target.value;
-                            await actualizarEstado(p.id, nuevoEstado);
-                        });
-
-                        tr.querySelector('.btn-ver-detalle').addEventListener('click', () => {
-                            abrirModal(p);
-                        });
-
-                        tbody.appendChild(tr);
-                    });
-                } else {
-                    tbody.innerHTML = `<tr><td colspan="7" class="adm-empty">No se encontraron pedidos con ese criterio.</td></tr>`;
-                }
-            } catch (err) {
-                tbody.innerHTML = `<tr><td colspan="7" class="adm-err">Error: ${esc(err.message)}</td></tr>`;
-            }
-        }
-
-        async function actualizarEstado(pedidoId, nuevoEstado) {
-            try {
-                await api.patch(`/api/pedidos/${pedidoId}/estado`, { estado: nuevoEstado });
-                showToast(`Pedido #${pedidoId} actualizado a ${nuevoEstado}`, 'success');
-                cargarPedidosAdmin();
-            } catch (err) {
-                showToast(err.message, 'error');
-                cargarPedidosAdmin();
-            }
-        }
-
-        function obtenerBadge(estado) {
-            switch (estado) {
-                case 'PENDIENTE': return `<span class="adm-badge b-pendiente">Pendiente</span>`;
-                case 'EN_PROCESO': return `<span class="adm-badge b-proceso">En proceso</span>`;
-                case 'ENVIADO': return `<span class="adm-badge b-enviado">Enviado</span>`;
-                case 'ENTREGADO': return `<span class="adm-badge b-entregado">Entregado</span>`;
-                case 'CANCELADO': return `<span class="adm-badge b-cancelado">Cancelado</span>`;
-                default: return `<span class="adm-badge b-off">${esc(estado)}</span>`;
-            }
-        }
-
-        function abrirModal(p) {
-            modalTitle.textContent = `Artículos de orden #${p.id}`;
-            let html = '<div style="display:flex;flex-direction:column;gap:8px;">';
-            if (p.detalles && p.detalles.length > 0) {
-                p.detalles.forEach(d => {
-                    const sub = new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(d.subtotal);
-                    const pu = new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(d.precioUnitario);
-                    html += `
-                        <div class="adm-detail-row">
-                            <div>
-                                <span class="adm-strong" style="display:block;">${esc(d.productoNombre)}</span>
-                                <span class="adm-sub">${d.cantidad} uds. × ${pu}</span>
-                            </div>
-                            <span class="adm-strong" style="color:var(--adm-teal);">${sub}</span>
-                        </div>
-                    `;
-                });
-            } else {
-                html += '<p style="color:var(--adm-muted);font-size:0.8rem;">Sin detalles.</p>';
-            }
-            html += '</div>';
-            modalContent.innerHTML = html;
-            modal.classList.remove('hidden');
-        }
-    </script>
+    <script type="module" src="/assets/js/admin/pedidos.js?v=2"></script>
 </body>
 </html>
 

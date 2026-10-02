@@ -1,19 +1,21 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Categorías — ELECTRONIX Admin</title>
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 90%27%3E%3Crect width=%27100%27 height=%2790%27 rx=%2718%27 fill=%27%23171717%27/%3E%3Cpath d=%27M15 12h65c4 0 7 3 7 7s-3 7-7 7H38l-4 12h32c3 0 6 3 5 7l-4 10c-1 3-3 5-6 5H24l-6 18c-1 3-4 5-8 5s-6-3-5-7L15 12z%27 fill=%27%23e5e7eb%27/%3E%3Cpolygon points=%2768,28 48,50 62,50 42,75 50,56 36,56%27 fill=%27%231ca299%27/%3E%3C/svg%3E">
+    <link rel="icon" type="image/svg+xml" href="/assets/img/logo.svg">
     <link rel="stylesheet" href="/assets/css/output.css">
-    <script>try{var t=localStorage.getItem("electronix_admin_theme");if(t==="dark"){document.documentElement.setAttribute("data-theme","dark");}}catch(e){}</script>
-    <link rel="stylesheet" href="/assets/css/admin.css">
+    <script src="/assets/js/admin-theme.js"></script>
+    <link rel="stylesheet" href="/assets/css/admin.css?v=2">
+    <link rel="stylesheet" href="/assets/css/admin/categorias.css?v=2">
+    <link rel="stylesheet" href="/assets/css/ui/ui-inline.css?v=2">
 </head>
 <body class="adm">
 
     <header id="main-navbar"></header>
 
-    <main class="adm-main" style="max-width:1000px;">
+        <main class="adm-main">
 
         <div class="adm-pagehead">
             <div>
@@ -22,7 +24,6 @@
             </div>
             <div class="adm-actions">
                 <button id="btn-nueva-cat" class="adm-btn adm-btn-primary">
-                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                     <span>Nueva categoría</span>
                 </button>
             </div>
@@ -39,20 +40,21 @@
                             <th class="num">Acciones</th>
                         </tr>
                     </thead>
-                    <tbody id="categorias-table-body">
+                    <tbody id="categorias-table-body" class="adm-fade">
                         <tr>
                             <td colspan="4" class="adm-empty">Cargando categorías…</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
+            <div id="categorias-pager" class="adm-pager" hidden></div>
         </div>
 
     </main>
 
-    <!-- Modal Categoría -->
+    <!-- modal: es para crear y editar categorias -->
     <div id="cat-modal" class="adm-modal-backdrop hidden">
-        <div class="adm-modal" style="max-width:460px;">
+        <div class="adm-modal adm-modal--sm">
             <div class="adm-modal-head">
                 <h3 id="cat-modal-title" class="adm-modal-title">Nueva categoría</h3>
                 <button id="cat-modal-close" class="adm-close" aria-label="Cerrar">
@@ -63,14 +65,14 @@
             <form id="cat-form">
                 <input type="hidden" id="cat-id" />
 
-                <div style="margin-bottom:12px;">
+                <div class="adm-campo">
                     <label class="adm-label" for="cat-nombre">Nombre de categoría *</label>
-                    <input id="cat-nombre" type="text" required class="adm-input" />
+                    <input id="cat-nombre" type="text" required class="adm-input" placeholder="Ej. Laptops y Computadoras" />
                 </div>
 
-                <div style="margin-bottom:4px;">
+                <div class="adm-campo--ajustado">
                     <label class="adm-label" for="cat-descripcion">Descripción</label>
-                    <textarea id="cat-descripcion" rows="3" class="adm-textarea"></textarea>
+                    <textarea id="cat-descripcion" rows="3" class="adm-textarea" placeholder="Ej. Portátiles para trabajo y gaming…"></textarea>
                 </div>
 
                 <div class="adm-modal-foot">
@@ -89,127 +91,7 @@
         <p>© 2026 ELECTRONIX — Módulo de Administración.</p>
     </footer>
 
-    <script type="module">
-        import { api } from '/assets/js/api.js';
-        import { auth } from '/assets/js/auth.js';
-        import { renderAdminShell } from '/assets/js/ui/adminShell.js';
-        import { showToast } from '/assets/js/ui/toast.js';
-
-        // NOTA: referencias DOM primero (evita TDZ si init las toca antes del await).
-        const tbody = document.getElementById('categorias-table-body');
-        const modal = document.getElementById('cat-modal');
-        const modalClose = document.getElementById('cat-modal-close');
-        const btnCancelar = document.getElementById('btn-cat-cancelar');
-        const btnNueva = document.getElementById('btn-nueva-cat');
-        const form = document.getElementById('cat-form');
-        const modalTitle = document.getElementById('cat-modal-title');
-
-        renderAdminShell('categorias');
-
-        if (!auth.protegerRutaAdmin()) {
-            // Guard
-        } else {
-            initCategoriasAdmin();
-        }
-
-        function esc(value) {
-            return String(value ?? '')
-                .replace(/&/g, '&amp;').replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;').replace(/"/g, '&quot;')
-                .replace(/'/g, '&#39;');
-        }
-
-        function initCategoriasAdmin() {
-            cargarCategorias();
-
-            btnNueva.addEventListener('click', () => {
-                modalTitle.textContent = 'Nueva categoría';
-                document.getElementById('cat-id').value = '';
-                document.getElementById('cat-nombre').value = '';
-                document.getElementById('cat-descripcion').value = '';
-                modal.classList.remove('hidden');
-            });
-
-            modalClose.addEventListener('click', () => modal.classList.add('hidden'));
-            btnCancelar.addEventListener('click', () => modal.classList.add('hidden'));
-
-            form.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                await guardarCategoria();
-            });
-        }
-
-        async function cargarCategorias() {
-            try {
-                const res = await api.get('/api/categorias');
-                tbody.innerHTML = '';
-
-                if (res.exito && res.datos && res.datos.length > 0) {
-                    res.datos.forEach(c => {
-                        const tr = document.createElement('tr');
-                        tr.innerHTML = `
-                            <td><span class="adm-id">#${c.id}</span></td>
-                            <td class="adm-strong">${esc(c.nombre)}</td>
-                            <td style="color:var(--adm-muted);">${esc(c.descripcion) || '—'}</td>
-                            <td class="num" style="white-space:nowrap;">
-                                <button class="adm-btn adm-btn-edit adm-btn-sm btn-editar">Editar</button>
-                                <button class="adm-btn adm-btn-del adm-btn-sm btn-eliminar">Eliminar</button>
-                            </td>
-                        `;
-
-                        tr.querySelector('.btn-editar').addEventListener('click', () => {
-                            modalTitle.textContent = 'Editar categoría #' + c.id;
-                            document.getElementById('cat-id').value = c.id;
-                            document.getElementById('cat-nombre').value = c.nombre;
-                            document.getElementById('cat-descripcion').value = c.descripcion || '';
-                            modal.classList.remove('hidden');
-                        });
-
-                        tr.querySelector('.btn-eliminar').addEventListener('click', () => eliminarCategoria(c.id, c.nombre));
-
-                        tbody.appendChild(tr);
-                    });
-                } else {
-                    tbody.innerHTML = `<tr><td colspan="4" class="adm-empty">No hay categorías creadas.</td></tr>`;
-                }
-            } catch (err) {
-                tbody.innerHTML = `<tr><td colspan="4" class="adm-err">Error: ${esc(err.message)}</td></tr>`;
-            }
-        }
-
-        async function guardarCategoria() {
-            const id = document.getElementById('cat-id').value;
-            const payload = {
-                nombre: document.getElementById('cat-nombre').value.trim(),
-                descripcion: document.getElementById('cat-descripcion').value.trim()
-            };
-
-            try {
-                if (id) {
-                    await api.put(`/api/categorias/${id}`, payload);
-                    showToast('Categoría actualizada', 'success');
-                } else {
-                    await api.post('/api/categorias', payload);
-                    showToast('Categoría creada', 'success');
-                }
-                modal.classList.add('hidden');
-                cargarCategorias();
-            } catch (err) {
-                showToast(err.message, 'error');
-            }
-        }
-
-        async function eliminarCategoria(id, nombre) {
-            if (!confirm(`¿Eliminar la categoría "${nombre}"?`)) return;
-            try {
-                await api.delete(`/api/categorias/${id}`);
-                showToast('Categoría eliminada', 'info');
-                cargarCategorias();
-            } catch (err) {
-                showToast(err.message, 'error');
-            }
-        }
-    </script>
+    <script type="module" src="/assets/js/admin/categorias.js?v=2"></script>
 </body>
 </html>
 

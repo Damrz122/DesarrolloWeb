@@ -1,4 +1,4 @@
-// productCard.js - Componente de tarjeta de producto con clases CSS semánticas
+// productCard.js - Tarjeta de producto estilo tienda (imagen compacta, precio bajo el nombre)
 
 function escapeHtml(value) {
     return String(value ?? '')
@@ -9,50 +9,58 @@ function escapeHtml(value) {
         .replace(/'/g, '&#39;');
 }
 
+function formatoPEN(valor) {
+    return new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(valor);
+}
+
 export function renderProductCard(producto, onAddToCart) {
     const card = document.createElement('div');
     card.className = 'elx-product-card';
 
-    const precioFormateado = new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(producto.precio);
+    const precioFormateado = formatoPEN(producto.precio);
     const tieneStock = producto.stock > 0;
-    const esEnvioGratis = producto.precio >= 199;
     const imagenFallback = 'https://images.unsplash.com/photo-1526738549149-8e07eca6c147?w=600&auto=format&fit=crop&q=80';
 
-    const stockClass = producto.stock > 5 ? 'elx-stock-in' : (producto.stock > 0 ? 'elx-stock-low' : 'elx-stock-out');
-    const stockText = producto.stock > 0 ? `${producto.stock} disponibles` : 'Agotado';
+    const etiquetaUp = String(producto.etiqueta || '').trim().toUpperCase();
+    const precioOfertaNum = Number(producto.precioOferta);
+    const esOferta = etiquetaUp === 'OFERTA' && Number.isFinite(precioOfertaNum) && precioOfertaNum > 0
+        && Number(producto.precio) > precioOfertaNum;
+    const descuento = esOferta
+        ? Math.round((1 - precioOfertaNum / Number(producto.precio)) * 100)
+        : 0;
+
+    const ETIQUETAS = {
+        NUEVO: ['Nuevo', 'elx-ribbon-nuevo'],
+        OFERTA: [esOferta ? `-${descuento}%` : 'Oferta', 'elx-ribbon-oferta'],
+        TENDENCIA: ['Tendencia', 'elx-ribbon-tendencia']
+    };
+    const etiqueta = ETIQUETAS[etiquetaUp];
+    const bloquePrecio = esOferta
+        ? `<div class="elx-product-price"><s class="elx-old-price">${precioFormateado}</s> <span class="elx-offer-price">${formatoPEN(precioOfertaNum)}</span></div>`
+        : `<div class="elx-product-price">${precioFormateado}</div>`;
 
     card.innerHTML = `
         <div class="elx-product-img-wrap">
-            <img 
-                src="${escapeHtml(producto.imagenUrl) || imagenFallback}" 
-                alt="${escapeHtml(producto.nombre)}"
-                class="elx-product-img"
-                onerror="this.src='${imagenFallback}'"
-            />
-            
-            <span class="elx-product-badge">
-                ${escapeHtml(producto.categoriaNombre) || 'Tecnología'}
-            </span>
-
-            <span class="elx-stock-badge ${stockClass}">
-                ${escapeHtml(stockText)}
-            </span>
+            ${etiqueta ? `<span class="elx-ribbon ${etiqueta[1]}">${etiqueta[0]}</span>` : ''}
+            <a href="/producto.html?id=${Number(producto.id) || ''}" tabindex="-1" aria-hidden="true">
+                <img
+                    src="${escapeHtml(producto.imagenUrl) || imagenFallback}"
+                    alt="${escapeHtml(producto.nombre)}"
+                    class="elx-product-img"
+                    loading="lazy"
+                    onerror="this.src='${imagenFallback}'"
+                />
+            </a>
         </div>
 
         <div class="elx-product-info">
             <div>
+                <div class="elx-product-cat">${escapeHtml(producto.categoriaNombre) || 'Tecnología'}</div>
                 <a href="/producto.html?id=${Number(producto.id) || ''}">
                     <h3 class="elx-product-title">${escapeHtml(producto.nombre)}</h3>
                 </a>
 
-                <div class="elx-product-price">${precioFormateado}</div>
-
-                ${esEnvioGratis ? `
-                    <div class="elx-free-shipping">
-                        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
-                        <span>Envío gratis</span>
-                    </div>
-                ` : ''}
+                ${bloquePrecio}
             </div>
 
             <div class="elx-product-actions">
@@ -60,13 +68,10 @@ export function renderProductCard(producto, onAddToCart) {
                     Ver detalle
                 </a>
 
-                <button 
-                    class="add-btn elx-btn-add"
-                    ${tieneStock ? '' : 'disabled style="opacity: 0.4; cursor: not-allowed;"'}
+                <button
+                    class="add-btn elx-btn-add ${tieneStock ? '' : 'elx-btn-deshabilitado'}"
+                    ${tieneStock ? '' : 'disabled'}
                 >
-                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                    </svg>
                     <span>${tieneStock ? 'Agregar' : 'Sin stock'}</span>
                 </button>
             </div>

@@ -37,7 +37,7 @@ export function showToast(mensaje, tipo = 'info', duracion = 3500) {
 
     const iconWrap = document.createElement('span');
     iconWrap.innerHTML = ICONS[kind];
-    iconWrap.style.display = 'flex';
+    iconWrap.className = 'elx-toast-icono';
 
     toast.appendChild(iconWrap);
     toast.appendChild(text);
