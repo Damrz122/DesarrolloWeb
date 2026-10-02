@@ -10,5 +10,6 @@ public interface UsuarioService {
     UsuarioResponse obtenerPorEmail(String email);
     UsuarioResponse actualizar(Long id, ActualizarUsuarioRequest request);
     UsuarioResponse cambiarRol(Long id, Rol nuevoRol);
+    UsuarioResponse cambiarEstado(Long id, boolean activo);
     List<UsuarioResponse> listarTodos();
 }

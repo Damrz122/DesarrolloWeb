@@ -1,7 +1,9 @@
 package com.tienda.ecommerce.usuario;
 
 import com.tienda.ecommerce.common.ApiResponse;
+import com.tienda.ecommerce.common.BadRequestException;
 import com.tienda.ecommerce.usuario.dto.ActualizarUsuarioRequest;
+import com.tienda.ecommerce.usuario.dto.CambiarEstadoUsuarioRequest;
 import com.tienda.ecommerce.usuario.dto.CambiarRolRequest;
 import com.tienda.ecommerce.usuario.dto.UsuarioResponse;
 import jakarta.validation.Valid;
@@ -51,9 +53,31 @@ public class UsuarioController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<UsuarioResponse>> cambiarRol(
             @PathVariable Long id,
-            @Valid @RequestBody CambiarRolRequest request
+            @Valid @RequestBody CambiarRolRequest request,
+            Authentication authentication
     ) {
+        UsuarioResponse objetivo = usuarioService.obtenerPorId(id);
+        if (objetivo.getEmail().equalsIgnoreCase(authentication.getName())
+                && request.getRol() != Rol.ADMIN) {
+            throw new BadRequestException("No puedes quitarte tu propio rol de administrador");
+        }
         UsuarioResponse actualizado = usuarioService.cambiarRol(id, request.getRol());
         return ResponseEntity.ok(ApiResponse.exito("Rol de usuario actualizado", actualizado));
+    }
+
+    @PatchMapping("/{id}/estado")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<UsuarioResponse>> cambiarEstado(
+            @PathVariable Long id,
+            @Valid @RequestBody CambiarEstadoUsuarioRequest request,
+            Authentication authentication
+    ) {
+        UsuarioResponse objetivo = usuarioService.obtenerPorId(id);
+        if (!request.getActivo() && objetivo.getEmail().equalsIgnoreCase(authentication.getName())) {
+            throw new BadRequestException("No puedes desactivar tu propia cuenta");
+        }
+        UsuarioResponse actualizado = usuarioService.cambiarEstado(id, request.getActivo());
+        String mensaje = request.getActivo() ? "Usuario activado" : "Usuario desactivado";
+        return ResponseEntity.ok(ApiResponse.exito(mensaje, actualizado));
     }
 }
