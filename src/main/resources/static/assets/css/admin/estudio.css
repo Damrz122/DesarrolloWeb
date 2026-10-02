@@ -1,0 +1,106 @@
+/* Estudio visual (canvas Fabric.js): vista fullscreen sin navbar del admin */
+.est-body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: #0c0d12;
+    overflow: hidden;
+}
+
+.est-topbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    background: #14151c;
+    border-bottom: 1px solid #26272f;
+    flex-wrap: wrap;
+    z-index: 10;
+}
+
+.est-topbar-title {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    color: #f0f0f0;
+    margin-right: 4px;
+}
+
+.est-topbar-title strong { font-size: 0.95rem; font-weight: 900; }
+.est-topbar-title span { font-size: 0.75rem; color: #a8a8a8; }
+
+.est-select { min-width: 180px; max-width: 240px; }
+
+.est-topbar .ap-check { color: #c9c9c9; }
+
+.est-zoom {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #c9c9c9;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-left: auto;
+}
+
+.est-zoom span { min-width: 46px; text-align: center; font-variant-numeric: tabular-nums; }
+
+#est-guardar { margin-left: 4px; }
+
+.est-main {
+    flex: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 0;
+    min-height: 0;
+}
+
+.est-canvas-wrap {
+    overflow: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 28px;
+    background-image: repeating-conic-gradient(rgba(255,255,255,.05) 0% 25%, transparent 0% 50%);
+    background-size: 22px 22px;
+    background-color: #0c0d12;
+    min-height: 0;
+}
+
+.est-canvas-wrap canvas { box-shadow: 0 24px 70px rgba(0, 0, 0, 0.6); }
+
+.est-panel {
+    background: #14151c;
+    border-left: 1px solid #26272f;
+    padding: 16px 18px 24px;
+    overflow-y: auto;
+    min-height: 0;
+}
+
+.est-panel input[type="range"] { width: 100%; accent-color: #3b82f6; }
+
+.est-sel-nombre { font-size: 0.82rem; font-weight: 800; color: #f0f0f0; margin: 0 0 4px; }
+
+.est-hint { margin-top: 14px; line-height: 1.6; }
+
+/* Componentes reutilizados del panel clásico (autocontenidos aquí) */
+.ap-group { display: flex; align-items: center; gap: 7px; margin: 14px 0 4px; font-size: 0.74rem; font-weight: 800; color: #7aa5ff; }
+.ap-group:first-child { margin-top: 0; }
+.ap-group span { width: 6px; height: 6px; border-radius: 50%; background: #7aa5ff; flex-shrink: 0; }
+.ap-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 0.76rem; font-weight: 600; color: #e6e6e6; margin: 8px 0 2px; }
+.ap-val { background: rgba(59,130,246,.16); color: #8fb4ff; font-size: 0.7rem; font-weight: 800; border-radius: 6px; padding: 2px 8px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ap-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
+.ap-seg { display: flex; gap: 6px; }
+.ap-seg button { flex: 1; border: 1px solid #33343d; background: transparent; color: #a8a8a8; border-radius: 8px; padding: 7px 0; font-size: 0.75rem; font-weight: 800; cursor: pointer; font-family: inherit; }
+.ap-seg button.is-sel { background: #3564C9; color: #fff; border-color: #3564C9; }
+.ap-check { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; font-weight: 600; }
+.ap-check input { width: 16px; height: 16px; accent-color: #3b82f6; }
+.ap-color-row { display: flex; align-items: center; gap: 10px; margin: 2px 0 4px; }
+.ap-color { width: 52px; height: 36px; border: none; border-radius: 8px; background: transparent; cursor: pointer; padding: 0; }
+
+@media (max-width: 900px) {
+    .est-main { grid-template-columns: 1fr; overflow-y: auto; }
+    .est-panel { border-left: none; border-top: 1px solid #26272f; }
+    .est-body { overflow: auto; }
+}

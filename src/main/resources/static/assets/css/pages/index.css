@@ -1,0 +1,21 @@
+/* tienda index: estilos extraidos del catalogo y banners */
+.elx-hero-btn--compact{padding:7px 26px;font-size:.78rem;font-weight:500;letter-spacing:.02em}
+.elx-banner-tag--light{color:#fff;opacity:.85}
+.elx-banner-title--sm{font-size:1.25rem}
+.elx-banner-link{font-size:.75rem;font-weight:500;color:#fff;text-decoration:underline;margin-top:1rem;display:inline-block}
+.elx-catalogo{padding-bottom:4rem}
+.elx-catalogo-titulo{font-size:1.125rem;font-weight:900;text-transform:uppercase}
+.elx-catalogo-sub{font-size:.75rem;color:#6b7280}
+.elx-limpiar-filtros{font-size:.75rem;font-weight:800;color:var(--elx-teal-primary);background:none;border:none;cursor:pointer;text-decoration:underline}
+.elx-precio-max{font-weight:900;color:var(--elx-teal-primary)}
+.elx-estado-carga{grid-column:1/-1;padding:4rem 1rem;text-align:center}
+.elx-estado-carga-texto{font-size:.875rem;color:#6b7280;font-weight:600}
+.elx-footer-brand-row{display:flex;align-items:center;gap:10px}
+.elx-footer-logo-nombre{font-size:1.5rem;font-weight:900;letter-spacing:.05em;color:#fff;text-transform:uppercase}
+.elx-footer-logo-x{color:var(--elx-teal-accent)}
+.elx-footer-desc{font-size:.75rem;color:#9ca3af}
+.elx-vacio{grid-column:1/-1;padding:4rem 1rem;text-align:center;background:#fff;border-radius:var(--radius-lg);border:1px solid var(--elx-border-light)}
+.elx-vacio-icono{margin:0 auto .75rem auto;color:#9ca3af}
+.elx-vacio-titulo{font-size:1rem;font-weight:800;color:#1f2937}
+.elx-vacio-sub{font-size:.75rem;color:#6b7280;margin-top:4px}
+.elx-error-carga{grid-column:1/-1;padding:3rem 1rem;text-align:center;color:#dc2626;font-size:.875rem;font-weight:700}

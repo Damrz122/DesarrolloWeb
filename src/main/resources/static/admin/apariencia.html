@@ -1,0 +1,192 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apariencia — ELECTRONIX Admin</title>
+    <link rel="icon" type="image/svg+xml" href="/assets/img/logo.svg">
+    <link rel="stylesheet" href="/assets/css/output.css">
+    <script src="/assets/js/admin-theme.js"></script>
+    <link rel="stylesheet" href="/assets/css/admin.css?v=2">
+    <link rel="stylesheet" href="/assets/css/admin/apariencia.css?v=2">
+    <link rel="stylesheet" href="/assets/css/ui/ui-inline.css?v=2">
+</head>
+<body class="adm">
+
+    <header id="main-navbar"></header>
+
+    <main class="adm-main">
+
+        <div class="adm-pagehead ap-pagehead">
+            <p class="ap-kicker">Apariencia</p>
+            <div class="adm-actions">
+                <a href="/index.html" target="_blank" rel="noopener" class="adm-btn adm-btn-ghost adm-btn-sm">Ver página</a>
+            </div>
+        </div>
+
+        <div class="ap-layout">
+
+            <!-- lateral: secciones -->
+            <nav class="adm-card ap-side" aria-label="Secciones de apariencia">
+                <button type="button" class="ap-side-btn is-active" data-panel="general">General</button>
+                <button type="button" class="ap-side-btn" data-panel="hero">Hero</button>
+                <button type="button" class="ap-side-btn" data-panel="cards">Tarjetas</button>
+                <button type="button" class="ap-side-btn ap-side-btn--doble" data-panel="equipos">
+                    <span>Seccion</span>
+                    <small>Equipos Electrónicos</small>
+                </button>
+                <button type="button" class="ap-side-btn" data-panel="banners">Banners Promocionales</button>
+                <button type="button" class="ap-side-btn" data-panel="spot">Carrusel Destacado</button>
+            </nav>
+
+            <!-- contenido -->
+            <div class="ap-contenido">
+
+                <!-- general -->
+                <section class="adm-card ap-card" data-panel="general">
+                    <div class="adm-card-pad">
+                        <h2 class="ap-bloque-titulo">General</h2>
+
+                        <label class="adm-label" for="ap-nombre">Nombre de la página</label>
+                        <input id="ap-nombre" class="adm-input ap-input-max" type="text" placeholder="Ej. ELECTRONIX" />
+
+                        <h3 class="ap-subtitulo">Logotipo</h3>
+                        <div class="ap-logo-row">
+                            <div class="ap-logo-prev">
+                                <img id="ap-logo-img" alt="Vista previa del logo" />
+                                <span class="adm-sub">Vista previa</span>
+                            </div>
+                            <button type="button" id="ap-logo-cambiar" class="ap-btn-cambiar">Cambiar</button>
+                        </div>
+                        <div id="ap-logo-edit" class="ap-logo-edit" hidden>
+                            <input id="ap-logo" class="adm-input" type="text" placeholder="Pega un SVG, una imagen o una URL. Ej. /assets/img/logo.svg o https://…" />
+                            <span class="adm-sub">Acepta SVG pegado, ruta de imagen o URL externa.</span>
+                        </div>
+
+                        <h3 class="ap-subtitulo">Colores</h3>
+                        <p class="adm-sub ap-mb">Personaliza los colores de la página</p>
+                        <div class="ap-swatches">
+                            <div class="ap-sw-card">
+                                <p class="ap-sw-titulo">Color Primario</p>
+                                <div class="ap-dots" id="dots-primario"></div>
+                                <div class="ap-custom">
+                                    <span>Personalizar</span>
+                                    <span class="ap-hex" id="hex-primario">#3564C9</span>
+                                    <input type="color" id="ap-primario" class="ap-dot-picker" value="#3564C9" title="Elegir color primario" />
+                                </div>
+                            </div>
+                            <div class="ap-sw-card">
+                                <p class="ap-sw-titulo">Color Secundario</p>
+                                <div class="ap-dots" id="dots-secundario"></div>
+                                <div class="ap-custom">
+                                    <span>Personalizar</span>
+                                    <span class="ap-hex" id="hex-secundario">#000000</span>
+                                    <input type="color" id="ap-secundario" class="ap-dot-picker" value="#000000" title="Elegir color secundario" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="ap-guardar-fila">
+                            <button class="adm-btn adm-btn-primary adm-btn-sm" data-guardar="general">Guardar</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- hero -->
+                <section class="adm-card ap-card" data-panel="hero" hidden>
+                    <div class="adm-card-head">
+                        <h2 class="adm-card-title">Hero <span class="adm-sub" id="ap-hero-count"></span></h2>
+                        <div class="adm-actions">
+                            <button class="adm-btn adm-btn-primary adm-btn-sm" id="ap-hero-nuevo">Nuevo slide</button>
+                            <button class="adm-btn adm-btn-ghost adm-btn-sm" data-guardar="hero">Guardar</button>
+                        </div>
+                    </div>
+                    <div id="ap-hero-lista" class="ap-lista"></div>
+                </section>
+
+                <!-- cards -->
+                <section class="adm-card ap-card" data-panel="cards" hidden>
+                    <div class="adm-card-head">
+                        <h2 class="adm-card-title">Tarjetas <span class="adm-sub" id="ap-cards-count"></span></h2>
+                        <div class="adm-actions">
+                            <button class="adm-btn adm-btn-primary adm-btn-sm" id="ap-cards-nuevo">Nueva tarjeta</button>
+                            <button class="adm-btn adm-btn-ghost adm-btn-sm" data-guardar="cards">Guardar</button>
+                        </div>
+                    </div>
+                    <div id="ap-cards-lista" class="ap-lista"></div>
+                </section>
+
+                <!-- equipos -->
+                <section class="adm-card ap-card" data-panel="equipos" hidden>
+                    <div class="adm-card-head">
+                        <h2 class="adm-card-title">Equipos electrónicos</h2>
+                        <button class="adm-btn adm-btn-ghost adm-btn-sm" data-guardar="equipos">Guardar</button>
+                    </div>
+                    <div class="adm-card-pad">
+                        <label class="adm-label" for="ap-equipos-titulo">Título de la sección</label>
+                        <input id="ap-equipos-titulo" class="adm-input" type="text" placeholder="Ej. EQUIPOS ELECTRONICOS" />
+                    </div>
+                    <div class="adm-card-head ap-subhead">
+                        <span class="adm-sub" id="ap-equipos-count"></span>
+                        <div class="adm-actions">
+                            <a href="/admin/estudio.html" class="adm-btn adm-btn-ghost adm-btn-sm">Abrir estudio</a>
+                            <button class="adm-btn adm-btn-primary adm-btn-sm" id="ap-equipos-nuevo">Nuevo bloque</button>
+                        </div>
+                    </div>
+                    <div id="ap-equipos-lista" class="ap-lista"></div>
+                </section>
+
+                <!-- banners -->
+                <section class="adm-card ap-card" data-panel="banners" hidden>
+                    <div class="adm-card-head">
+                        <h2 class="adm-card-title">Banners promocionales</h2>
+                        <div class="adm-actions">
+                            <button class="adm-btn adm-btn-primary adm-btn-sm" id="ap-banners-nuevo">Nuevo banner</button>
+                            <button class="adm-btn adm-btn-ghost adm-btn-sm" data-guardar="banners">Guardar</button>
+                        </div>
+                    </div>
+                    <div id="ap-banners-lista" class="ap-lista"></div>
+                </section>
+
+                <!-- spotlight -->
+                <section class="adm-card ap-card" data-panel="spot" hidden>
+                    <div class="adm-card-head">
+                        <h2 class="adm-card-title">Carrusel destacado <span class="adm-sub" id="ap-spot-count"></span></h2>
+                        <div class="adm-actions">
+                            <button class="adm-btn adm-btn-primary adm-btn-sm" id="ap-spot-nuevo">Nueva tarjeta</button>
+                            <button class="adm-btn adm-btn-ghost adm-btn-sm" data-guardar="spot">Guardar</button>
+                        </div>
+                    </div>
+                    <div id="ap-spot-lista" class="ap-lista"></div>
+                </section>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- modal: editor generico de bloques -->
+    <div id="ap-modal" class="adm-modal-backdrop hidden">
+        <div class="adm-modal">
+            <div class="adm-modal-head">
+                <h3 id="ap-modal-titulo" class="adm-modal-title">Editar</h3>
+                <button id="ap-modal-cerrar" class="adm-close" aria-label="Cerrar">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <form id="ap-form">
+                <div id="ap-form-campos"></div>
+                <div class="adm-modal-foot">
+                    <button type="button" id="ap-form-cancelar" class="adm-btn adm-btn-ghost adm-btn-sm">Cancelar</button>
+                    <button type="submit" class="adm-btn adm-btn-primary adm-btn-sm">Guardar bloque</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer class="adm-footer">
+        <p>© 2026 ELECTRONIX — Módulo de Administración.</p>
+    </footer>
+
+    <script type="module" src="/assets/js/admin/apariencia.js?v=2"></script>
+</body>
+</html>

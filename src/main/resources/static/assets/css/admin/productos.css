@@ -1,0 +1,4 @@
+/* admin productos: separacion de campos del formulario */
+.adm-campo{margin-bottom:12px}
+.adm-campo--ajustado{margin-bottom:4px}
+.adm-celda-num{white-space:nowrap}

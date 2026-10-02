@@ -1,0 +1,6 @@
+/* ui compartido: logo, botones y toast sin estilos inline */
+.elx-logo-row{display:flex;align-items:center;gap:10px;user-select:none}
+.elx-btn-deshabilitado{opacity:.4;cursor:not-allowed}
+.adm-shell-fila{display:flex;align-items:center;gap:8px}
+.elx-toast-icono{display:flex}
+.is-hidden{display:none!important}

@@ -1,0 +1,7 @@
+/* admin categorias: anchos de modal y separacion de campos */
+.adm-main--estrecho{max-width:1000px}
+.adm-modal--sm{max-width:380px}
+.adm-campo{margin-bottom:12px}
+.adm-campo--ajustado{margin-bottom:4px}
+.adm-texto-suave{color:var(--adm-muted)}
+.adm-celda-num{white-space:nowrap}
