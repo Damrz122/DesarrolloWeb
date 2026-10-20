@@ -112,6 +112,11 @@ Si prefieres usar Maven en el equipo, levanta solo PostgreSQL:
 
 ```bash
 docker compose up -d ecommerce-postgres
+```
+
+Spring Boot no lee `.env` automáticamente. Exporta `DB_URL`, `DB_USER`, `DB_PASSWORD`, `JWT_SECRET` y `ADMIN_PASSWORD` en la terminal y luego ejecuta:
+
+```bash
 mvn spring-boot:run
 ```
 
