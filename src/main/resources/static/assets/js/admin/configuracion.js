@@ -72,7 +72,7 @@ function abrirModal(tipo, datos = null) {
     const titulos = {moneda: editando ? 'Editar moneda' : 'Nueva moneda', tasa:'Registrar cotización', metodo: editando ? 'Editar método de pago' : 'Nuevo método de pago', rol: editando ? 'Editar rol' : 'Nuevo rol'};
     $('cfg-modal-title').textContent = titulos[tipo];
     $('cfg-modal-kicker').textContent = editando ? 'EDITAR CONFIGURACIÓN' : 'NUEVA CONFIGURACIÓN';
-    $('cfg-modal-help').textContent = ({moneda:'PEN es la moneda contable base.',tasa:'Una nueva tasa no modifica pedidos ya registrados.',metodo:'No solicites datos de tarjeta, CVV ni contraseñas.',rol:'Los permisos se aplican en la siguiente petición.'})[tipo];
+    $('cfg-modal-help').textContent = ({moneda:'PEN es la moneda contable base.',tasa:'Una nueva tasa no modifica pedidos ya registrados.',metodo:'No solicites datos de tarjeta, CVV ni contraseñas.',rol:editando ? 'Los permisos se aplican en la siguiente petición.' : 'El código se genera automáticamente a partir del nombre del rol.'})[tipo];
     if (tipo === 'moneda') formularioMoneda(datos || {});
     if (tipo === 'tasa') formularioTasa();
     if (tipo === 'metodo') formularioMetodo(datos || {});
@@ -98,8 +98,8 @@ function formularioMetodo(m = {}) {
 }
 function formularioRol(r = {}) {
     const asignados = new Set(r.permisos || []);
-    $('cfg-form').innerHTML = `<div class="cfg-form-grid">${campo('rol-codigo','Código','text',r.codigo || '','maxlength="40" required')}${campo('rol-nombre','Nombre','text',r.nombre || '','required')}<label class="adm-field adm-field--full"><span class="adm-label">Descripción</span><input id="rol-descripcion" class="adm-input" value="${esc(r.descripcion || '')}"></label><label class="cfg-switch"><input id="rol-activo" type="checkbox" ${r.activo !== false ? 'checked' : ''}><span></span>Rol activo</label><fieldset class="cfg-fieldset adm-field--full"><legend>Permisos</legend><div id="rol-permisos" class="cfg-check-grid">${[...permisos].sort().map(p => `<label><input type="checkbox" value="${esc(p)}" ${asignados.has(p) ? 'checked' : ''}>${esc(p.replaceAll('_',' '))}</label>`).join('')}</div></fieldset></div>`;
-    if (r.codigo) $('rol-codigo').disabled = true;
+    const codigo = r.codigo ? `<label class="adm-field"><span class="adm-label">Código asignado</span><input class="adm-input" value="${esc(r.codigo)}" disabled></label>` : '';
+    $('cfg-form').innerHTML = `<div class="cfg-form-grid">${campo('rol-nombre','Nombre del rol','text',r.nombre || '','required')}${codigo}<label class="adm-field adm-field--full"><span class="adm-label">Descripción</span><input id="rol-descripcion" class="adm-input" value="${esc(r.descripcion || '')}"></label><label class="cfg-switch"><input id="rol-activo" type="checkbox" ${r.activo !== false ? 'checked' : ''}><span></span>Rol activo</label><fieldset class="cfg-fieldset adm-field--full"><legend>Permisos</legend><div id="rol-permisos" class="cfg-check-grid">${[...permisos].sort().map(p => `<label><input type="checkbox" value="${esc(p)}" ${asignados.has(p) ? 'checked' : ''}>${esc(p.replaceAll('_',' '))}</label>`).join('')}</div></fieldset></div>`;
 }
 function agregarCampo(c = {}) {
     const fila = document.createElement('div'); fila.className = 'cfg-extra-row';
@@ -114,7 +114,7 @@ async function guardar(e) {
         let endpoint, datos, metodo = id ? 'put' : 'post';
         if (tipo === 'moneda') { endpoint = 'monedas'; datos = {codigo:valor('mon-codigo'),nombre:valor('mon-nombre'),simbolo:valor('mon-simbolo'),locale:valor('mon-locale'),decimales:Number(valor('mon-decimales')),activa:$('mon-activa').checked}; }
         if (tipo === 'tasa') { endpoint = 'tipos-cambio'; datos = {monedaOrigen:valor('tasa-origen'),monedaDestino:valor('tasa-destino'),tasa:valor('tasa-valor'),vigenteDesde:valor('tasa-fecha') || null}; metodo = 'post'; }
-        if (tipo === 'rol') { endpoint = 'roles'; datos = {codigo:valor('rol-codigo'),nombre:valor('rol-nombre'),descripcion:valor('rol-descripcion'),activo:$('rol-activo').checked,permisos:[...document.querySelectorAll('#rol-permisos input:checked')].map(x => x.value)}; }
+        if (tipo === 'rol') { endpoint = 'roles'; datos = {nombre:valor('rol-nombre'),descripcion:valor('rol-descripcion'),activo:$('rol-activo').checked,permisos:[...document.querySelectorAll('#rol-permisos input:checked')].map(x => x.value)}; }
         if (tipo === 'metodo') { endpoint = 'metodos-pago'; datos = datosMetodo(); }
         await api[metodo]('/api/admin/configuracion/' + endpoint + (id ? '/' + encodeURIComponent(id) : ''), datos);
         showToast(tipo === 'tasa' ? 'Cotización registrada' : 'Configuración guardada', 'success'); cerrarModal(); await cargar();

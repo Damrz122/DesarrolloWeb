@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.text.Normalizer;
 
 @RestController
 @RequestMapping("/api/admin/configuracion")
@@ -72,9 +73,10 @@ public class ConfiguracionAdminController {
     }
     @GetMapping("/roles") public ApiResponse<List<RolConfig>> roles() { return ApiResponse.exito("Roles", roles.findAll()); }
     @GetMapping("/permisos") public ApiResponse<Set<String>> permisos() { return ApiResponse.exito("Permisos disponibles", AccesoService.PERMISOS); }
-    @PostMapping("/roles") public ApiResponse<RolConfig> crearRol(@RequestBody RolConfig r) {
-        r.setCodigo(codigo(r.getCodigo())); r.setSistema(false);
-        if (!r.getCodigo().matches("[A-Z][A-Z0-9_]{1,39}") || roles.existsById(r.getCodigo())) throw new BadRequestException("Código de rol inválido o duplicado");
+    @PostMapping("/roles") @Transactional public ApiResponse<RolConfig> crearRol(@RequestBody RolConfig r) {
+        // Los roles del sistema conservan ADMIN y CLIENTE. Los personalizados
+        // reciben un código legible y consecutivo basado en su nombre.
+        r.setCodigo(siguienteCodigoRol(r.getNombre())); r.setSistema(false);
         validarRol(r); return ApiResponse.exito("Rol creado", roles.save(r));
     }
     @Transactional
@@ -86,6 +88,19 @@ public class ConfiguracionAdminController {
         return ApiResponse.exito("Rol actualizado; permisos aplicados en la siguiente petición", roles.save(a));
     }
     private String codigo(String c) { return c == null ? "" : c.trim().toUpperCase(Locale.ROOT); }
+    private synchronized String siguienteCodigoRol(String nombre) {
+        texto(nombre, 80, "nombre del rol");
+        String letras = Normalizer.normalize(nombre, Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "").replaceAll("[^A-Za-z]", "").toUpperCase(Locale.ROOT);
+        if (letras.isBlank()) throw new BadRequestException("Indica un nombre de rol válido");
+        String prefijo = (letras + "XXX").substring(0, 3);
+        int siguiente = roles.findAll().stream()
+                .map(RolConfig::getCodigo)
+                .filter(c -> c != null && c.matches(prefijo + "\\d+"))
+                .map(c -> Integer.parseInt(c.substring(prefijo.length())))
+                .max(Integer::compareTo).orElse(0) + 1;
+        return prefijo + String.format(Locale.ROOT, "%03d", siguiente);
+    }
     private void formularioNormalizado(MetodoPagoConfig m) {
         if (m.getFormularioJson() == null || m.getFormularioJson().isBlank()) m.setFormularioJson("[]");
     }

@@ -137,4 +137,12 @@ class ConfiguracionComercialTest {
         mvc.perform(get("/api/pagos/metodos?moneda=PEN")).andExpect(status().isOk()).andExpect(jsonPath("$.datos[?(@.codigo == 'BANCO_API')]").isNotEmpty());
         mvc.perform(get("/api/pagos/metodos?moneda=USD")).andExpect(status().isOk()).andExpect(jsonPath("$.datos[?(@.codigo == 'BANCO_API')]").isEmpty());
     }
+    @Test void creaRolConCodigoAutomaticoBasadoEnNombre() throws Exception {
+        Usuario admin=usuario(Rol.ADMIN);
+        var body=Map.of("nombre","Operador Bodega","descripcion","Opera el almacén","activo",true,
+                "permisos",List.of("ADMIN_ACCESO","INVENTARIO_GESTIONAR"));
+        mvc.perform(post("/api/admin/configuracion/roles").header("Authorization","Bearer "+jwt.generarToken(admin))
+                .contentType("application/json").content(json.writeValueAsString(body)))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.datos.codigo").value("OPE001"));
+    }
 }
