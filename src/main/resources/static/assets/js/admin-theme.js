@@ -1,2 +1,2 @@
-// tema admin: aplica modo oscuro guardado antes de pintar
-try{var t=localStorage.getItem("electronix_admin_theme");if(t==="dark"){document.documentElement.setAttribute("data-theme","dark");}}catch(e){}
+// Tema del panel: se aplica antes de pintar para evitar parpadeos.
+try{var t=localStorage.getItem("electronix_admin_theme");if(t==="dark"||t==="mixed"){document.documentElement.setAttribute("data-theme",t);}}catch(e){}
