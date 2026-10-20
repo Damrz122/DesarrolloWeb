@@ -4,63 +4,124 @@ import { renderAdminShell } from '/assets/js/ui/adminShell.js';
 import { showToast } from '/assets/js/ui/toast.js';
 
 const $ = id => document.getElementById(id);
-const esc = v => String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+const esc = value => String(value ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+const pencil = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
+const lock = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>';
+const power = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v10"/><path d="M6.2 5.2a9 9 0 1 0 11.6 0"/></svg>';
 let monedas = [], metodos = [], roles = [], permisos = [], tasas = [];
-let monedaEditada = null, metodoEditado = null, rolEditado = null;
-const campo = (id,label,tipo='text',valor='') => `<div class="adm-field"><label class="adm-label" for="${id}">${label}</label><input id="${id}" class="adm-input" type="${tipo}" value="${esc(valor)}"></div>`;
-const acciones = texto => `<div class="adm-field adm-field--full cfg-actions"><button class="adm-btn adm-btn-primary" type="submit">${texto}</button><button class="adm-btn" type="reset">Cancelar edición</button></div>`;
-const opcionesMoneda = () => monedas.map(m=>`<option value="${esc(m.codigo)}">${esc(m.codigo)} · ${esc(m.nombre)}</option>`).join('');
-const val = id => $(id).value.trim();
+let modalState = null;
 
 renderAdminShell('configuracion');
-if (auth.protegerRutaAdmin()) {
-    $('cfg-refresh').onclick = () => cargar().catch(error);
-    await cargar().catch(error);
+if (auth.protegerRutaAdmin()) init();
+
+function init() {
+    $('cfg-refresh').onclick = () => cargar().catch(mostrarError);
+    $('btn-nueva-moneda').onclick = () => abrirModal('moneda');
+    $('btn-nueva-tasa').onclick = () => abrirModal('tasa');
+    $('btn-nuevo-metodo').onclick = () => abrirModal('metodo');
+    $('btn-nuevo-rol').onclick = () => abrirModal('rol');
+    $('cfg-modal-close').onclick = cerrarModal;
+    $('cfg-modal-cancel').onclick = cerrarModal;
+    $('cfg-modal').onclick = e => { if (e.target === $('cfg-modal')) cerrarModal(); };
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && modalState) cerrarModal(); });
+    $('cfg-form').onsubmit = guardar;
+    cargar().catch(mostrarError);
 }
-function error(e) { $('cfg-error').textContent = e.message; showToast(e.message,'error'); }
+
+function mostrarError(error) { const mensaje = error?.message || 'No se pudo cargar la configuración'; $('cfg-error').textContent = mensaje; showToast(mensaje, 'error'); }
 async function cargar() {
-    const r = await Promise.all(['monedas','metodos-pago','roles','permisos','tipos-cambio'].map(x=>api.get('/api/admin/configuracion/'+x)));
-    [monedas, metodos, roles, permisos, tasas] = r.map(x=>x.datos || []);
-    $('cfg-error').textContent = ''; formularios(); listas();
+    const respuestas = await Promise.all(['monedas','metodos-pago','roles','permisos','tipos-cambio'].map(x => api.get('/api/admin/configuracion/' + x)));
+    [monedas, metodos, roles, permisos, tasas] = respuestas.map(x => x.datos || []);
+    $('cfg-error').textContent = ''; renderizar();
 }
-function formularios() {
-    monedaEditada = metodoEditado = rolEditado = null;
-    $('form-moneda').innerHTML = campo('mon-codigo','Código ISO')+campo('mon-nombre','Nombre')+campo('mon-simbolo','Símbolo')+campo('mon-locale','Locale','text','es-PE')+campo('mon-decimales','Decimales','number',2)+`<label><input id="mon-activa" type="checkbox" checked> Activa</label>`+acciones('Guardar moneda');
-    $('mon-decimales').min=0; $('mon-decimales').max=4;
-    $('mon-codigo').onchange = () => { try { $('mon-decimales').value = new Intl.NumberFormat('es-PE',{style:'currency',currency:val('mon-codigo').toUpperCase()}).resolvedOptions().maximumFractionDigits; } catch {} };
-    $('form-tasa').innerHTML = `<div class="adm-field"><label class="adm-label" for="tasa-origen">Origen</label><select class="adm-select" id="tasa-origen">${opcionesMoneda()}</select></div><div class="adm-field"><label class="adm-label" for="tasa-destino">Destino</label><select class="adm-select" id="tasa-destino">${opcionesMoneda()}</select></div>`+campo('tasa-valor','Tasa','number')+campo('tasa-fecha','Vigente desde (opcional)','datetime-local')+acciones('Registrar cotización');
-    $('tasa-valor').step='0.00000001'; $('tasa-valor').min='0.00000001';
-    $('form-metodo').innerHTML = campo('met-codigo','Código')+campo('met-nombre','Nombre')+campo('met-descripcion','Descripción')+`<div class="adm-field"><label class="adm-label" for="met-procesamiento">Procesamiento</label><select class="adm-select" id="met-procesamiento"><option value="VERIFICACION_MANUAL">Verificación manual</option><option value="SIMULADO">Simulado</option><option value="CONTRA_ENTREGA">Contra entrega</option></select></div>`+campo('met-orden','Orden','number',10)+campo('met-prefijo','Prefijo de transacción','text','TX-')+campo('met-referencia','Etiqueta de referencia')+`<div class="adm-field"><label class="adm-label" for="met-icono">Icono</label><select id="met-icono" class="adm-select">${['PAGO','TARJETA','TRANSFERENCIA','ENTREGA','YAPE','PLIN'].map(x=>`<option>${x}</option>`).join('')}</select></div><div class="adm-field adm-field--full"><label class="adm-label" for="met-instrucciones">Instrucciones</label><textarea id="met-instrucciones" class="adm-textarea"></textarea></div><div class="cfg-checks adm-field--full"><label><input id="met-activo" type="checkbox" checked> Activo</label><label><input id="met-requiere" type="checkbox"> Exigir referencia (6–100 caracteres)</label></div><fieldset class="adm-field--full"><legend>Monedas aceptadas</legend><div id="met-monedas" class="cfg-checks">${monedas.map(m=>`<label><input type="checkbox" value="${esc(m.codigo)}">${esc(m.codigo)}</label>`).join('')}</div></fieldset><div class="adm-field--full"><p class="cfg-hint">Campos adicionales: clave, etiqueta, tipo, obligatorio, longitud máxima y opciones separadas por |. No solicites datos de tarjeta o CVV.</p><div style="overflow:auto" id="met-campos"></div><button id="campo-agregar" class="adm-btn" type="button">Agregar campo</button></div>`+acciones('Guardar método');
+
+function renderizar() {
+    pintarMonedas(); pintarTasas(); pintarMetodos(); pintarRoles();
+}
+function vacio(texto) { return `<div class="cfg-empty">${esc(texto)}</div>`; }
+function tarjeta({icono, titulo, codigo, clave = codigo, detalle, estado, accion, bloqueada = false, accionTitulo = 'Editar'}) {
+    return `<article class="cfg-item-card"><div class="cfg-item-top"><span class="cfg-item-icon">${icono}</span><div class="cfg-item-title"><strong>${esc(titulo)}</strong><code>${esc(codigo)}</code></div>${bloqueada ? `<span class="cfg-lock" title="Elemento protegido">${lock}</span>` : `<button class="cfg-icon-btn" type="button" data-action="${accion}" data-code="${esc(clave)}" aria-label="${accionTitulo} ${esc(titulo)}" title="${accionTitulo}">${accion === 'toggle-rate' ? power : pencil}</button>`}</div><p class="cfg-item-detail">${esc(detalle)}</p><span class="cfg-status ${estado ? 'is-active' : 'is-inactive'}"><i></i>${estado ? 'Activo' : 'Inactivo'}</span></article>`;
+}
+function enlazar(contenedor, selector, callback) { $(contenedor).querySelectorAll(selector).forEach(b => b.onclick = () => callback(b.dataset.code)); }
+function pintarMonedas() {
+    $('lista-monedas').innerHTML = monedas.length ? monedas.map(m => tarjeta({icono:'¤',titulo:m.nombre,codigo:m.codigo,detalle:`${m.simbolo} · ${m.decimales} decimales · ${m.locale}`,estado:m.activa,accion:'edit-moneda'})).join('') : vacio('Aún no hay monedas registradas.');
+    enlazar('lista-monedas','[data-action="edit-moneda"]', codigo => abrirModal('moneda', monedas.find(m => m.codigo === codigo)));
+}
+function pintarTasas() {
+    $('lista-tasas').innerHTML = tasas.length ? [...tasas].sort((a,b) => String(b.vigenteDesde).localeCompare(String(a.vigenteDesde))).map(t => tarjeta({icono:'↔',titulo:`1 ${t.monedaOrigen}`,codigo:`${t.tasa} ${t.monedaDestino}`,clave:t.id,detalle:`Vigente desde ${formatearFecha(t.vigenteDesde)}`,estado:t.activo,accion:'toggle-rate',accionTitulo:t.activo ? 'Desactivar cotización' : 'Activar cotización'})).join('') : vacio('Registra una cotización cuando uses más de una moneda.');
+    enlazar('lista-tasas','[data-action="toggle-rate"]', codigo => cambiarTasa(Number(codigo)));
+}
+function pintarMetodos() {
+    $('lista-metodos').innerHTML = metodos.length ? [...metodos].sort((a,b) => a.orden - b.orden).map(m => tarjeta({icono:iconoMetodo(m.icono),titulo:m.nombre,codigo:m.codigo,detalle:`${(m.monedas || []).join(' · ') || 'Sin monedas'} · ${textoProceso(m.procesamiento)}`,estado:m.activo,accion:'edit-metodo'})).join('') : vacio('Aún no hay métodos de pago.');
+    enlazar('lista-metodos','[data-action="edit-metodo"]', codigo => abrirModal('metodo', metodos.find(m => m.codigo === codigo)));
+}
+function pintarRoles() {
+    $('lista-roles').innerHTML = roles.length ? roles.map(r => tarjeta({icono:r.sistema ? '★' : '♙',titulo:r.nombre,codigo:r.codigo,detalle:`${(r.permisos || []).length} permisos${r.sistema ? ' · Rol del sistema' : ''}`,estado:r.activo,accion:'edit-rol',bloqueada:r.sistema})).join('') : vacio('Aún no hay roles creados.');
+    enlazar('lista-roles','[data-action="edit-rol"]', codigo => abrirModal('rol', roles.find(r => r.codigo === codigo)));
+}
+function formatearFecha(valor) { try { return new Intl.DateTimeFormat('es-PE',{dateStyle:'medium',timeStyle:'short'}).format(new Date(valor)); } catch { return valor || '—'; } }
+function textoProceso(valor) { return ({SIMULADO:'Simulado', VERIFICACION_MANUAL:'Verificación manual', CONTRA_ENTREGA:'Contra entrega'})[valor] || valor; }
+function iconoMetodo(icono) { return ({TARJETA:'▣',TRANSFERENCIA:'⇄',ENTREGA:'□',YAPE:'Y',PLIN:'P'})[icono] || '¤'; }
+function opcionesMoneda(seleccionada = '') { return monedas.map(m => `<option value="${esc(m.codigo)}" ${m.codigo === seleccionada ? 'selected' : ''}>${esc(m.codigo)} · ${esc(m.nombre)}</option>`).join(''); }
+function campo(id, etiqueta, tipo = 'text', valor = '', extras = '') { return `<label class="adm-field"><span class="adm-label">${etiqueta}</span><input id="${id}" class="adm-input" type="${tipo}" value="${esc(valor)}" ${extras}></label>`; }
+
+function abrirModal(tipo, datos = null) {
+    modalState = { tipo, id: datos?.codigo || null };
+    $('cfg-modal-error').textContent = ''; $('cfg-form').innerHTML = '';
+    const editando = Boolean(datos);
+    const titulos = {moneda: editando ? 'Editar moneda' : 'Nueva moneda', tasa:'Registrar cotización', metodo: editando ? 'Editar método de pago' : 'Nuevo método de pago', rol: editando ? 'Editar rol' : 'Nuevo rol'};
+    $('cfg-modal-title').textContent = titulos[tipo];
+    $('cfg-modal-kicker').textContent = editando ? 'EDITAR CONFIGURACIÓN' : 'NUEVA CONFIGURACIÓN';
+    $('cfg-modal-help').textContent = ({moneda:'PEN es la moneda contable base.',tasa:'Una nueva tasa no modifica pedidos ya registrados.',metodo:'No solicites datos de tarjeta, CVV ni contraseñas.',rol:'Los permisos se aplican en la siguiente petición.'})[tipo];
+    if (tipo === 'moneda') formularioMoneda(datos || {});
+    if (tipo === 'tasa') formularioTasa();
+    if (tipo === 'metodo') formularioMetodo(datos || {});
+    if (tipo === 'rol') formularioRol(datos || {});
+    $('cfg-modal').classList.remove('hidden'); document.body.style.overflow = 'hidden';
+    $('cfg-form').querySelector('input,select,textarea')?.focus();
+}
+function cerrarModal() { $('cfg-modal').classList.add('hidden'); document.body.style.overflow = ''; modalState = null; }
+function formularioMoneda(m = {}) {
+    $('cfg-form').innerHTML = `<div class="cfg-form-grid">${campo('mon-codigo','Código ISO','text',m.codigo || '','maxlength="3" required')}${campo('mon-nombre','Nombre','text',m.nombre || '','required')}${campo('mon-simbolo','Símbolo','text',m.simbolo || '','required')}${campo('mon-locale','Locale','text',m.locale || 'es-PE','required')}${campo('mon-decimales','Decimales','number',m.decimales ?? 2,'min="0" max="4" required')}<label class="cfg-switch"><input id="mon-activa" type="checkbox" ${m.activa !== false ? 'checked' : ''}><span></span>Moneda activa</label></div>`;
+    if (m.codigo) $('mon-codigo').disabled = true;
+    $('mon-codigo').onchange = () => { try { $('mon-decimales').value = new Intl.NumberFormat('es-PE',{style:'currency',currency:$('mon-codigo').value.toUpperCase()}).resolvedOptions().maximumFractionDigits; } catch {} };
+}
+function formularioTasa() {
+    $('cfg-form').innerHTML = `<div class="cfg-form-grid"><label class="adm-field"><span class="adm-label">Moneda de origen</span><select id="tasa-origen" class="adm-select">${opcionesMoneda()}</select></label><label class="adm-field"><span class="adm-label">Moneda de destino</span><select id="tasa-destino" class="adm-select">${opcionesMoneda(monedas[1]?.codigo || '')}</select></label>${campo('tasa-valor','Tasa','number','','min="0.00000001" step="0.00000001" required')}${campo('tasa-fecha','Vigente desde (opcional)','datetime-local')}</div>`;
+}
+function formularioMetodo(m = {}) {
+    const aceptadas = new Set(m.monedas || []);
+    $('cfg-form').innerHTML = `<div class="cfg-form-grid">${campo('met-codigo','Código','text',m.codigo || '','maxlength="50" required')}${campo('met-nombre','Nombre visible','text',m.nombre || '','required')}<label class="adm-field"><span class="adm-label">Procesamiento</span><select id="met-procesamiento" class="adm-select"><option value="VERIFICACION_MANUAL" ${m.procesamiento === 'VERIFICACION_MANUAL' ? 'selected' : ''}>Verificación manual</option><option value="SIMULADO" ${m.procesamiento === 'SIMULADO' ? 'selected' : ''}>Simulado</option><option value="CONTRA_ENTREGA" ${m.procesamiento === 'CONTRA_ENTREGA' ? 'selected' : ''}>Contra entrega</option></select></label>${campo('met-orden','Orden','number',m.orden ?? 10,'min="0" required')}${campo('met-prefijo','Prefijo de transacción','text',m.prefijoTransaccion || 'TX-')}${campo('met-referencia','Etiqueta de referencia','text',m.etiquetaReferencia || '')}<label class="adm-field"><span class="adm-label">Icono</span><select id="met-icono" class="adm-select">${['PAGO','TARJETA','TRANSFERENCIA','ENTREGA','YAPE','PLIN'].map(x => `<option value="${x}" ${m.icono === x ? 'selected' : ''}>${x}</option>`).join('')}</select></label><label class="adm-field adm-field--full"><span class="adm-label">Descripción</span><input id="met-descripcion" class="adm-input" value="${esc(m.descripcion || '')}"></label><label class="adm-field adm-field--full"><span class="adm-label">Instrucciones para el cliente</span><textarea id="met-instrucciones" class="adm-textarea" rows="3">${esc(m.instrucciones || '')}</textarea></label><div class="cfg-check-row adm-field--full"><label class="cfg-switch"><input id="met-activo" type="checkbox" ${m.activo !== false ? 'checked' : ''}><span></span>Activo</label><label class="cfg-switch"><input id="met-requiere" type="checkbox" ${m.requiereReferencia ? 'checked' : ''}><span></span>Exigir referencia</label></div><fieldset class="cfg-fieldset adm-field--full"><legend>Monedas aceptadas</legend><div class="cfg-check-grid">${monedas.map(x => `<label><input type="checkbox" value="${esc(x.codigo)}" ${aceptadas.has(x.codigo) ? 'checked' : ''}>${esc(x.codigo)}</label>`).join('')}</div></fieldset><section class="cfg-extra-fields adm-field--full"><div><strong>Campos adicionales</strong><p>Solo datos no sensibles, como número de operación.</p></div><div id="met-campos"></div><button id="campo-agregar" type="button" class="adm-btn adm-btn-ghost">+ Agregar campo</button></section></div>`;
+    if (m.codigo) $('met-codigo').disabled = true;
     $('campo-agregar').onclick = () => agregarCampo();
-    $('form-rol').innerHTML = campo('rol-codigo','Código')+campo('rol-nombre','Nombre')+campo('rol-descripcion','Descripción')+`<label><input id="rol-activo" type="checkbox" checked> Activo</label><fieldset class="adm-field--full"><legend>Permisos</legend><div id="rol-permisos" class="cfg-checks">${[...permisos].sort().map(p=>`<label><input type="checkbox" value="${esc(p)}">${esc(p.replaceAll('_',' '))}</label>`).join('')}</div></fieldset>`+acciones('Guardar rol');
-    for (const id of ['form-moneda','form-tasa','form-metodo','form-rol']) $(id).onreset = () => setTimeout(formularios,0);
-    $('form-moneda').onsubmit = guardarMoneda; $('form-metodo').onsubmit = guardarMetodo; $('form-rol').onsubmit = guardarRol; $('form-tasa').onsubmit = guardarTasa;
+    try { JSON.parse(m.formularioJson || '[]').forEach(agregarCampo); } catch { showToast('El formulario guardado tiene formato inválido', 'warning'); }
 }
-function agregarCampo(c={}) {
-    const fila=document.createElement('div'); fila.className='cfg-field-row';
-    fila.innerHTML=`<input class="adm-input" aria-label="Clave" placeholder="operacion" data-k="clave" value="${esc(c.clave)}"><input class="adm-input" aria-label="Etiqueta" placeholder="Etiqueta" data-k="etiqueta" value="${esc(c.etiqueta)}"><select class="adm-select" aria-label="Tipo" data-k="tipo">${['text','tel','select','date','textarea'].map(t=>`<option ${c.tipo===t?'selected':''}>${t}</option>`).join('')}</select><label><input type="checkbox" data-k="obligatorio" ${c.obligatorio?'checked':''}> Req.</label><input class="adm-input" type="number" aria-label="Longitud máxima" data-k="maxLongitud" min="1" max="1000" value="${Number(c.maxLongitud)||100}"><input class="adm-input" aria-label="Opciones" placeholder="Opción 1|Opción 2" data-k="opciones" value="${esc((c.opciones||[]).join('|'))}"><button type="button" class="adm-btn" aria-label="Quitar campo">×</button>`;
-    fila.querySelector('button').onclick=()=>fila.remove(); $('met-campos').append(fila);
+function formularioRol(r = {}) {
+    const asignados = new Set(r.permisos || []);
+    $('cfg-form').innerHTML = `<div class="cfg-form-grid">${campo('rol-codigo','Código','text',r.codigo || '','maxlength="40" required')}${campo('rol-nombre','Nombre','text',r.nombre || '','required')}<label class="adm-field adm-field--full"><span class="adm-label">Descripción</span><input id="rol-descripcion" class="adm-input" value="${esc(r.descripcion || '')}"></label><label class="cfg-switch"><input id="rol-activo" type="checkbox" ${r.activo !== false ? 'checked' : ''}><span></span>Rol activo</label><fieldset class="cfg-fieldset adm-field--full"><legend>Permisos</legend><div id="rol-permisos" class="cfg-check-grid">${[...permisos].sort().map(p => `<label><input type="checkbox" value="${esc(p)}" ${asignados.has(p) ? 'checked' : ''}>${esc(p.replaceAll('_',' '))}</label>`).join('')}</div></fieldset></div>`;
+    if (r.codigo) $('rol-codigo').disabled = true;
 }
-function filaLista(contenedor, texto, editar, cambioEstado) {
-    const fila=document.createElement('div'); fila.className='cfg-row';
-    const info=document.createElement('span'); info.textContent=texto; fila.append(info);
-    const actions=document.createElement('div'); actions.className='cfg-actions'; fila.append(actions);
-    if(editar){const b=document.createElement('button'); b.className='adm-btn';b.textContent='Editar';b.onclick=editar;actions.append(b);}
-    if(cambioEstado){const b=document.createElement('button');b.className='adm-btn';b.textContent='Cambiar estado';b.onclick=()=>cambioEstado().catch(error);actions.append(b);}
-    $(contenedor).append(fila);
+function agregarCampo(c = {}) {
+    const fila = document.createElement('div'); fila.className = 'cfg-extra-row';
+    fila.innerHTML = `<input class="adm-input" placeholder="Clave" data-k="clave" value="${esc(c.clave || '')}"><input class="adm-input" placeholder="Etiqueta" data-k="etiqueta" value="${esc(c.etiqueta || '')}"><select class="adm-select" data-k="tipo">${['text','tel','select','date','textarea'].map(t => `<option value="${t}" ${c.tipo === t ? 'selected' : ''}>${t}</option>`).join('')}</select><label class="cfg-required"><input type="checkbox" data-k="obligatorio" ${c.obligatorio ? 'checked' : ''}> Oblig.</label><input class="adm-input" type="number" min="1" max="1000" placeholder="Máx." data-k="maxLongitud" value="${Number(c.maxLongitud) || 100}"><input class="adm-input" placeholder="Opciones con |" data-k="opciones" value="${esc((c.opciones || []).join('|'))}"><button class="cfg-remove-field" type="button" aria-label="Quitar campo">×</button>`;
+    fila.querySelector('button').onclick = () => fila.remove(); $('met-campos').append(fila);
 }
-function listas() {
-    for(const id of ['lista-monedas','lista-metodos','lista-roles','lista-tasas']) $(id).replaceChildren();
-    for(const m of monedas) filaLista('lista-monedas',`${m.codigo} · ${m.nombre} · ${m.decimales} decimales · ${m.activa?'Activa':'Inactiva'}`,()=>{ monedaEditada=m.codigo;for(const [k,v] of Object.entries({codigo:m.codigo,nombre:m.nombre,simbolo:m.simbolo,locale:m.locale,decimales:m.decimales})) $('mon-'+k).value=v;$('mon-activa').checked=m.activa;$('mon-codigo').disabled=true;$('form-moneda').scrollIntoView({block:'center'}); });
-    for(const m of metodos.sort((a,b)=>a.orden-b.orden)) filaLista('lista-metodos',`${m.codigo} · ${m.nombre} · ${(m.monedas||[]).join(', ')} · ${m.activo?'Activo':'Inactivo'}`,()=>{metodoEditado=m.codigo;for(const [k,v] of Object.entries({codigo:m.codigo,nombre:m.nombre,descripcion:m.descripcion,procesamiento:m.procesamiento,orden:m.orden,prefijo:m.prefijoTransaccion,referencia:m.etiquetaReferencia,instrucciones:m.instrucciones,icono:m.icono})) $('met-'+k).value=v??'';$('met-activo').checked=m.activo;$('met-requiere').checked=m.requiereReferencia;$('met-codigo').disabled=true;document.querySelectorAll('#met-monedas input').forEach(i=>i.checked=m.monedas.includes(i.value));$('met-campos').replaceChildren();try{JSON.parse(m.formularioJson).forEach(agregarCampo);}catch{error(new Error('Formulario inválido en la base de datos'));}$('form-metodo').scrollIntoView({block:'center'});});
-    for(const r of roles) filaLista('lista-roles',`${r.codigo} · ${r.nombre} · ${r.activo?'Activo':'Inactivo'}${r.sistema?' · Protegido':''}`,r.sistema?null:()=>{rolEditado=r.codigo;for(const k of ['codigo','nombre','descripcion']) $('rol-'+k).value=r[k]??'';$('rol-activo').checked=r.activo;$('rol-codigo').disabled=true;document.querySelectorAll('#rol-permisos input').forEach(i=>i.checked=r.permisos.includes(i.value));$('form-rol').scrollIntoView({block:'center'});});
-    for(const t of tasas) filaLista('lista-tasas',`1 ${t.monedaOrigen} = ${t.tasa} ${t.monedaDestino} · ${t.vigenteDesde} · ${t.activo?'Activa':'Inactiva'}`,null,async()=>{await api.patch('/api/admin/configuracion/tipos-cambio/'+t.id,{activo:!t.activo});await cargar();});
+function valor(id) { return $(id).value.trim(); }
+async function guardar(e) {
+    e.preventDefault(); if (!modalState) return;
+    const {tipo, id} = modalState; const boton = $('cfg-modal-save'); boton.disabled = true; $('cfg-modal-error').textContent = '';
+    try {
+        let endpoint, datos, metodo = id ? 'put' : 'post';
+        if (tipo === 'moneda') { endpoint = 'monedas'; datos = {codigo:valor('mon-codigo'),nombre:valor('mon-nombre'),simbolo:valor('mon-simbolo'),locale:valor('mon-locale'),decimales:Number(valor('mon-decimales')),activa:$('mon-activa').checked}; }
+        if (tipo === 'tasa') { endpoint = 'tipos-cambio'; datos = {monedaOrigen:valor('tasa-origen'),monedaDestino:valor('tasa-destino'),tasa:valor('tasa-valor'),vigenteDesde:valor('tasa-fecha') || null}; metodo = 'post'; }
+        if (tipo === 'rol') { endpoint = 'roles'; datos = {codigo:valor('rol-codigo'),nombre:valor('rol-nombre'),descripcion:valor('rol-descripcion'),activo:$('rol-activo').checked,permisos:[...document.querySelectorAll('#rol-permisos input:checked')].map(x => x.value)}; }
+        if (tipo === 'metodo') { endpoint = 'metodos-pago'; datos = datosMetodo(); }
+        await api[metodo]('/api/admin/configuracion/' + endpoint + (id ? '/' + encodeURIComponent(id) : ''), datos);
+        showToast(tipo === 'tasa' ? 'Cotización registrada' : 'Configuración guardada', 'success'); cerrarModal(); await cargar();
+    } catch (error) { $('cfg-modal-error').textContent = error.message || 'No se pudo guardar'; } finally { boton.disabled = false; }
 }
-async function enviar(form,tipo,editado,datos) {
-    const b=form.querySelector('[type="submit"]'); b.disabled=true;
-    try { const url='/api/admin/configuracion/'+tipo;await (editado?api.put(url+'/'+encodeURIComponent(editado),datos):api.post(url,datos));showToast('Configuración guardada','success');await cargar(); } catch(e){error(e);}finally{b.disabled=false;}
+function datosMetodo() {
+    const campos = [...$('met-campos').children].map(f => { const dato = k => f.querySelector(`[data-k="${k}"]`); return {clave:dato('clave').value.trim(),etiqueta:dato('etiqueta').value.trim(),tipo:dato('tipo').value,obligatorio:dato('obligatorio').checked,maxLongitud:Number(dato('maxLongitud').value),opciones:dato('opciones').value ? dato('opciones').value.split('|').map(x => x.trim()) : []}; });
+    return {codigo:valor('met-codigo'),nombre:valor('met-nombre'),descripcion:valor('met-descripcion'),instrucciones:valor('met-instrucciones'),procesamiento:valor('met-procesamiento'),requiereReferencia:$('met-requiere').checked,etiquetaReferencia:valor('met-referencia'),prefijoTransaccion:valor('met-prefijo'),icono:valor('met-icono'),orden:Number(valor('met-orden')),activo:$('met-activo').checked,monedas:[...document.querySelectorAll('.cfg-fieldset input:checked')].map(x => x.value),formularioJson:JSON.stringify(campos)};
 }
-function guardarMoneda(e){e.preventDefault();return enviar(e.target,'monedas',monedaEditada,{codigo:val('mon-codigo'),nombre:val('mon-nombre'),simbolo:val('mon-simbolo'),locale:val('mon-locale'),decimales:Number(val('mon-decimales')),activa:$('mon-activa').checked});}
-function guardarTasa(e){e.preventDefault();return enviar(e.target,'tipos-cambio',null,{monedaOrigen:val('tasa-origen'),monedaDestino:val('tasa-destino'),tasa:val('tasa-valor'),vigenteDesde:val('tasa-fecha')||null});}
-function guardarRol(e){e.preventDefault();return enviar(e.target,'roles',rolEditado,{codigo:val('rol-codigo'),nombre:val('rol-nombre'),descripcion:val('rol-descripcion'),activo:$('rol-activo').checked,permisos:[...document.querySelectorAll('#rol-permisos input:checked')].map(i=>i.value)});}
-function guardarMetodo(e){e.preventDefault();const campos=[...$('met-campos').children].map(f=>{const v=k=>f.querySelector(`[data-k="${k}"]`);return{clave:v('clave').value.trim(),etiqueta:v('etiqueta').value.trim(),tipo:v('tipo').value,obligatorio:v('obligatorio').checked,maxLongitud:Number(v('maxLongitud').value),opciones:v('opciones').value?v('opciones').value.split('|').map(x=>x.trim()):[]};});return enviar(e.target,'metodos-pago',metodoEditado,{codigo:val('met-codigo'),nombre:val('met-nombre'),descripcion:val('met-descripcion'),instrucciones:val('met-instrucciones'),procesamiento:val('met-procesamiento'),requiereReferencia:$('met-requiere').checked,etiquetaReferencia:val('met-referencia'),prefijoTransaccion:val('met-prefijo'),icono:val('met-icono'),orden:Number(val('met-orden')),activo:$('met-activo').checked,monedas:[...document.querySelectorAll('#met-monedas input:checked')].map(i=>i.value),formularioJson:JSON.stringify(campos)});}
+async function cambiarTasa(id) { const tasa = tasas.find(t => Number(t.id) === id); if (!tasa) return; try { await api.patch('/api/admin/configuracion/tipos-cambio/' + id, {activo:!tasa.activo}); showToast('Estado de cotización actualizado','success'); await cargar(); } catch (error) { mostrarError(error); } }

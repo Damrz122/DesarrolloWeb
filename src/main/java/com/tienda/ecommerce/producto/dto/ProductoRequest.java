@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.DecimalMax;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -45,6 +46,10 @@ public class ProductoRequest {
      */
     @PositiveOrZero(message = "El precio de oferta no puede ser negativo")
     private BigDecimal precioOferta;
+
+    @DecimalMax(value = "100", message = "El impuesto no puede superar 100%")
+    @PositiveOrZero(message = "El impuesto no puede ser negativo")
+    private BigDecimal impuestoPorcentaje = BigDecimal.ZERO;
 
     public ProductoRequest() {
     }
@@ -141,4 +146,6 @@ public class ProductoRequest {
     public void setPrecioOferta(BigDecimal precioOferta) {
         this.precioOferta = precioOferta;
     }
+    public BigDecimal getImpuestoPorcentaje() { return impuestoPorcentaje; }
+    public void setImpuestoPorcentaje(BigDecimal impuestoPorcentaje) { this.impuestoPorcentaje = impuestoPorcentaje; }
 }

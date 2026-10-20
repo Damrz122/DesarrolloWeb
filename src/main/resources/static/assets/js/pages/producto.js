@@ -47,8 +47,12 @@ async function cargarDetalle(id) {
         const esOferta = String(p.etiqueta || '').trim().toUpperCase() === 'OFERTA'
             && Number.isFinite(precioOfertaNum) && precioOfertaNum > 0 && Number(p.precio) > precioOfertaNum;
         const precioVigente = esOferta ? precioOfertaNum : Number(p.precio);
+        const impuestoPorcentaje = Number(p.impuestoPorcentaje || 0);
+        const impuestoUnitario = precioVigente * impuestoPorcentaje / 100;
+        const precioFinal = precioVigente + impuestoUnitario;
         const precioFormateado = formatoMoneda(p.precio, p.monedaCodigo);
         const precioVigenteFmt = formatoMoneda(precioVigente, p.monedaCodigo);
+        const precioFinalFmt = formatoMoneda(precioFinal, p.monedaCodigo);
         const cuota = formatoMoneda(precioVigente / 6, p.monedaCodigo);
         const tieneStock = p.stock > 0;
         const esEnvioGratis = precioVigente >= 199;
@@ -82,6 +86,7 @@ async function cargarDetalle(id) {
                     <h1 class="elx-detail-title">${esc(p.nombre)}</h1>
 
                     <div class="elx-detail-price">${esOferta ? `<s class="elx-old-price">${precioFormateado}</s> <span class="elx-offer-price">${precioVigenteFmt}</span>` : precioVigenteFmt}</div>
+                    ${impuestoPorcentaje > 0 ? `<p class="text-xs text-neutral-500 mt-1">Impuesto adicional ${impuestoPorcentaje}%: total ${precioFinalFmt}</p>` : ''}
                     <p class="elx-detail-cuotas">6 cuotas de ${cuota} sin interés</p>
 
                     ${esEnvioGratis ? `

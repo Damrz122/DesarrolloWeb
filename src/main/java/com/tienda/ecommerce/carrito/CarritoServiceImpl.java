@@ -161,15 +161,23 @@ public class CarritoServiceImpl implements CarritoService {
     private CarritoResponse mapearADto(Carrito carrito) {
         List<ItemCarritoResponse> itemsDto = new ArrayList<>();
         BigDecimal total = BigDecimal.ZERO;
+        BigDecimal subtotalSinImpuesto = BigDecimal.ZERO;
+        BigDecimal impuestoTotal = BigDecimal.ZERO;
         int cantidadTotal = 0;
         String monedaTotal = carrito.getItems() == null || carrito.getItems().isEmpty() ? "PEN" : carrito.getItems().get(0).getProducto().getMonedaCodigo();
 
         if (carrito.getItems() != null) {
             for (ItemCarrito item : carrito.getItems()) {
-                BigDecimal precioVigente = dinero.redondear(item.getProducto().getPrecioVigente().multiply(
+                BigDecimal precioBase = dinero.redondear(item.getProducto().getPrecioVigente().multiply(
                         dinero.tasa(item.getProducto().getMonedaCodigo(), monedaTotal)), monedaTotal);
-                BigDecimal subtotal = precioVigente.multiply(BigDecimal.valueOf(item.getCantidad()));
-                total = total.add(subtotal);
+                BigDecimal impuestoPorcentaje = item.getProducto().getImpuestoPorcentaje() == null ? BigDecimal.ZERO : item.getProducto().getImpuestoPorcentaje();
+                BigDecimal impuestoUnitario = dinero.redondear(precioBase.multiply(impuestoPorcentaje).movePointLeft(2), monedaTotal);
+                BigDecimal precioVigente = precioBase.add(impuestoUnitario);
+                BigDecimal subtotalItem = precioVigente.multiply(BigDecimal.valueOf(item.getCantidad()));
+                BigDecimal impuestoItem = impuestoUnitario.multiply(BigDecimal.valueOf(item.getCantidad()));
+                total = total.add(subtotalItem);
+                subtotalSinImpuesto = subtotalSinImpuesto.add(precioBase.multiply(BigDecimal.valueOf(item.getCantidad())));
+                impuestoTotal = impuestoTotal.add(impuestoItem);
                 cantidadTotal += item.getCantidad();
 
                 itemsDto.add(new ItemCarritoResponse(
@@ -178,9 +186,13 @@ public class CarritoServiceImpl implements CarritoService {
                         item.getProducto().getNombre(),
                         precioVigente,
                         item.getCantidad(),
-                        subtotal,
+                        subtotalItem,
                         item.getProducto().getImagenUrl()
                 ));
+                ItemCarritoResponse dto = itemsDto.get(itemsDto.size() - 1);
+                dto.setSubtotalSinImpuesto(precioBase.multiply(BigDecimal.valueOf(item.getCantidad())));
+                dto.setImpuestoPorcentaje(impuestoPorcentaje);
+                dto.setImpuestoMonto(impuestoItem);
             }
         }
 
@@ -188,6 +200,8 @@ public class CarritoServiceImpl implements CarritoService {
         String moneda = "PEN";
         if (carrito.getItems() != null && !carrito.getItems().isEmpty()) moneda = carrito.getItems().get(0).getProducto().getMonedaCodigo();
         respuesta.setMonedaCodigo(moneda);
+        respuesta.setSubtotal(subtotalSinImpuesto);
+        respuesta.setImpuestoTotal(impuestoTotal);
         for (ItemCarritoResponse item : itemsDto) item.setMonedaCodigo(moneda);
         return respuesta;
     }

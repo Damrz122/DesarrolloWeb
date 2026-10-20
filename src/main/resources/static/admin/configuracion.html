@@ -6,24 +6,46 @@
     <link rel="icon" type="image/svg+xml" href="/assets/img/logo.svg">
     <link rel="stylesheet" href="/assets/css/output.css"><script src="/assets/js/admin-theme.js"></script>
     <link rel="stylesheet" href="/assets/css/admin.css"><link rel="stylesheet" href="/assets/css/ui/ui-inline.css">
-    <style>
-        .cfg-section{padding:24px;margin-bottom:24px}.cfg-section h2{font-size:20px;font-weight:800;margin-bottom:10px}
-        .cfg-section form{margin:18px 0}.cfg-list{overflow-x:auto}.cfg-row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 0;border-top:1px solid #d4d4d4}
-        .cfg-checks{display:flex;gap:16px;flex-wrap:wrap}.cfg-checks label{display:flex;gap:6px;align-items:center}
-        .cfg-field-row{display:grid;grid-template-columns:1fr 1fr 110px 70px 70px 1fr auto;gap:6px;margin:8px 0;min-width:780px}
-        .cfg-hint{font-size:13px;opacity:.75}.cfg-actions{display:flex;gap:8px;flex-wrap:wrap}.cfg-code{font-family:monospace}
-    </style>
+    <link rel="stylesheet" href="/assets/css/admin/configuracion.css?v=3">
 </head>
 <body class="adm">
     <header id="main-navbar"></header>
     <main class="adm-main">
-        <div class="adm-pagehead"><div><h1 class="adm-title">Configuración comercial y accesos</h1><p class="adm-subtitle">Los cambios se aplican en la siguiente consulta, sin reiniciar Docker.</p></div><button type="button" id="cfg-refresh" class="adm-btn">Actualizar catálogos</button></div>
-        <p id="cfg-error" role="alert"></p>
-        <section class="adm-card cfg-section"><h2>Monedas</h2><p class="cfg-hint">Códigos ISO. PEN es la base contable; el precio de cada producto se configura por separado.</p><form id="form-moneda" class="adm-form-grid"></form><div id="lista-monedas" class="cfg-list"></div></section>
-        <section class="adm-card cfg-section"><h2>Cotizaciones</h2><p class="cfg-hint">La tasa significa: 1 unidad de origen = tasa unidades de destino. Una nueva cotización no altera compras anteriores. Hora local del servidor.</p><form id="form-tasa" class="adm-form-grid"></form><div id="lista-tasas" class="cfg-list"></div></section>
-        <section class="adm-card cfg-section"><h2>Métodos y formularios de pago</h2><p class="cfg-hint">Asocia las monedas aceptadas. Solo simulación, contra entrega y verificación manual; no se conectan bancos automáticamente.</p><form id="form-metodo" class="adm-form-grid"></form><div id="lista-metodos" class="cfg-list"></div></section>
-        <section class="adm-card cfg-section"><h2>Roles y permisos</h2><p class="cfg-hint">Un rol por usuario. Los permisos corresponden a acciones existentes; los roles del sistema están protegidos.</p><form id="form-rol" class="adm-form-grid"></form><div id="lista-roles" class="cfg-list"></div></section>
+        <div class="adm-pagehead cfg-pagehead">
+            <div><h1 class="adm-title">Configuración comercial y accesos</h1><p class="adm-subtitle">Gestiona catálogos, métodos de cobro y permisos sin reiniciar Docker.</p></div>
+            <button type="button" id="cfg-refresh" class="adm-btn cfg-refresh">Actualizar</button>
+        </div>
+        <p id="cfg-error" class="cfg-page-error" role="alert"></p>
+
+        <section class="cfg-section" aria-labelledby="titulo-monedas">
+            <div class="cfg-section-head"><div><span class="cfg-section-icon" aria-hidden="true">$</span><div><h2 id="titulo-monedas">Monedas</h2><p>Códigos ISO y precisión para precios y conversiones.</p></div></div><button id="btn-nueva-moneda" type="button" class="adm-btn adm-btn-primary">+ Nueva moneda</button></div>
+            <div id="lista-monedas" class="cfg-grid" aria-live="polite"></div>
+        </section>
+
+        <section class="cfg-section" aria-labelledby="titulo-tasas">
+            <div class="cfg-section-head"><div><span class="cfg-section-icon" aria-hidden="true">↔</span><div><h2 id="titulo-tasas">Cotizaciones</h2><p>Una cotización nueva conserva intactas las compras anteriores.</p></div></div><button id="btn-nueva-tasa" type="button" class="adm-btn adm-btn-primary">+ Registrar tasa</button></div>
+            <div id="lista-tasas" class="cfg-grid" aria-live="polite"></div>
+        </section>
+
+        <section class="cfg-section" aria-labelledby="titulo-metodos">
+            <div class="cfg-section-head"><div><span class="cfg-section-icon" aria-hidden="true">▣</span><div><h2 id="titulo-metodos">Métodos de pago</h2><p>Configura sus monedas, instrucciones y datos que solicita el checkout.</p></div></div><button id="btn-nuevo-metodo" type="button" class="adm-btn adm-btn-primary">+ Nuevo método</button></div>
+            <div id="lista-metodos" class="cfg-grid" aria-live="polite"></div>
+        </section>
+
+        <section class="cfg-section" aria-labelledby="titulo-roles">
+            <div class="cfg-section-head"><div><span class="cfg-section-icon" aria-hidden="true">♙</span><div><h2 id="titulo-roles">Roles y permisos</h2><p>Asigna las acciones disponibles para cada tipo de usuario.</p></div></div><button id="btn-nuevo-rol" type="button" class="adm-btn adm-btn-primary">+ Nuevo rol</button></div>
+            <div id="lista-roles" class="cfg-grid" aria-live="polite"></div>
+        </section>
     </main>
+
+    <div id="cfg-modal" class="adm-modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="cfg-modal-title">
+        <div class="adm-modal cfg-modal">
+            <div class="adm-modal-head"><div><p id="cfg-modal-kicker" class="cfg-modal-kicker">CONFIGURACIÓN</p><h3 id="cfg-modal-title" class="adm-modal-title"></h3></div><button id="cfg-modal-close" type="button" class="adm-close" aria-label="Cerrar">×</button></div>
+            <p id="cfg-modal-help" class="cfg-modal-help"></p><p id="cfg-modal-error" class="cfg-modal-error" role="alert"></p>
+            <form id="cfg-form" class="cfg-form"></form>
+            <div class="adm-modal-foot"><button id="cfg-modal-cancel" type="button" class="adm-btn adm-btn-ghost">Cancelar</button><button id="cfg-modal-save" type="submit" form="cfg-form" class="adm-btn adm-btn-primary">Guardar</button></div>
+        </div>
+    </div>
     <footer class="adm-footer"><p>© 2026 ELECTRONIX — Administración.</p></footer>
-    <script type="module" src="/assets/js/admin/configuracion.js"></script>
+    <script type="module" src="/assets/js/admin/configuracion.js?v=3"></script>
 </body></html>

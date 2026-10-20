@@ -41,9 +41,13 @@ public class DetallePedido {
     @Column(name = "precio_original", precision = 19, scale = 4) private BigDecimal precioOriginal;
     @Column(name = "moneda_original", length = 3) private String monedaOriginal;
     @Column(name = "producto_nombre", length = 150) private String productoNombre;
+    @Column(name = "impuesto_porcentaje", nullable = false, precision = 5, scale = 2) private BigDecimal impuestoPorcentaje = BigDecimal.ZERO;
+    @Column(name = "impuesto_monto", nullable = false, precision = 19, scale = 4) private BigDecimal impuestoMonto = BigDecimal.ZERO;
     public BigDecimal getPrecioOriginal() { return precioOriginal; } public void setPrecioOriginal(BigDecimal v) { precioOriginal = v; }
     public String getMonedaOriginal() { return monedaOriginal; } public void setMonedaOriginal(String v) { monedaOriginal = v; }
     public String getProductoNombre() { return productoNombre; } public void setProductoNombre(String v) { productoNombre = v; }
+    public BigDecimal getImpuestoPorcentaje() { return impuestoPorcentaje; } public void setImpuestoPorcentaje(BigDecimal v) { impuestoPorcentaje = v != null ? v : BigDecimal.ZERO; }
+    public BigDecimal getImpuestoMonto() { return impuestoMonto; } public void setImpuestoMonto(BigDecimal v) { impuestoMonto = v != null ? v : BigDecimal.ZERO; }
 
     public DetallePedido() {
     }

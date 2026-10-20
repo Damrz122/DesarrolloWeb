@@ -20,7 +20,9 @@ import java.util.*;
 @Service
 public class CotizacionService {
     public record Linea(Long productoId, String nombre, int cantidad, BigDecimal precioOriginal,
-                        String monedaOriginal, BigDecimal tasa, BigDecimal precioUnitario, BigDecimal subtotal) {}
+                        String monedaOriginal, BigDecimal tasa, BigDecimal precioBaseUnitario,
+                        BigDecimal impuestoPorcentaje, BigDecimal impuestoUnitario, BigDecimal impuestoMonto,
+                        BigDecimal precioUnitario, BigDecimal subtotal) {}
     public record Datos(String id, Long usuarioId, String huella, String monedaCodigo, BigDecimal total,
                         BigDecimal tasaPen, BigDecimal totalBasePen, List<Linea> items) {}
     public record Respuesta(String token, Datos datos, Instant venceEn) {}
@@ -45,10 +47,15 @@ public class CotizacionService {
             var p = item.getProducto();
             if (!p.isActivo()) throw new BadRequestException("Producto no disponible: " + p.getNombre());
             BigDecimal tasa = dinero.tasa(p.getMonedaCodigo(), moneda);
-            BigDecimal precio = dinero.redondear(p.getPrecioVigente().multiply(tasa), moneda);
+            BigDecimal precioBase = dinero.redondear(p.getPrecioVigente().multiply(tasa), moneda);
+            BigDecimal impuestoPorcentaje = p.getImpuestoPorcentaje() == null ? BigDecimal.ZERO : p.getImpuestoPorcentaje();
+            BigDecimal impuestoUnitario = dinero.redondear(precioBase.multiply(impuestoPorcentaje).movePointLeft(2), moneda);
+            BigDecimal precio = precioBase.add(impuestoUnitario);
+            BigDecimal impuestoMonto = impuestoUnitario.multiply(BigDecimal.valueOf(item.getCantidad()));
             BigDecimal sub = precio.multiply(BigDecimal.valueOf(item.getCantidad()));
             total = total.add(sub);
-            lineas.add(new Linea(p.getId(), p.getNombre(), item.getCantidad(), p.getPrecioVigente(), p.getMonedaCodigo(), tasa, precio, sub));
+            lineas.add(new Linea(p.getId(), p.getNombre(), item.getCantidad(), p.getPrecioVigente(), p.getMonedaCodigo(), tasa,
+                    precioBase, impuestoPorcentaje, impuestoUnitario, impuestoMonto, precio, sub));
         }
         BigDecimal tasaPen = dinero.tasa(moneda, "PEN");
         Datos datos = new Datos(UUID.randomUUID().toString(), usuarioId, huella(carrito), moneda, total,
@@ -76,9 +83,13 @@ public class CotizacionService {
         try {
             String contenido = carrito.getItems().stream().sorted(Comparator.comparing(i -> i.getProducto().getId()))
                     .map(i -> i.getProducto().getId() + ":" + i.getCantidad() + ":" + i.getProducto().getPrecioVigente().stripTrailingZeros().toPlainString()
-                            + ":" + i.getProducto().getMonedaCodigo() + ":" + i.getProducto().isActivo()).reduce("", (a,b) -> a + "|" + b);
+                            + ":" + i.getProducto().getMonedaCodigo() + ":" + impuestoHuella(i.getProducto()) + ":" + i.getProducto().isActivo()).reduce("", (a,b) -> a + "|" + b);
             return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(contenido.getBytes(StandardCharsets.UTF_8)));
         } catch (Exception e) { throw new IllegalStateException(e); }
+    }
+    private String impuestoHuella(com.tienda.ecommerce.producto.Producto producto) {
+        BigDecimal impuesto = producto.getImpuestoPorcentaje() == null ? BigDecimal.ZERO : producto.getImpuestoPorcentaje();
+        return impuesto.stripTrailingZeros().toPlainString();
     }
     public String serializar(Datos datos) {
         try { return json.writeValueAsString(datos); } catch (Exception e) { throw new IllegalStateException(e); }

@@ -72,6 +72,10 @@ public class Producto {
     @Column(name = "precio_oferta", precision = 19, scale = 4)
     private BigDecimal precioOferta;
 
+    /** Porcentaje adicional aplicado al precio vigente en el checkout. */
+    @Column(name = "impuesto_porcentaje", nullable = false, precision = 5, scale = 2)
+    private BigDecimal impuestoPorcentaje = BigDecimal.ZERO;
+
     @Column(nullable = false)
     private boolean activo = true;
 
@@ -165,6 +169,10 @@ public class Producto {
 
     public void setPrecioOferta(BigDecimal precioOferta) {
         this.precioOferta = precioOferta;
+    }
+    public BigDecimal getImpuestoPorcentaje() { return impuestoPorcentaje; }
+    public void setImpuestoPorcentaje(BigDecimal impuestoPorcentaje) {
+        this.impuestoPorcentaje = impuestoPorcentaje != null ? impuestoPorcentaje : BigDecimal.ZERO;
     }
 
     /**

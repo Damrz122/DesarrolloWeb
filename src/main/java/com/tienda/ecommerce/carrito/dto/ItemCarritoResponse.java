@@ -12,6 +12,9 @@ public class ItemCarritoResponse {
     private BigDecimal subtotal;
     private String imagenUrl;
     private String monedaCodigo;
+    private BigDecimal subtotalSinImpuesto = BigDecimal.ZERO;
+    private BigDecimal impuestoPorcentaje = BigDecimal.ZERO;
+    private BigDecimal impuestoMonto = BigDecimal.ZERO;
 
     public ItemCarritoResponse() {
     }
@@ -83,4 +86,10 @@ public class ItemCarritoResponse {
     }
     public String getMonedaCodigo() { return monedaCodigo; }
     public void setMonedaCodigo(String monedaCodigo) { this.monedaCodigo = monedaCodigo; }
+    public BigDecimal getSubtotalSinImpuesto() { return subtotalSinImpuesto; }
+    public void setSubtotalSinImpuesto(BigDecimal v) { subtotalSinImpuesto = v; }
+    public BigDecimal getImpuestoPorcentaje() { return impuestoPorcentaje; }
+    public void setImpuestoPorcentaje(BigDecimal v) { impuestoPorcentaje = v; }
+    public BigDecimal getImpuestoMonto() { return impuestoMonto; }
+    public void setImpuestoMonto(BigDecimal v) { impuestoMonto = v; }
 }

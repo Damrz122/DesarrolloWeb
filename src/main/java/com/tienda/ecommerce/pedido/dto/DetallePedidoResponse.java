@@ -11,6 +11,8 @@ public class DetallePedidoResponse {
     private BigDecimal precioUnitario;
     private BigDecimal subtotal;
     private String monedaCodigo;
+    private BigDecimal impuestoPorcentaje = BigDecimal.ZERO;
+    private BigDecimal impuestoMonto = BigDecimal.ZERO;
 
     public DetallePedidoResponse() {
     }
@@ -73,4 +75,8 @@ public class DetallePedidoResponse {
     }
     public String getMonedaCodigo() { return monedaCodigo; }
     public void setMonedaCodigo(String monedaCodigo) { this.monedaCodigo = monedaCodigo; }
+    public BigDecimal getImpuestoPorcentaje() { return impuestoPorcentaje; }
+    public void setImpuestoPorcentaje(BigDecimal impuestoPorcentaje) { this.impuestoPorcentaje = impuestoPorcentaje; }
+    public BigDecimal getImpuestoMonto() { return impuestoMonto; }
+    public void setImpuestoMonto(BigDecimal impuestoMonto) { this.impuestoMonto = impuestoMonto; }
 }

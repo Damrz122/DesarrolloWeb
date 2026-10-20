@@ -40,8 +40,12 @@ async function actualizar() {
     if (!m.datos?.length) throw new Error('No hay métodos de pago habilitados para '+moneda);
     cotizacion = q.datos; metodos = m.datos;
     const datos = cotizacion.datos, formato = v=>formatoMoneda(v,datos.monedaCodigo);
-    for(const id of ['checkout-subtotal','checkout-total','btn-total']) if($(id)) $(id).textContent=formato(datos.total);
-    $('checkout-items').innerHTML = datos.items.map(i=>`<div class="flex justify-between items-center py-2 border-b border-neutral-100"><div><span class="font-bold block text-xs">${esc(i.nombre)}</span><span class="text-xs text-neutral-500">${i.cantidad} × ${esc(formato(i.precioUnitario))}${i.monedaOriginal!==datos.monedaCodigo ? ' · Original: '+esc(formatoMoneda(i.precioOriginal,i.monedaOriginal)):''}</span></div><span class="font-bold text-xs">${esc(formato(i.subtotal))}</span></div>`).join('');
+    const subtotal = datos.items.reduce((s,i)=>s + Number(i.precioBaseUnitario) * i.cantidad, 0);
+    const impuestos = datos.items.reduce((s,i)=>s + Number(i.impuestoMonto || 0), 0);
+    for(const id of ['checkout-total','btn-total']) if($(id)) $(id).textContent=formato(datos.total);
+    if($('checkout-subtotal')) $('checkout-subtotal').textContent=formato(subtotal);
+    if($('checkout-tax')) $('checkout-tax').textContent=formato(impuestos);
+    $('checkout-items').innerHTML = datos.items.map(i=>`<div class="flex justify-between items-center py-2 border-b border-neutral-100"><div><span class="font-bold block text-xs">${esc(i.nombre)}</span><span class="text-xs text-neutral-500">${i.cantidad} × ${esc(formato(i.precioUnitario))}${Number(i.impuestoPorcentaje)>0 ? ` · Impuesto ${esc(i.impuestoPorcentaje)}%` : ''}${i.monedaOriginal!==datos.monedaCodigo ? ' · Original: '+esc(formatoMoneda(i.precioOriginal,i.monedaOriginal)):''}</span></div><span class="font-bold text-xs">${esc(formato(i.subtotal))}</span></div>`).join('');
     $('quote-note').textContent = `Cotización válida hasta ${new Date(cotizacion.venceEn).toLocaleTimeString()}. El importe queda fijado durante esos 5 minutos.`;
     $('payment-methods').innerHTML = metodos.map((m,i)=>`<label class="flex items-center gap-3 p-3.5 rounded-xl border cursor-pointer mb-2"><input type="radio" name="paymethod" value="${esc(m.codigo)}" ${i===0?'checked':''}><span class="text-blue-700">${icono}</span><span><strong class="block text-sm">${esc(m.nombre)}</strong><span class="text-xs text-neutral-500">${esc(m.descripcion)}</span></span></label>`).join('')+'<div id="payment-fields" class="space-y-3 mt-3"></div>';
     document.querySelectorAll('[name="paymethod"]').forEach(r=>r.onchange=pintarCampos);

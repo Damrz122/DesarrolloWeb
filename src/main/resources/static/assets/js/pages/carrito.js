@@ -46,6 +46,8 @@ import { formatoMoneda } from '/assets/js/money.js';
                 const moneda = datos.monedaCodigo || 'PEN';
                 const formato = valor => formatoMoneda(valor,moneda);
                 const totalFormateado = formato(datos.total);
+                const subtotalFormateado = formato(datos.subtotal ?? datos.total);
+                const impuestoFormateado = formato(datos.impuestoTotal ?? 0);
 
                 let itemsHTML = '';
                 datos.items.forEach(item => {
@@ -61,7 +63,7 @@ import { formatoMoneda } from '/assets/js/money.js';
                                     <a href="/producto.html?id=${item.productoId}" class="font-bold text-neutral-900 hover:text-[#3564C9] text-sm sm:text-base line-clamp-1">
                                         ${item.productoNombre}
                                     </a>
-                                    <span class="text-xs text-neutral-500 block mt-1">Precio unitario: ${precioUnit}</span>
+                                    <span class="text-xs text-neutral-500 block mt-1">Precio unitario: ${precioUnit}${Number(item.impuestoPorcentaje)>0 ? ` · Impuesto ${item.impuestoPorcentaje}%` : ''}</span>
                                 </div>
                             </div>
 
@@ -107,6 +109,12 @@ import { formatoMoneda } from '/assets/js/money.js';
                             <div class="flex justify-between text-neutral-600 text-xs">
                                 <span>Ítems totales</span>
                                 <span class="font-bold text-neutral-900">${datos.cantidadTotal} unidades</span>
+                            </div>
+                            <div class="flex justify-between text-neutral-600 text-xs">
+                                <span>Subtotal</span><span class="font-bold text-neutral-900">${subtotalFormateado}</span>
+                            </div>
+                            <div class="flex justify-between text-neutral-600 text-xs">
+                                <span>Impuestos</span><span class="font-bold text-neutral-900">${impuestoFormateado}</span>
                             </div>
                             <div class="flex justify-between text-neutral-600 text-xs">
                                 <span>Costo de envío</span>

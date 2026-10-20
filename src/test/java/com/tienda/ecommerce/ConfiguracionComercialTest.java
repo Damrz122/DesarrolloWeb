@@ -70,6 +70,18 @@ class ConfiguracionComercialTest {
         assertEquals(0,new BigDecimal("125").compareTo(q.datos().total()));
         assertEquals(0,new BigDecimal("450").compareTo(q.datos().totalBasePen()));
     }
+    @Test void aplicaImpuestoSoloAlProductoConfiguradoYLoCongela() {
+        Usuario u=usuario(Rol.CLIENTE); Producto p=producto("PEN","100");
+        p.setImpuestoPorcentaje(new BigDecimal("15.00")); productos.saveAndFlush(p);
+        carritos.agregarItem(u.getId(),new ItemCarritoRequest(p.getId(),2));
+        var q=cotizaciones.generar(u.getId(),"PEN");
+        assertEquals(0,new BigDecimal("230").compareTo(q.datos().total()));
+        assertEquals(0,new BigDecimal("30").compareTo(q.datos().items().get(0).impuestoMonto()));
+        var pedido=pedidos.crearDesdeCarrito(u.getId(),request(u,"PEN","TARJETA_CREDITO"));
+        var detalle=pedidoRepository.findById(pedido.getId()).orElseThrow().getDetalles().get(0);
+        assertEquals(0,new BigDecimal("15").compareTo(detalle.getImpuestoPorcentaje()));
+        assertEquals(0,new BigDecimal("30").compareTo(detalle.getImpuestoMonto()));
+    }
     @Test void pedidoCongelaImporteMonedaYNombreDelMetodo() {
         Usuario u=usuario(Rol.CLIENTE);tasa("USD","PEN","3.60");Producto p=producto("USD","12.50");
         carritos.agregarItem(u.getId(),new ItemCarritoRequest(p.getId(),1));

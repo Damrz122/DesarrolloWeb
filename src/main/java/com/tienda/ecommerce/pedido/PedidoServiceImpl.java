@@ -131,6 +131,8 @@ public class PedidoServiceImpl implements PedidoService {
             detalle.setPrecioOriginal(linea.precioOriginal());
             detalle.setMonedaOriginal(linea.monedaOriginal());
             detalle.setProductoNombre(linea.nombre());
+            detalle.setImpuestoPorcentaje(linea.impuestoPorcentaje());
+            detalle.setImpuestoMonto(linea.impuestoMonto());
             detalles.add(detalle);
 
             BigDecimal subtotal = linea.subtotal();
@@ -291,6 +293,8 @@ public class PedidoServiceImpl implements PedidoService {
                         subtotal
                 );
                 detalleDto.setMonedaCodigo(d.getMonedaCodigo());
+                detalleDto.setImpuestoPorcentaje(d.getImpuestoPorcentaje());
+                detalleDto.setImpuestoMonto(d.getImpuestoMonto());
                 detallesDto.add(detalleDto);
             }
         }

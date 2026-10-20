@@ -71,7 +71,8 @@ class PedidoServiceTest {
         lenient().when(metodoPagoConfigRepository.findById("TARJETA_CREDITO")).thenReturn(Optional.of(metodo));
         lenient().when(formularios.version(any())).thenReturn("v1");
         lenient().when(formularios.validar(any(),any())).thenReturn("{}");
-        var linea = new CotizacionService.Linea(5L,"Mouse",2,new BigDecimal("150.00"),"PEN",BigDecimal.ONE,new BigDecimal("150.00"),new BigDecimal("300.00"));
+        var linea = new CotizacionService.Linea(5L,"Mouse",2,new BigDecimal("150.00"),"PEN",BigDecimal.ONE,
+                new BigDecimal("150.00"),BigDecimal.ZERO,BigDecimal.ZERO,BigDecimal.ZERO,new BigDecimal("150.00"),new BigDecimal("300.00"));
         var cotizacion = new CotizacionService.Datos("00000000-0000-0000-0000-000000000001",1L,"huella","PEN",new BigDecimal("300.00"),BigDecimal.ONE,new BigDecimal("300.00"),java.util.List.of(linea));
         lenient().when(cotizaciones.verificar(any(),any(),any())).thenReturn(cotizacion);
     }

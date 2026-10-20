@@ -87,6 +87,7 @@ public class ProductoServiceImpl implements ProductoService {
         String etiqueta = normalizarEtiqueta(request.getEtiqueta());
         producto.setEtiqueta(etiqueta);
         producto.setPrecioOferta(validarPrecioOferta(etiqueta, request.getPrecio(), request.getPrecioOferta()));
+        producto.setImpuestoPorcentaje(validarImpuesto(request.getImpuestoPorcentaje()));
         producto.setActivo(true);
 
         Producto guardado = productoRepository.save(producto);
@@ -123,6 +124,7 @@ public class ProductoServiceImpl implements ProductoService {
         String etiqueta = normalizarEtiqueta(request.getEtiqueta());
         producto.setEtiqueta(etiqueta);
         producto.setPrecioOferta(validarPrecioOferta(etiqueta, request.getPrecio(), request.getPrecioOferta()));
+        producto.setImpuestoPorcentaje(validarImpuesto(request.getImpuestoPorcentaje()));
 
         Producto actualizado = productoRepository.save(producto);
         return mapearADto(actualizado);
@@ -185,6 +187,7 @@ public class ProductoServiceImpl implements ProductoService {
         dto.setEtiqueta(p.getEtiqueta());
         dto.setPrecioOferta(p.getPrecioOferta());
         dto.setMonedaCodigo(p.getMonedaCodigo());
+        dto.setImpuestoPorcentaje(p.getImpuestoPorcentaje());
         return dto;
     }
 
@@ -212,6 +215,17 @@ public class ProductoServiceImpl implements ProductoService {
             throw new BadRequestException("El precio de oferta debe ser menor al precio base");
         }
         return precioOferta;
+    }
+
+    private BigDecimal validarImpuesto(BigDecimal impuesto) {
+        BigDecimal valor = impuesto == null ? BigDecimal.ZERO : impuesto;
+        if (valor.compareTo(BigDecimal.ZERO) < 0 || valor.compareTo(new BigDecimal("100")) > 0) {
+            throw new BadRequestException("El impuesto debe estar entre 0 y 100%");
+        }
+        if (valor.scale() > 2 && valor.stripTrailingZeros().scale() > 2) {
+            throw new BadRequestException("El impuesto admite máximo 2 decimales");
+        }
+        return valor.setScale(2);
     }
 
     /**

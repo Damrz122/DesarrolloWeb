@@ -209,7 +209,7 @@ import { formatoMoneda } from '/assets/js/money.js';
             } catch (err) {
                 const msg = esc(err.message);
                 await swapSuave(tbody, () => {
-                    tbody.innerHTML = `<tr><td colspan="7" class="adm-err">Error: ${msg}</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="8" class="adm-err">Error: ${msg}</td></tr>`;
                 });
             }
         }
@@ -241,6 +241,7 @@ import { formatoMoneda } from '/assets/js/money.js';
                             </td>
                             <td>${esc(p.categoriaNombre) || 'Sin categoría'}</td>
                             <td class="adm-strong">${esOferta ? `${precioOferta} <small class="adm-sub">(<s>${precio}</s>)</small>` : precio}</td>
+                            <td>${Number(p.impuestoPorcentaje || 0) > 0 ? `${esc(p.impuestoPorcentaje)}%` : '—'}</td>
                             <td>
                                 <span class="${p.stock <= 5 ? 'adm-stock-low' : 'adm-strong'}">
                                     ${p.stock} uds.
@@ -274,7 +275,7 @@ import { formatoMoneda } from '/assets/js/money.js';
                         tbody.appendChild(tr);
                     });
                 } else {
-                    tbody.innerHTML = `<tr><td colspan="7" class="adm-empty">No hay productos registrados.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="8" class="adm-empty">No hay productos registrados.</td></tr>`;
                 }
         }
 
@@ -292,6 +293,7 @@ import { formatoMoneda } from '/assets/js/money.js';
             document.getElementById('prod-precio').value = '';
             document.getElementById('prod-moneda').value = 'PEN';
             document.getElementById('prod-stock').value = '';
+            document.getElementById('prod-impuesto').value = '0';
             document.getElementById('prod-imagen').value = '';
             document.getElementById('prod-etiqueta').value = '';
             document.getElementById('prod-precio-oferta').value = '';
@@ -311,6 +313,7 @@ import { formatoMoneda } from '/assets/js/money.js';
             document.getElementById('prod-precio').value = p.precio;
             document.getElementById('prod-moneda').value = p.monedaCodigo || 'PEN';
             document.getElementById('prod-stock').value = p.stock;
+            document.getElementById('prod-impuesto').value = p.impuestoPorcentaje ?? 0;
             document.getElementById('prod-imagen').value = p.imagenUrl || '';
             document.getElementById('prod-etiqueta').value = p.etiqueta || '';
             document.getElementById('prod-precio-oferta').value = p.precioOferta ?? '';
@@ -345,6 +348,7 @@ import { formatoMoneda } from '/assets/js/money.js';
                 precio,
                 monedaCodigo: document.getElementById('prod-moneda').value,
                 stock: parseInt(document.getElementById('prod-stock').value),
+                impuestoPorcentaje: parseFloat(document.getElementById('prod-impuesto').value || '0'),
                 imagenUrl: document.getElementById('prod-imagen').value.trim(),
                 etiqueta,
                 precioOferta,

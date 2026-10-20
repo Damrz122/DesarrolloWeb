@@ -11,6 +11,8 @@ public class CarritoResponse {
     private BigDecimal total = BigDecimal.ZERO;
     private int cantidadTotal = 0;
     private String monedaCodigo = "PEN";
+    private BigDecimal subtotal = BigDecimal.ZERO;
+    private BigDecimal impuestoTotal = BigDecimal.ZERO;
 
     public CarritoResponse() {
     }
@@ -55,4 +57,8 @@ public class CarritoResponse {
     }
     public String getMonedaCodigo() { return monedaCodigo; }
     public void setMonedaCodigo(String monedaCodigo) { this.monedaCodigo = monedaCodigo; }
+    public BigDecimal getSubtotal() { return subtotal; }
+    public void setSubtotal(BigDecimal subtotal) { this.subtotal = subtotal; }
+    public BigDecimal getImpuestoTotal() { return impuestoTotal; }
+    public void setImpuestoTotal(BigDecimal impuestoTotal) { this.impuestoTotal = impuestoTotal; }
 }

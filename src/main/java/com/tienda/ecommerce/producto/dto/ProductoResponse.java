@@ -20,6 +20,7 @@ public class ProductoResponse {
     private String etiqueta;
     /** Precio rebajado (solo cuando etiqueta = OFERTA). */
     private BigDecimal precioOferta;
+    private BigDecimal impuestoPorcentaje = BigDecimal.ZERO;
     private boolean activo;
     private LocalDateTime fechaCreacion;
 
@@ -135,6 +136,8 @@ public class ProductoResponse {
     public void setPrecioOferta(BigDecimal precioOferta) {
         this.precioOferta = precioOferta;
     }
+    public BigDecimal getImpuestoPorcentaje() { return impuestoPorcentaje; }
+    public void setImpuestoPorcentaje(BigDecimal impuestoPorcentaje) { this.impuestoPorcentaje = impuestoPorcentaje; }
 
     public boolean isActivo() {
         return activo;
