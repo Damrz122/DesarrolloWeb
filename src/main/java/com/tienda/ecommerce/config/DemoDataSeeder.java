@@ -31,6 +31,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -44,7 +45,7 @@ import java.util.Random;
 import java.util.Set;
 
 /**
-     * Datos demo para exposición (50 usuarios activos, sabor Perú).
+ * Datos demo reproducibles para exposición (50 usuarios exactos, sabor Perú).
  * Se ejecuta solo en perfil distinto de "test" y se auto-omite si la BD
  * ya fue sembrada (no duplica al reiniciar).
  */
@@ -63,10 +64,7 @@ public class DemoDataSeeder implements CommandLineRunner {
     private final PedidoRepository pedidoRepository;
     private final ConversacionChatRepository conversacionChatRepository;
     private final PasswordEncoder passwordEncoder;
-    private final String demoUserPassword;
-
     private final int targetClientes;
-    private final int targetAdmins;
     private final int targetProductos;
     private final int targetCarritos;
     private final int targetPedidos;
@@ -80,13 +78,11 @@ public class DemoDataSeeder implements CommandLineRunner {
             PedidoRepository pedidoRepository,
             ConversacionChatRepository conversacionChatRepository,
             PasswordEncoder passwordEncoder,
-            @Value("${DEMO_USER_PASSWORD:}") String demoUserPassword,
-            @Value("${app.demo-seed.clientes:43}") int targetClientes,
-            @Value("${app.demo-seed.admins:5}") int targetAdmins,
+            @Value("${app.demo-seed.clientes:49}") int targetClientes,
             @Value("${app.demo-seed.productos:200}") int targetProductos,
             @Value("${app.demo-seed.carritos:150}") int targetCarritos,
             @Value("${app.demo-seed.pedidos:200}") int targetPedidos,
-            @Value("${app.demo-seed.conversaciones:40}") int targetConversaciones) {
+            @Value("${app.demo-seed.conversaciones:10}") int targetConversaciones) {
         this.usuarioRepository = usuarioRepository;
         this.categoriaRepository = categoriaRepository;
         this.productoRepository = productoRepository;
@@ -94,9 +90,7 @@ public class DemoDataSeeder implements CommandLineRunner {
         this.pedidoRepository = pedidoRepository;
         this.conversacionChatRepository = conversacionChatRepository;
         this.passwordEncoder = passwordEncoder;
-        this.demoUserPassword = demoUserPassword;
         this.targetClientes = targetClientes;
-        this.targetAdmins = targetAdmins;
         this.targetProductos = targetProductos;
         this.targetCarritos = targetCarritos;
         this.targetPedidos = targetPedidos;
@@ -104,24 +98,22 @@ public class DemoDataSeeder implements CommandLineRunner {
     }
 
     @Override
+    @Transactional
     public void run(String... args) {
-        if (usuarioRepository.count() >= 50) {
-            log.info("DemoDataSeeder: BD ya sembrada ({} usuarios), se omite.", usuarioRepository.count());
+        if (usuarioRepository.count() > 0 || productoRepository.count() > 0 || pedidoRepository.count() > 0) {
+            log.info("DemoDataSeeder: la BD ya contiene datos de negocio; se omite para no duplicar.");
             return;
         }
         log.info("DemoDataSeeder: sembrando datos demo...");
-        if (demoUserPassword.isBlank()) {
-            throw new IllegalStateException("Define DEMO_USER_PASSWORD para crear usuarios demo");
-        }
         Random random = new Random(42);
 
         List<Usuario> clientes = sembrarUsuarios(random);
-        List<Usuario> admins = sembrarAdmins();
+        Usuario admin = sembrarAdministrador();
         Map<String, Categoria> categorias = sembrarCategorias();
         List<Producto> productos = sembrarProductos(categorias, random);
         sembrarCarritos(clientes, productos, random);
         sembrarPedidos(clientes, productos, random);
-        sembrarChat(clientes, admins, random);
+        sembrarChat(clientes, List.of(admin), random);
 
         log.info("DemoDataSeeder: listo. usuarios={} productos={} pedidos={}",
                 usuarioRepository.count(), productoRepository.count(), pedidoRepository.count());
@@ -130,7 +122,6 @@ public class DemoDataSeeder implements CommandLineRunner {
     // ---------------- usuarios ----------------
 
     private List<Usuario> sembrarUsuarios(Random random) {
-        String hash = passwordEncoder.encode(demoUserPassword);
         List<Usuario> nuevos = new ArrayList<>();
         for (int i = 1; i <= targetClientes; i++) {
             nuevos.add(new Usuario(null,
@@ -139,22 +130,16 @@ public class DemoDataSeeder implements CommandLineRunner {
                     APELLIDOS[random.nextInt(APELLIDOS.length)],
                     TipoDocumento.DNI,
                     String.format("%08d", 71000000 + i),
-                    String.format("cliente%03d@demo.pe", i), hash, Rol.CLIENTE, true));
+                    String.format("Usuario%d@gmail.com", i), passwordEncoder.encode("User" + i), Rol.CLIENTE, true));
         }
         return usuarioRepository.saveAll(nuevos);
     }
 
-    private List<Usuario> sembrarAdmins() {
-        String hash = passwordEncoder.encode(demoUserPassword);
-        List<Usuario> nuevos = new ArrayList<>();
-        for (int i = 1; i <= targetAdmins; i++) {
-            nuevos.add(new Usuario(null,
-                    NOMBRES[(i * 7) % NOMBRES.length], "Soporte", "Demo",
-                    TipoDocumento.DNI,
-                    String.format("%08d", 72000000 + i),
-                    String.format("soporte%d@demo.pe", i), hash, Rol.ADMIN, true));
-        }
-        return usuarioRepository.saveAll(nuevos);
+    private Usuario sembrarAdministrador() {
+        return usuarioRepository.save(new Usuario(null,
+                "Administrador", "Sistema", null,
+                TipoDocumento.DNI, "00000001",
+                "Admin@gmail.com", passwordEncoder.encode("Admin1221:)"), Rol.ADMIN, true));
     }
 
     // ---------------- categorías y productos ----------------
@@ -268,8 +253,7 @@ public class DemoDataSeeder implements CommandLineRunner {
             String metodo = metodos[random.nextInt(metodos.length)];
             String procesamiento = "PAGO_CONTRAENTREGA".equals(metodo) ? "CONTRA_ENTREGA"
                     : ("TARJETA_CREDITO".equals(metodo) ? "SIMULADO" : "VERIFICACION_MANUAL");
-            EstadoPago estadoPago = estado == EstadoPedido.CANCELADO ? EstadoPago.RECHAZADO
-                    : estado == EstadoPedido.PENDIENTE ? EstadoPago.PENDIENTE : EstadoPago.APROBADO;
+            EstadoPago estadoPago = EstadoPago.APROBADO;
             Pago pago = new Pago(pedido, metodo, procesamiento, estadoPago, total,
                     String.format("TX-DEMO-%06d", i + 1));
             if ("YAPE".equals(metodo) || "PLIN".equals(metodo)) {
@@ -278,27 +262,25 @@ public class DemoDataSeeder implements CommandLineRunner {
             pago.setFechaPago(fecha.plusMinutes(5 + random.nextInt(115)));
             pedido.setPago(pago);
 
-            if (estado != EstadoPedido.CANCELADO) {
-                Envio envio = new Envio(pedido, pedido.getDireccionEnvio(), "Electronix Express Logistics");
-                envio.setNumeroGuia(String.format("GUIA-DEMO-%06d", i + 1));
-                envio.setEstadoEnvio(switch (estado) {
-                    case ENTREGADO -> EstadoEnvio.ENTREGADO;
-                    case ENVIADO -> random.nextBoolean() ? EstadoEnvio.EN_TRANSITO : EstadoEnvio.EN_DISTRIBUCION;
-                    default -> EstadoEnvio.PREPARANDO;
-                });
-                LocalDateTime despacho = fecha.plusDays(1 + random.nextInt(2));
-                if (estado == EstadoPedido.PENDIENTE || estado == EstadoPedido.EN_PROCESO) {
-                    envio.setFechaDespacho(null);
-                    envio.setFechaEstimadaEntrega(fecha.plusDays(3));
-                } else {
-                    envio.setFechaDespacho(despacho);
-                    envio.setFechaEstimadaEntrega(despacho.plusDays(2));
-                    if (estado == EstadoPedido.ENTREGADO) {
-                        envio.setFechaEntregaReal(despacho.plusDays(1 + random.nextInt(3)));
-                    }
+            Envio envio = new Envio(pedido, pedido.getDireccionEnvio(), "Electronix Express Logistics");
+            envio.setNumeroGuia(String.format("GUIA-DEMO-%06d", i + 1));
+            envio.setEstadoEnvio(switch (estado) {
+                case ENTREGADO -> EstadoEnvio.ENTREGADO;
+                case ENVIADO -> random.nextBoolean() ? EstadoEnvio.EN_TRANSITO : EstadoEnvio.EN_DISTRIBUCION;
+                default -> EstadoEnvio.PREPARANDO;
+            });
+            LocalDateTime despacho = fecha.plusDays(1 + random.nextInt(2));
+            if (estado == EstadoPedido.PENDIENTE || estado == EstadoPedido.EN_PROCESO) {
+                envio.setFechaDespacho(null);
+                envio.setFechaEstimadaEntrega(fecha.plusDays(3));
+            } else {
+                envio.setFechaDespacho(despacho);
+                envio.setFechaEstimadaEntrega(despacho.plusDays(2));
+                if (estado == EstadoPedido.ENTREGADO) {
+                    envio.setFechaEntregaReal(despacho.plusDays(1 + random.nextInt(3)));
                 }
-                pedido.setEnvio(envio);
             }
+            pedido.setEnvio(envio);
             pedidos.add(pedido);
         }
         productoRepository.saveAll(productos);
@@ -307,10 +289,9 @@ public class DemoDataSeeder implements CommandLineRunner {
 
     private EstadoPedido sortearEstado(Random random) {
         int r = random.nextInt(100);
-        if (r < 60) return EstadoPedido.ENTREGADO;
-        if (r < 80) return EstadoPedido.ENVIADO;
-        if (r < 90) return random.nextBoolean() ? EstadoPedido.EN_PROCESO : EstadoPedido.PENDIENTE;
-        return EstadoPedido.CANCELADO;
+        if (r < 65) return EstadoPedido.ENTREGADO;
+        if (r < 85) return EstadoPedido.ENVIADO;
+        return random.nextBoolean() ? EstadoPedido.EN_PROCESO : EstadoPedido.PENDIENTE;
     }
 
     // ---------------- chat ----------------
@@ -318,7 +299,6 @@ public class DemoDataSeeder implements CommandLineRunner {
     private void sembrarChat(List<Usuario> clientes, List<Usuario> admins, Random random) {
         List<ConversacionChat> conversaciones = new ArrayList<>();
         int mensajesTotales = 0;
-        int porConversacion = Math.max(1, 200 / Math.max(1, targetConversaciones));
         for (int i = 0; i < targetConversaciones; i++) {
             Usuario cliente = clientes.get(random.nextInt(clientes.size()));
             Usuario admin = admins.get(random.nextInt(admins.size()));
@@ -326,7 +306,9 @@ public class DemoDataSeeder implements CommandLineRunner {
             String estado = r < 50 ? "ACTIVA" : r < 80 ? "CERRADA" : "ARCHIVADA";
             ConversacionChat conv = new ConversacionChat(null, cliente, admin, estado);
             conv.setFechaCreacion(LocalDateTime.now().minusDays(random.nextInt(30)));
-            int n = 3 + random.nextInt(porConversacion);
+            // El chat es proporcional a la cantidad de usuarios, no otra
+            // colección artificial de 200 filas.
+            int n = 2 + random.nextInt(4);
             for (int m = 0; m < n; m++) {
                 boolean delCliente = m % 2 == 0;
                 String contenido = delCliente

@@ -53,7 +53,9 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        if (categoriaRepository.count() == 0) {
+        // Los datos demo crean su propio catálogo de 200 productos exactos.
+        // Este catálogo mínimo queda reservado para instalaciones sin demo.
+        if (!demoSeedEnabled && categoriaRepository.count() == 0) {
             Categoria catLaptops = categoriaRepository.save(new Categoria(null, "Laptops y Computadoras", "Laptops ultraligeras, gamers y estaciones de trabajo"));
             Categoria catPhones = categoriaRepository.save(new Categoria(null, "Smartphones", "Teléfonos móviles de última generación y accesorios"));
             Categoria catAudio = categoriaRepository.save(new Categoria(null, "Audio y Sonido", "Audífonos inalámbricos, parlantes y micrófonos"));
@@ -102,36 +104,11 @@ public class DataInitializer implements CommandLineRunner {
             productoRepository.saveAll(productosIniciales);
         }
 
-        if (usuarioRepository.count() == 0 && demoSeedEnabled) {
-            // Seed demo: solo si esta habilitado (desactivado en prod)
-            if (adminPassword.isBlank() || clientePassword.isBlank()) {
-                throw new IllegalStateException("Define ADMIN_PASSWORD y CLIENTE_PASSWORD para crear usuarios demo");
-            }
-            Usuario admin = new Usuario(
-                    null,
-                    "Administrador", "Sistema", null,
-                    TipoDocumento.DNI, "00000001",
-                    normalizarEmailAdministrador(),
-                    passwordEncoder.encode(adminPassword),
-                    Rol.ADMIN,
-                    true
-            );
-
-            Usuario cliente = new Usuario(
-                    null,
-                    "Cliente", "Demo", null,
-                    TipoDocumento.DNI, "45678901",
-                    "cliente@tienda.com",
-                    passwordEncoder.encode(clientePassword),
-                    Rol.CLIENTE,
-                    true
-            );
-
-            usuarioRepository.save(admin);
-            usuarioRepository.save(cliente);
+        // DemoDataSeeder administra las 50 cuentas de demostración. En una
+        // instalación real el administrador se administra por variables.
+        if (!demoSeedEnabled) {
+            asegurarAdministradorConfigurado();
         }
-
-        asegurarAdministradorConfigurado();
     }
 
     /**

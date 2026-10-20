@@ -37,7 +37,7 @@ services:
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
       CLIENTE_PASSWORD: ${CLIENTE_PASSWORD:-}
       DEMO_USER_PASSWORD: ${DEMO_USER_PASSWORD:-}
-      DEMO_SEED_ENABLED: ${DEMO_SEED_ENABLED:-false}
+      DEMO_SEED_ENABLED: ${DEMO_SEED_ENABLED:-true}
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       SPRING_JPA_SHOW_SQL: "false"
       # Sirve HTML, CSS, JS e imágenes desde el directorio local montado.

@@ -47,7 +47,7 @@ class DemoDataSeederTest {
     private DemoDataSeeder seederPequeno() {
         return new DemoDataSeeder(usuarioRepository, categoriaRepository, productoRepository,
                 carritoRepository, pedidoRepository, conversacionChatRepository,
-                new BCryptPasswordEncoder(), "clave-solo-para-pruebas", 10, 2, 12, 8, 10, 4);
+                new BCryptPasswordEncoder(), 10, 12, 8, 10, 4);
     }
 
     @Test
@@ -55,7 +55,7 @@ class DemoDataSeederTest {
     void siembra_con_invariantes() {
         seederPequeno().run();
 
-        assertEquals(12, usuarioRepository.count(), "10 clientes + 2 admins");
+        assertEquals(11, usuarioRepository.count(), "10 clientes + 1 administrador");
         assertEquals(12, productoRepository.count());
         assertEquals(12, productoImagenRepository.count(), "1 imagen 4FN por producto");
         assertEquals(10, pedidoRepository.count());

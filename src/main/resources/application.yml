@@ -80,4 +80,4 @@ spring:
     validate-on-migrate: false # V1 fue editado (sin comentarios); checksum no coincide, migración ya aplicada
 app:
   demo-seed:
-    enabled: ${DEMO_SEED_ENABLED:false}
+    enabled: ${DEMO_SEED_ENABLED:true}

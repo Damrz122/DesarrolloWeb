@@ -104,7 +104,9 @@ Esto inicia:
 - Adminer: [http://localhost:8091](http://localhost:8091)
 - PostgreSQL 16: puerto `5435` del equipo
 
-La cuenta administradora se crea con `ADMIN_EMAIL` y `ADMIN_PASSWORD` del `.env`. La contraseña nunca se muestra en el frontend y no hay cuentas demo por defecto.
+Con `DEMO_SEED_ENABLED=true` (valor de la plantilla), una base vacía recibe 50 usuarios, 200 productos y 200 ventas demo. La cuenta demo es `Admin@gmail.com` / `Admin1221:)`; los clientes son `Usuario1@gmail.com` / `User1` hasta `Usuario49@gmail.com` / `User49`. Cambia a `false` para una instalación real y define la cuenta administradora por variables de entorno.
+
+> Los volúmenes Docker no reemplazan un respaldo. Consulta [respaldo y recuperación](docs/respaldo-y-recuperacion.md) antes de usar `docker compose down -v`.
 
 ### Paso 3: Ejecutar el backend fuera de Docker (opcional)
 
