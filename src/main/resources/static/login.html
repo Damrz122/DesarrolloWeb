@@ -11,6 +11,40 @@
     <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
     <link rel="stylesheet" href="/assets/css/ui/ui-inline.css">
     <link rel="stylesheet" href="/assets/css/pages/figma-home.css">
+    <style>
+        .login-remember-toggle {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            margin: 0 8px 0 0;
+            border: 1.5px solid #d4d8df;
+            border-radius: 9999px;
+            background: #fff;
+            cursor: pointer;
+            display: grid;
+            place-content: center;
+            transition: background-color .18s, border-color .18s, box-shadow .18s;
+        }
+        .login-remember-toggle::after {
+            content: '';
+            width: 5px;
+            height: 8px;
+            border: solid #fff;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg) scale(0);
+            margin-top: -2px;
+            transition: transform .18s ease;
+        }
+        .login-remember-toggle:checked {
+            background: #1a73e8;
+            border-color: #1a73e8;
+        }
+        .login-remember-toggle:checked::after { transform: rotate(45deg) scale(1); }
+        .login-remember-toggle:focus-visible {
+            outline: 2px solid #8dbbf2;
+            outline-offset: 2px;
+        }
+    </style>
 </head>
 <body class="bg-[#ededed] text-neutral-800 min-h-screen flex flex-col antialiased">
 
@@ -121,59 +155,52 @@
     </header>
 
     <main class="flex-1 flex items-center justify-center p-4 sm:p-6 w-full my-8">
-        <div class="bg-white w-full max-w-md p-6 sm:p-8 rounded-2xl border border-neutral-200 shadow-xl space-y-6">
+        <div class="bg-white w-full max-w-sm px-6 py-10 sm:px-8 sm:py-11 rounded-2xl border border-neutral-200 shadow-xl space-y-8">
             
             <div class="text-center">
-                <h1 class="text-2xl font-black text-neutral-900 tracking-tight uppercase">Bienvenido a Electronix</h1>
+                <img src="/assets/img/logo.svg" alt="Electronix" class="w-10 h-10 mx-auto mb-3" />
+                <h1 class="text-2xl font-black text-neutral-900 tracking-tight uppercase">Bienvenido</h1>
                 <p class="text-xs text-neutral-500 mt-1">Ingresa tus credenciales para acceder a tu cuenta</p>
             </div>
 
-            <!-- accesos demo: es para entrar rapido -->
-            <div class="p-3.5 bg-neutral-50 rounded-lg border border-neutral-200 space-y-2">
-                <div class="flex items-center justify-center space-x-1.5 text-neutral-500">
-                    <span class="text-[11px] font-bold uppercase tracking-wider">Cuentas de demostración</span>
-                </div>
-                <div class="grid grid-cols-2 gap-2">
-                    <button type="button" id="demo-client-btn" class="p-2 rounded-lg bg-white hover:bg-neutral-100 text-xs font-bold text-neutral-700 border border-neutral-300 transition-colors flex items-center justify-center space-x-1.5 shadow-sm">
-                        <svg class="w-3.5 h-3.5 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                        <span>Cliente Demo</span>
-                    </button>
-                    <button type="button" id="demo-admin-btn" class="p-2 rounded-lg bg-[#3564C9] hover:bg-[#2A51A5] text-xs font-bold text-white border border-[#3564C9] transition-colors flex items-center justify-center space-x-1.5 shadow-sm">
-                        <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-                        <span>Administrador</span>
-                    </button>
-                </div>
-            </div>
-
             <!-- formulario: es para iniciar sesion -->
-            <form id="login-form" class="space-y-4">
+            <form id="login-form" class="space-y-5">
                 <div>
-                    <label class="block text-xs font-bold text-neutral-700 mb-1.5">Correo Electrónico</label>
+                    <label class="block text-xs font-bold text-neutral-700 mb-1.5 uppercase tracking-wide">CORREO ELECTRÓNICO</label>
                     <input id="login-email" type="email" placeholder="ejemplo@correo.com" required
                            class="w-full bg-neutral-50 border border-neutral-300 rounded-lg px-4 py-2 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:border-[#3564C9] transition-colors" />
                 </div>
 
                 <div>
-                    <label class="block text-xs font-bold text-neutral-700 mb-1.5">Contraseña</label>
-                    <input id="login-password" type="password" placeholder="••••••••" required
-                           class="w-full bg-neutral-50 border border-neutral-300 rounded-lg px-4 py-2 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:border-[#3564C9] transition-colors" />
+                    <label class="block text-xs font-bold text-neutral-700 mb-1.5 uppercase tracking-wide">CONTRASEÑA</label>
+                    <div class="relative">
+                        <input id="login-password" type="password" placeholder="••••••••" required
+                               class="w-full bg-neutral-50 border border-neutral-300 rounded-lg px-4 py-2 pr-11 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:border-[#3564C9] transition-colors" />
+                        <button type="button" id="login-password-toggle" aria-label="Mostrar contraseña" aria-pressed="false"
+                                class="absolute inset-y-0 right-0 flex items-center justify-center w-11 text-neutral-500 hover:text-[#3564C9] focus:outline-none" title="Mostrar contraseña">
+                            <svg id="login-password-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12s3.5-6 9.75-6 9.75 6 9.75 6-3.5 6-9.75 6-9.75-6-9.75-6Z" />
+                                <circle cx="12" cy="12" r="2.5" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
 
                 <div class="flex items-center justify-between text-xs">
                     <label class="flex items-center text-neutral-600 font-medium">
-                        <input id="login-remember" type="checkbox" checked class="rounded border-neutral-300 text-[#3564C9] focus:ring-0 mr-2">
+                        <input id="login-remember" type="checkbox" checked class="login-remember-toggle">
                         Recordar sesión
                     </label>
                 </div>
 
-                <button type="submit" id="btn-submit-login" class="w-full bg-[#3564C9] hover:bg-[#2A51A5] text-white font-bold py-3 px-6 rounded-xl shadow-md transition-all flex items-center justify-center space-x-2">
+                <button type="submit" id="btn-submit-login" class="w-full bg-[#3564C9] hover:bg-[#2A51A5] text-white font-bold py-3 px-6 rounded-[2px] shadow-md transition-all flex items-center justify-center space-x-2">
                     <span>Iniciar Sesión</span>
                 </button>
             </form>
 
             <div class="text-center text-xs text-neutral-500 pt-2 border-t border-neutral-100">
                 ¿Aún no tienes cuenta? 
-                <a href="/registro.html" class="text-[#3564C9] font-bold hover:underline">Regístrate gratis</a>
+                <a href="/registro.html" class="text-[#3564C9] font-bold hover:underline">Regístrate aquí</a>
             </div>
 
         </div>

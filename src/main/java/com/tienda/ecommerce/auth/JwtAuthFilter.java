@@ -1,6 +1,7 @@
 package com.tienda.ecommerce.auth;
 
-import com.tienda.ecommerce.usuario.Rol;
+import com.tienda.ecommerce.usuario.UsuarioRepository;
+import com.tienda.ecommerce.configuracion.AccesoService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,9 +20,13 @@ import java.util.List;
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
+    private final UsuarioRepository usuarios;
+    private final AccesoService acceso;
 
-    public JwtAuthFilter(JwtService jwtService) {
+    public JwtAuthFilter(JwtService jwtService, UsuarioRepository usuarios, AccesoService acceso) {
         this.jwtService = jwtService;
+        this.usuarios = usuarios;
+        this.acceso = acceso;
     }
 
     @Override
@@ -41,16 +46,16 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         final String jwt = authHeader.substring(7);
 
         if (jwtService.esTokenValido(jwt)) {
-            String email = jwtService.extraerEmail(jwt);
-            Rol rol = jwtService.extraerRol(jwt);
-
-            if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                List<SimpleGrantedAuthority> authorities = List.of(
-                        new SimpleGrantedAuthority("ROLE_" + rol.name())
-                );
+            Long id = jwtService.extraerId(jwt);
+            var usuario = id == null ? null : usuarios.findById(id).orElse(null);
+            if (usuario != null && usuario.isActivo() && acceso.rolActivo(usuario)
+                    && SecurityContextHolder.getContext().getAuthentication() == null) {
+                var authorities = new java.util.ArrayList<SimpleGrantedAuthority>();
+                acceso.permisos(usuario).forEach(p -> authorities.add(new SimpleGrantedAuthority(p)));
+                authorities.add(new SimpleGrantedAuthority("ROLE_" + usuario.getRol().name()));
 
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        email,
+                        usuario.getEmail(),
                         null,
                         authorities
                 );

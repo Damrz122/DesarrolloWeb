@@ -50,7 +50,7 @@ public class ProductoController {
     }
 
     @GetMapping("/admin")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('PRODUCTOS_VER','PRODUCTOS_GESTIONAR','INVENTARIO_GESTIONAR')")
     public ResponseEntity<ApiResponse<PaginaResponse<ProductoResponse>>> listarParaAdmin(
             @RequestParam(required = false) String nombre,
             @RequestParam(required = false) Long categoriaId,
@@ -64,7 +64,7 @@ public class ProductoController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('PRODUCTOS_GESTIONAR') and hasAuthority('PRECIOS_GESTIONAR')")
     public ResponseEntity<ApiResponse<ProductoResponse>> crear(@Valid @RequestBody ProductoRequest request) {
         ProductoResponse creado = productoService.crear(request);
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -72,7 +72,7 @@ public class ProductoController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('PRODUCTOS_GESTIONAR') and hasAuthority('PRECIOS_GESTIONAR')")
     public ResponseEntity<ApiResponse<ProductoResponse>> actualizar(
             @PathVariable Long id,
             @Valid @RequestBody ProductoRequest request
@@ -82,9 +82,17 @@ public class ProductoController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('PRODUCTOS_GESTIONAR')")
     public ResponseEntity<ApiResponse<Void>> eliminar(@PathVariable Long id) {
         productoService.eliminar(id);
         return ResponseEntity.ok(ApiResponse.exito("Producto desactivado correctamente", null));
     }
+    public record StockRequest(@jakarta.validation.constraints.PositiveOrZero int stock) {}
+    @PatchMapping("/{id}/stock")
+    @PreAuthorize("hasAuthority('INVENTARIO_GESTIONAR')")
+    public ResponseEntity<ApiResponse<Void>> stock(@PathVariable Long id, @Valid @RequestBody StockRequest request) {
+        inventario.actualizar(id, request.stock());
+        return ResponseEntity.ok(ApiResponse.exito("Stock actualizado", null));
+    }
+    @org.springframework.beans.factory.annotation.Autowired private InventarioService inventario;
 }

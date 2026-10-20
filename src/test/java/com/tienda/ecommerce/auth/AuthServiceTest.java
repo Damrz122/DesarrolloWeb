@@ -39,6 +39,7 @@ class AuthServiceTest {
 
     @Mock
     private JwtService jwtService;
+    @Mock private com.tienda.ecommerce.configuracion.AccesoService acceso;
 
     @InjectMocks
     private AuthServiceImpl authService;
@@ -47,6 +48,8 @@ class AuthServiceTest {
 
     @BeforeEach
     void setUp() {
+        lenient().when(acceso.rolActivo(any())).thenReturn(true);
+        lenient().when(acceso.permisos(any())).thenReturn(java.util.Set.of("COMPRAR"));
         usuario = new Usuario(1L, "Carlos Lopez", "carlos@tienda.com", "hashBcrypt", Rol.CLIENTE, true);
     }
 

@@ -82,8 +82,12 @@
 
                 <div class="adm-form-row adm-campo">
                     <div>
-                        <label class="adm-label" for="prod-precio">Precio (S/) *</label>
+                        <label class="adm-label" for="prod-precio">Precio *</label>
                         <input id="prod-precio" type="number" step="0.01" min="0.1" required class="adm-input" placeholder="Ej. 2499.99" />
+                    </div>
+                    <div>
+                        <label class="adm-label" for="prod-moneda">Moneda *</label>
+                        <select id="prod-moneda" class="adm-select"></select>
                     </div>
                     <div>
                         <label class="adm-label" for="prod-stock">Stock disponible *</label>
@@ -102,7 +106,7 @@
                         </select>
                     </div>
                     <div id="prod-oferta-wrap" hidden>
-                        <label class="adm-label" for="prod-precio-oferta">Precio oferta (S/) *</label>
+                        <label class="adm-label" for="prod-precio-oferta">Precio oferta (en la moneda elegida) *</label>
                         <input id="prod-precio-oferta" type="number" step="0.01" min="0.01" class="adm-input" placeholder="Ej. 1999.99" />
                     </div>
                 </div>

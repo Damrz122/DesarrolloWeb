@@ -40,7 +40,7 @@ public class ChatRestController {
     }
 
     @GetMapping("/conversaciones")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('CHAT_ATENDER')")
     public ResponseEntity<ApiResponse<List<ConversacionResponse>>> listarConversaciones() {
         List<ConversacionResponse> conversaciones = chatService.listarConversacionesAdmin();
         return ResponseEntity.ok(ApiResponse.exito("Conversaciones de chat obtenidas", conversaciones));
@@ -53,7 +53,7 @@ public class ChatRestController {
             @PathVariable Long id
     ) {
         Usuario usuario = obtenerUsuarioAutenticado(authentication);
-        boolean esAdmin = usuario.getRol() == Rol.ADMIN;
+        boolean esAdmin = authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("CHAT_ATENDER"));
         List<MensajeChatResponse> mensajes = chatService.obtenerHistorial(id, usuario.getId(), esAdmin);
         return ResponseEntity.ok(ApiResponse.exito("Historial de mensajes obtenido", mensajes));
     }

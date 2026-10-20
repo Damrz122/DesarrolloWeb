@@ -46,6 +46,10 @@ class PedidoServiceTest {
 
     @Mock
     private UsuarioRepository usuarioRepository;
+    @Mock private com.tienda.ecommerce.pago.MetodoPagoConfigRepository metodoPagoConfigRepository;
+    @Mock private CotizacionService cotizaciones;
+    @Mock private com.tienda.ecommerce.pago.FormularioPagoService formularios;
+    @Mock private jakarta.persistence.EntityManager entityManager;
 
     @InjectMocks
     private PedidoServiceImpl pedidoService;
@@ -63,12 +67,20 @@ class PedidoServiceTest {
         carrito = new Carrito(1L, usuario);
         ItemCarrito item = new ItemCarrito(100L, carrito, producto, 2);
         carrito.agregarItem(item);
+        var metodo = new com.tienda.ecommerce.pago.MetodoPagoConfig(); metodo.setCodigo("TARJETA_CREDITO"); metodo.setNombre("Tarjeta simulada"); metodo.setProcesamiento("SIMULADO"); metodo.setPrefijoTransaccion("TX-");metodo.setMonedas(java.util.Set.of("PEN"));
+        lenient().when(metodoPagoConfigRepository.findById("TARJETA_CREDITO")).thenReturn(Optional.of(metodo));
+        lenient().when(formularios.version(any())).thenReturn("v1");
+        lenient().when(formularios.validar(any(),any())).thenReturn("{}");
+        var linea = new CotizacionService.Linea(5L,"Mouse",2,new BigDecimal("150.00"),"PEN",BigDecimal.ONE,new BigDecimal("150.00"),new BigDecimal("300.00"));
+        var cotizacion = new CotizacionService.Datos("00000000-0000-0000-0000-000000000001",1L,"huella","PEN",new BigDecimal("300.00"),BigDecimal.ONE,new BigDecimal("300.00"),java.util.List.of(linea));
+        lenient().when(cotizaciones.verificar(any(),any(),any())).thenReturn(cotizacion);
     }
 
     @Test
     @DisplayName("Debe crear pedido descontando stock y vaciando el carrito")
     void crearDesdeCarrito_exitoso() {
         CrearPedidoRequest request = new CrearPedidoRequest("Av. Principal 123", "987654321");
+        request.setMetodoPago("TARJETA_CREDITO");request.setVersionMetodo("v1");
 
         when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
         when(carritoService.obtenerOCrearCarritoEntity(1L)).thenReturn(carrito);
@@ -98,6 +110,7 @@ class PedidoServiceTest {
     void crearDesdeCarrito_carritoVacio() {
         carrito.getItems().clear();
         CrearPedidoRequest request = new CrearPedidoRequest("Av. Principal 123", "987654321");
+        request.setMetodoPago("TARJETA_CREDITO");request.setVersionMetodo("v1");
 
         when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
         when(carritoService.obtenerOCrearCarritoEntity(1L)).thenReturn(carrito);
@@ -111,6 +124,7 @@ class PedidoServiceTest {
     void crearDesdeCarrito_stockInsuficiente() {
         producto.setStock(1); // El carrito tiene 2
         CrearPedidoRequest request = new CrearPedidoRequest("Av. Principal 123", "987654321");
+        request.setMetodoPago("TARJETA_CREDITO");request.setVersionMetodo("v1");
 
         when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
         when(carritoService.obtenerOCrearCarritoEntity(1L)).thenReturn(carrito);
@@ -123,7 +137,7 @@ class PedidoServiceTest {
     @DisplayName("Debe cambiar el estado de un pedido")
     void cambiarEstado_exitoso() {
         Pedido pedido = new Pedido(50L, usuario, EstadoPedido.PENDIENTE, BigDecimal.valueOf(300), "Dir", "Tel");
-        when(pedidoRepository.findById(50L)).thenReturn(Optional.of(pedido));
+        when(pedidoRepository.findByIdConDetalles(50L)).thenReturn(Optional.of(pedido));
         when(pedidoRepository.save(any(Pedido.class))).thenAnswer(i -> i.getArgument(0));
 
         PedidoResponse response = pedidoService.cambiarEstado(50L, EstadoPedido.EN_PROCESO);
@@ -131,5 +145,56 @@ class PedidoServiceTest {
         assertNotNull(response);
         assertEquals(EstadoPedido.EN_PROCESO, response.getEstado());
         verify(pedidoRepository, times(1)).save(pedido);
+    }
+
+    @Test
+    @DisplayName("Contraentrega ENTREGADO debe quedar cobrado (APROBADO)")
+    void cambiarEstado_contraentregaEntregada_cobra() {
+        Pedido pedido = new Pedido(51L, usuario, EstadoPedido.ENVIADO, BigDecimal.valueOf(600), "Dir", "Tel");
+        com.tienda.ecommerce.pago.Pago pago = new com.tienda.ecommerce.pago.Pago(
+                pedido, "PAGO_CONTRAENTREGA", "CONTRA_ENTREGA",
+                com.tienda.ecommerce.pago.EstadoPago.PENDIENTE, BigDecimal.valueOf(600), "COD-1");
+        pedido.setPago(pago);
+        when(pedidoRepository.findByIdConDetalles(51L)).thenReturn(Optional.of(pedido));
+        when(pedidoRepository.save(any(Pedido.class))).thenAnswer(i -> i.getArgument(0));
+
+        PedidoResponse response = pedidoService.cambiarEstado(51L, EstadoPedido.ENTREGADO);
+
+        assertEquals(EstadoPedido.ENTREGADO, response.getEstado());
+        assertEquals(com.tienda.ecommerce.pago.EstadoPago.APROBADO, response.getEstadoPago());
+        assertEquals("PAGO_CONTRAENTREGA", response.getMetodoPago());
+    }
+
+    @Test
+    @DisplayName("Yape ENVIADO no debe auto-aprobarse, requiere verificación")
+    void cambiarEstado_yapeNoAutoAprueba() {
+        Pedido pedido = new Pedido(52L, usuario, EstadoPedido.PENDIENTE, BigDecimal.valueOf(100), "Dir", "Tel");
+        com.tienda.ecommerce.pago.Pago pago = new com.tienda.ecommerce.pago.Pago(
+                pedido, "YAPE", "VERIFICACION_MANUAL",
+                com.tienda.ecommerce.pago.EstadoPago.PENDIENTE, BigDecimal.valueOf(100), "YAPE-1");
+        pago.setReferenciaComprobante("OP-123456");
+        pedido.setPago(pago);
+        when(pedidoRepository.findByIdConDetalles(52L)).thenReturn(Optional.of(pedido));
+        when(pedidoRepository.save(any(Pedido.class))).thenAnswer(i -> i.getArgument(0));
+
+        PedidoResponse response = pedidoService.cambiarEstado(52L, EstadoPedido.ENVIADO);
+
+        assertEquals(com.tienda.ecommerce.pago.EstadoPago.PENDIENTE, response.getEstadoPago());
+    }
+
+    @Test
+    @DisplayName("Verificar pago Yape lo deja APROBADO")
+    void verificarPago_aprueba() {
+        Pedido pedido = new Pedido(53L, usuario, EstadoPedido.ENVIADO, BigDecimal.valueOf(100), "Dir", "Tel");
+        com.tienda.ecommerce.pago.Pago pago = new com.tienda.ecommerce.pago.Pago(
+                pedido, "YAPE", "VERIFICACION_MANUAL",
+                com.tienda.ecommerce.pago.EstadoPago.PENDIENTE, BigDecimal.valueOf(100), "YAPE-2");
+        pedido.setPago(pago);
+        when(pedidoRepository.findByIdConDetalles(53L)).thenReturn(Optional.of(pedido));
+        when(pedidoRepository.save(any(Pedido.class))).thenAnswer(i -> i.getArgument(0));
+
+        PedidoResponse response = pedidoService.verificarPago(53L, com.tienda.ecommerce.pago.EstadoPago.APROBADO);
+
+        assertEquals(com.tienda.ecommerce.pago.EstadoPago.APROBADO, response.getEstadoPago());
     }
 }

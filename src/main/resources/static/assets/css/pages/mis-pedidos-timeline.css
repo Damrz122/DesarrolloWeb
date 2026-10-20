@@ -1,0 +1,24 @@
+/* Timeline estado de pedido — Electronix */
+.elx-timeline { display: flex; align-items: flex-start; justify-content: space-between; position: relative; padding: 6px 2px 2px; }
+.elx-timeline::before { content: ""; position: absolute; left: 26px; right: 26px; top: 26px; height: 3px; background: #e5e7eb; border-radius: 999px; }
+.elx-timeline-fill { position: absolute; left: 26px; top: 26px; height: 3px; background: linear-gradient(90deg,#3564C9,#10b981); border-radius: 999px; transition: width .4s ease; }
+.elx-step { position: relative; z-index: 1; flex: 1; display: flex; flex-direction: column; align-items: center; text-align: center; min-width: 0; }
+.elx-dot { width: 40px; height: 40px; border-radius: 999px; display: flex; align-items: center; justify-content: center; border: 2px solid #e5e7eb; background: #fff; color: #9ca3af; transition: all .2s; }
+.elx-step.done .elx-dot { background: #10b981; border-color: #10b981; color: #fff; box-shadow: 0 4px 10px rgba(16,185,129,.35); }
+.elx-step.current .elx-dot { background: #3564C9; border-color: #3564C9; color: #fff; box-shadow: 0 0 0 5px rgba(53,100,201,.15); animation: elx-pulse 1.6s infinite; }
+.elx-step.cancelled .elx-dot { background: #e11d48; border-color: #e11d48; color: #fff; }
+.elx-step-label { margin-top: 8px; font-size: 11px; font-weight: 800; color: #111827; line-height: 1.2; }
+.elx-step-sub { font-size: 10px; color: #6b7280; font-weight: 600; }
+.elx-step.done .elx-step-sub { color: #059669; }
+.elx-step.current .elx-step-sub { color: #3564C9; }
+@keyframes elx-pulse { 0% { box-shadow: 0 0 0 4px rgba(53,100,201,.18);} 50% { box-shadow: 0 0 0 8px rgba(53,100,201,.08);} 100% { box-shadow: 0 0 0 4px rgba(53,100,201,.18);} }
+.elx-paybox { display:flex; gap:10px; align-items:center; padding:12px 14px; border-radius:14px; border:1px solid #e5e7eb; background:#f8fafc; }
+.elx-mini-progress { height:5px; background:#e5e7eb; border-radius:999px; overflow:hidden; margin-top:8px; }
+.elx-mini-progress > div { height:100%; background:linear-gradient(90deg,#3564C9,#10b981); border-radius:999px; transition: width .3s; }
+@media (max-width: 640px) {
+  .elx-timeline { flex-direction: column; gap: 2px; }
+  .elx-timeline::before, .elx-timeline-fill { display: none; }
+  .elx-step { flex-direction: row; gap: 12px; text-align: left; width: 100%; background:#fff; border:1px solid #f1f5f9; border-radius:12px; padding:8px 10px; margin-bottom:6px; }
+  .elx-dot { width:34px; height:34px; flex-shrink:0; }
+  .elx-step-label { margin-top:0; }
+}

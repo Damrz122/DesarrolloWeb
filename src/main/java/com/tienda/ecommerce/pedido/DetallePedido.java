@@ -33,9 +33,17 @@ public class DetallePedido {
     @Min(value = 1, message = "La cantidad debe ser mayor a 0")
     private int cantidad;
 
-    @Column(name = "precio_unitario", nullable = false, precision = 10, scale = 2)
+    @Column(name = "precio_unitario", nullable = false, precision = 19, scale = 4)
     @Min(value = 0, message = "El precio unitario no puede ser negativo")
     private BigDecimal precioUnitario;
+    @Column(name = "moneda_codigo", nullable = false, length = 3)
+    private String monedaCodigo = "PEN";
+    @Column(name = "precio_original", precision = 19, scale = 4) private BigDecimal precioOriginal;
+    @Column(name = "moneda_original", length = 3) private String monedaOriginal;
+    @Column(name = "producto_nombre", length = 150) private String productoNombre;
+    public BigDecimal getPrecioOriginal() { return precioOriginal; } public void setPrecioOriginal(BigDecimal v) { precioOriginal = v; }
+    public String getMonedaOriginal() { return monedaOriginal; } public void setMonedaOriginal(String v) { monedaOriginal = v; }
+    public String getProductoNombre() { return productoNombre; } public void setProductoNombre(String v) { productoNombre = v; }
 
     public DetallePedido() {
     }
@@ -87,4 +95,6 @@ public class DetallePedido {
     public void setPrecioUnitario(BigDecimal precioUnitario) {
         this.precioUnitario = precioUnitario;
     }
+    public String getMonedaCodigo() { return monedaCodigo; }
+    public void setMonedaCodigo(String monedaCodigo) { this.monedaCodigo = monedaCodigo; }
 }

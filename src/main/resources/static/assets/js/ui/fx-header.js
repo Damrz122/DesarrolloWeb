@@ -328,9 +328,9 @@
                 .replace(/&/g, '&amp;').replace(/</g, '&lt;')
                 .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         }
-        function precioPEN(v) {
+        function precioPEN(v, moneda) {
             try {
-                return new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(v);
+                return new Intl.NumberFormat('es-PE', { style: 'currency', currency: moneda || 'PEN', currencyDisplay: 'code' }).format(v);
             } catch (e) { return 'S/ ' + v; }
         }
         function ocultar() { box.style.display = 'none'; box.innerHTML = ''; }
@@ -366,7 +366,7 @@
                         a.href = '/producto.html?id=' + encodeURIComponent(p.id);
                         var img = p.imagenUrl || '';
                         a.innerHTML = '<img src="' + esc(img) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'" />' +
-                            '<span class="elx-search-live-info"><b>' + esc(p.nombre) + '</b><i>' + esc(precioPEN(p.precio)) + '</i></span>';
+                             '<span class="elx-search-live-info"><b>' + esc(p.nombre) + '</b><i>' + esc(precioPEN(p.precio, p.monedaCodigo)) + '</i></span>';
                         box.appendChild(a);
                     });
                     box.style.display = 'flex';

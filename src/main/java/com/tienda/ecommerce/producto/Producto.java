@@ -32,9 +32,12 @@ public class Producto {
     @Column(length = 1000)
     private String descripcion;
 
-    @Column(nullable = false, precision = 10, scale = 2)
+    @Column(nullable = false, precision = 19, scale = 4)
     @Min(value = 0, message = "El precio no puede ser negativo")
     private BigDecimal precio;
+
+    @Column(name = "moneda_codigo", nullable = false, length = 3)
+    private String monedaCodigo = "PEN";
 
     @Column(nullable = false)
     @Min(value = 0, message = "El stock no puede ser negativo")
@@ -66,7 +69,7 @@ public class Producto {
      * Precio rebajado. Solo tiene efecto cuando etiqueta = OFERTA;
      * en cualquier otro caso se guarda NULL.
      */
-    @Column(name = "precio_oferta", precision = 10, scale = 2)
+    @Column(name = "precio_oferta", precision = 19, scale = 4)
     private BigDecimal precioOferta;
 
     @Column(nullable = false)
@@ -121,6 +124,8 @@ public class Producto {
     public void setPrecio(BigDecimal precio) {
         this.precio = precio;
     }
+    public String getMonedaCodigo() { return monedaCodigo; }
+    public void setMonedaCodigo(String monedaCodigo) { this.monedaCodigo = monedaCodigo; }
 
     public int getStock() {
         return stock;

@@ -33,6 +33,8 @@ class ProductoServiceTest {
 
     @Mock
     private CategoriaRepository categoriaRepository;
+    @Mock private com.tienda.ecommerce.configuracion.MonedaRepository monedaRepository;
+    @Mock private com.tienda.ecommerce.configuracion.MonetarioService dinero;
 
     @InjectMocks
     private ProductoServiceImpl productoService;

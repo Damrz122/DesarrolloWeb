@@ -4,7 +4,7 @@
 // shell admin: es para pintar el menu segun el modulo
 
 import { auth } from '../auth.js';
-import { obtenerSitio, pintarLogo } from '../sitio.js?v=4';
+import { obtenerSitio, pintarLogo } from '../sitio.js?v=5';
 
 export const ADMIN_THEME_KEY = 'electronix_admin_theme';
 
@@ -23,6 +23,7 @@ const LINKS = [
     { id: 'categorias', href: '/admin/categorias.html', label: 'Categorías' },
     { id: 'pedidos', href: '/admin/pedidos.html', label: 'Pedidos' },
     { id: 'usuarios', href: '/admin/usuarios.html', label: 'Usuarios' },
+    { id: 'configuracion', href: '/admin/configuracion.html', label: 'Configuración' },
     { id: 'reportes', href: '/admin/reportes.html', label: 'Reportes' },
     { id: 'chat', href: '/admin/chat.html', label: 'Chat Clientes', dot: true }
 ];
@@ -66,7 +67,8 @@ export function renderAdminShell(active) {
     const initial = nombre.charAt(0).toUpperCase();
     const theme = getAdminTheme();
 
-    const nav = LINKS.map(l => `
+    const permisosNav = { dashboard: ['REPORTES_VER','PEDIDOS_GESTIONAR'], productos: ['PRODUCTOS_VER','PRODUCTOS_GESTIONAR','INVENTARIO_GESTIONAR'], categorias: ['CATEGORIAS_GESTIONAR'], pedidos: ['PEDIDOS_GESTIONAR'], usuarios: ['USUARIOS_GESTIONAR'], configuracion: ['CONFIGURACION_GESTIONAR'], reportes: ['REPORTES_VER'], chat: ['CHAT_ATENDER'] };
+    const nav = LINKS.filter(l => permisosNav[l.id]?.some(p => auth.tienePermiso(p))).map(l => `
         <a href="${l.href}" class="${l.id === active ? 'adm-active' : ''}">
             ${l.label}${l.dot ? ' <span class="adm-dot-live"></span>' : ''}
         </a>`).join('');
@@ -74,7 +76,7 @@ export function renderAdminShell(active) {
     header.innerHTML = `
         <div class="adm-topbar-wrap">
             <div class="adm-topbar">
-                <a class="adm-brand" href="/admin/dashboard.html" title="ELECTRONIX Admin">
+                <a class="adm-brand" href="${auth.inicioAdmin()}" title="ELECTRONIX Admin">
                     <span class="adm-brand-logo">${LOGO_SVG}</span>
                     <span>
                         <span class="adm-brand-name">ELECTRONIX</span><br/>
@@ -92,7 +94,7 @@ export function renderAdminShell(active) {
                         <div id="adm-profile-menu" class="adm-profile-menu" role="menu">
                             <div class="adm-profile-mail">Conectado como<br/><strong>${escapeHtml(email || nombre)}</strong></div>
                             <a href="/index.html" class="adm-menu-btn" role="menuitem">Ir a página</a>
-                            <a href="/admin/apariencia.html" class="adm-menu-btn" role="menuitem">Ajustes Página</a>
+                            ${auth.tienePermiso('APARIENCIA_GESTIONAR') ? '<a href="/admin/apariencia.html" class="adm-menu-btn" role="menuitem">Ajustes Página</a>' : ''}
                             <button id="adm-theme-btn" class="adm-menu-btn" role="menuitem">
                                 <span class="adm-shell-fila">
                                     <span>Apariencia</span>

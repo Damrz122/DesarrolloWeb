@@ -270,10 +270,20 @@ function htmlCapas(t, capas, fondoRaw, fondoColor, fallbackFondo, fondoBlur) {
             if (!src) return '';
             const w = num(c.w, 80);
             const h = c.h == null ? null : num(c.h, 0);
+            const a = c.ajustes && typeof c.ajustes === 'object' ? c.ajustes : {};
+            const bright = Math.max(0, (100 + num(a.brightness, 0)) / 100);
+            const contrast = Math.max(0, (100 + num(a.contrast, 0)) / 100);
+            const saturation = Math.max(0, (100 + num(a.saturation, 0)) / 100);
+            const blurImg = Math.max(0, num(a.blur, 0));
+            const filtro = `brightness(${bright}) contrast(${contrast}) saturate(${saturation})${a.grayscale ? ' grayscale(1)' : ''}${a.sepia ? ' sepia(1)' : ''}${blurImg ? ` blur(${blurImg}px)` : ''} drop-shadow(0 12px 18px rgba(0,0,0,.45))`;
+            const sx = c.flipX ? -1 : 1, sy = c.flipY ? -1 : 1;
             const st = [
                 `left:${x}%`, `top:${y}%`, `width:${w}%`,
                 h ? `height:${h}%` : 'height:auto',
-                `transform:translate(-50%,-50%) rotate(${rot}deg)`,
+                `transform:translate(-50%,-50%) rotate(${rot}deg) scale(${sx},${sy})`,
+                `opacity:${Math.max(0, Math.min(1, num(c.opacity, 1)))}`,
+                c.visible === false ? 'display:none' : '',
+                `filter:${filtro}`,
             ].join(';');
             return `<img class="cap-layer cap-img" src="${esc(src)}" alt="" loading="lazy" style="${st}" onerror="this.remove()">`;
         }
@@ -281,14 +291,18 @@ function htmlCapas(t, capas, fondoRaw, fondoColor, fallbackFondo, fondoBlur) {
         const w = num(c.w, 60);
         const sy = num(c.sy, 1);
         const align = ['left', 'center', 'right'].includes(c.align) ? c.align : 'left';
+        const sx = c.flipX ? -1 : 1;
+        const syFlip = c.flipY ? -sy : sy;
         const st = [
             `left:${x}%`, `top:${y}%`, `width:${w}%`,
-            `font-size:${size}px`, `text-align:${align}`,
+            `font-size:${size}px`, `text-align:${align}`, `font-family:${esc(c.font || 'Montserrat')},sans-serif`,
             `color:${esc(String(c.color || '#ffffff'))}`,
             `font-weight:${num(c.peso, 700)}`,
-            'line-height:1.35', 'letter-spacing:0.02em',
+            `line-height:${num(c.lineHeight, 1.35)}`, `letter-spacing:${num(c.charSpacing, 20) / 1000}em`,
             'white-space:pre-wrap', 'padding:0', 'margin:0',
-            `transform:translate(-50%,-50%) rotate(${rot}deg)` + (sy !== 1 ? ` scale(1,${sy})` : ''),
+            `opacity:${Math.max(0, Math.min(1, num(c.opacity, 1)))}`,
+            c.visible === false ? 'display:none' : '',
+            `transform:translate(-50%,-50%) rotate(${rot}deg) scale(${sx},${syFlip})`,
         ].join(';');
         return `<span class="cap-layer cap-t" style="${st}">${esc(c.texto ?? '')}</span>`;
     }).join('');
@@ -297,11 +311,28 @@ function htmlCapas(t, capas, fondoRaw, fondoColor, fallbackFondo, fondoBlur) {
     const ctaStyle = al === 'center'
         ? 'left:50%;transform:translateX(-50%)'
         : (al === 'right' ? 'right:1.1rem' : 'left:1.1rem');
+    // El botón también es una capa: el estudio puede moverlo y cambiar sus colores
+    // sin convertirlo en una imagen ni perder su navegación en la tienda.
+    const b0 = t.boton && typeof t.boton === 'object' ? t.boton : {};
+    const hasCustomButton = Object.keys(b0).length > 0;
+    const boton = {
+        texto: String(b0.texto || t.cta || 'Ver productos'),
+        cx: num(b0.cx, al === 'center' ? 50 : (al === 'right' ? 69 : 31)),
+        cy: num(b0.cy, 92.8),
+        escalaX: num(b0.escalaX, 1), escalaY: num(b0.escalaY, 1), rot: num(b0.rot, 0),
+        fontSize: num(b0.fontSize, 10.5), fondo: /^#?[0-9a-f]{6}$/i.test(String(b0.fondo || '')) ? String(b0.fondo) : '#FFFFFF',
+        color: /^#?[0-9a-f]{6}$/i.test(String(b0.color || '')) ? String(b0.color) : '#111111',
+        radio: num(b0.radio, 999), paddingX: num(b0.paddingX, 14), paddingY: num(b0.paddingY, 7),
+        borde: num(b0.borde, 0), bordeColor: /^#?[0-9a-f]{6}$/i.test(String(b0.bordeColor || '')) ? String(b0.bordeColor) : '#FFFFFF', oculto: !!b0.oculto,
+    };
+    const botonStyle = hasCustomButton
+        ? `left:${boton.cx}%;top:${boton.cy}%;bottom:auto;right:auto;transform:translate(-50%,-50%) rotate(${boton.rot}deg) scale(${boton.escalaX},${boton.escalaY});background:${boton.fondo};color:${boton.color};font-size:${boton.fontSize}px;border-radius:${boton.radio}px;padding:${boton.paddingY}px ${boton.paddingX}px;border:${boton.borde}px solid ${boton.bordeColor};${boton.oculto ? 'display:none' : ''}`
+        : ctaStyle;
     return `
         <span class="elx-cat-bg" aria-hidden="true" style="${bgStyle.replace(/"/g, '&quot;')}"></span>
         <span class="elx-cat-veil" aria-hidden="true"></span>
         ${capasHtml}
-        <span class="elx-cat-cta" style="${ctaStyle}">${esc(t.cta || 'Ver productos')}</span>`;
+        <span class="elx-cat-cta" style="${botonStyle}">${esc(boton.texto)}</span>`;
 }
 
 function aplicarEquipos(cfg) {

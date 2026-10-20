@@ -9,7 +9,6 @@ import com.tienda.ecommerce.chat.ConversacionChatRepository;
 import com.tienda.ecommerce.envio.Envio;
 import com.tienda.ecommerce.envio.EstadoEnvio;
 import com.tienda.ecommerce.pago.EstadoPago;
-import com.tienda.ecommerce.pago.MetodoPago;
 import com.tienda.ecommerce.pago.Pago;
 import com.tienda.ecommerce.pedido.DetallePedido;
 import com.tienda.ecommerce.pedido.EstadoPedido;
@@ -45,7 +44,7 @@ import java.util.Random;
 import java.util.Set;
 
 /**
- * Datos demo para exposición (~200 filas por tabla, sabor Perú).
+     * Datos demo para exposición (50 usuarios activos, sabor Perú).
  * Se ejecuta solo en perfil distinto de "test" y se auto-omite si la BD
  * ya fue sembrada (no duplica al reiniciar).
  */
@@ -64,6 +63,7 @@ public class DemoDataSeeder implements CommandLineRunner {
     private final PedidoRepository pedidoRepository;
     private final ConversacionChatRepository conversacionChatRepository;
     private final PasswordEncoder passwordEncoder;
+    private final String demoUserPassword;
 
     private final int targetClientes;
     private final int targetAdmins;
@@ -80,7 +80,8 @@ public class DemoDataSeeder implements CommandLineRunner {
             PedidoRepository pedidoRepository,
             ConversacionChatRepository conversacionChatRepository,
             PasswordEncoder passwordEncoder,
-            @Value("${app.demo-seed.clientes:200}") int targetClientes,
+            @Value("${DEMO_USER_PASSWORD:}") String demoUserPassword,
+            @Value("${app.demo-seed.clientes:43}") int targetClientes,
             @Value("${app.demo-seed.admins:5}") int targetAdmins,
             @Value("${app.demo-seed.productos:200}") int targetProductos,
             @Value("${app.demo-seed.carritos:150}") int targetCarritos,
@@ -93,6 +94,7 @@ public class DemoDataSeeder implements CommandLineRunner {
         this.pedidoRepository = pedidoRepository;
         this.conversacionChatRepository = conversacionChatRepository;
         this.passwordEncoder = passwordEncoder;
+        this.demoUserPassword = demoUserPassword;
         this.targetClientes = targetClientes;
         this.targetAdmins = targetAdmins;
         this.targetProductos = targetProductos;
@@ -103,11 +105,14 @@ public class DemoDataSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        if (usuarioRepository.count() > 50) {
+        if (usuarioRepository.count() >= 50) {
             log.info("DemoDataSeeder: BD ya sembrada ({} usuarios), se omite.", usuarioRepository.count());
             return;
         }
         log.info("DemoDataSeeder: sembrando datos demo...");
+        if (demoUserPassword.isBlank()) {
+            throw new IllegalStateException("Define DEMO_USER_PASSWORD para crear usuarios demo");
+        }
         Random random = new Random(42);
 
         List<Usuario> clientes = sembrarUsuarios(random);
@@ -125,7 +130,7 @@ public class DemoDataSeeder implements CommandLineRunner {
     // ---------------- usuarios ----------------
 
     private List<Usuario> sembrarUsuarios(Random random) {
-        String hash = passwordEncoder.encode("demo123");
+        String hash = passwordEncoder.encode(demoUserPassword);
         List<Usuario> nuevos = new ArrayList<>();
         for (int i = 1; i <= targetClientes; i++) {
             nuevos.add(new Usuario(null,
@@ -140,7 +145,7 @@ public class DemoDataSeeder implements CommandLineRunner {
     }
 
     private List<Usuario> sembrarAdmins() {
-        String hash = passwordEncoder.encode("demo123");
+        String hash = passwordEncoder.encode(demoUserPassword);
         List<Usuario> nuevos = new ArrayList<>();
         for (int i = 1; i <= targetAdmins; i++) {
             nuevos.add(new Usuario(null,
@@ -259,12 +264,15 @@ public class DemoDataSeeder implements CommandLineRunner {
             }
             pedido.setTotal(total);
 
-            MetodoPago metodo = MetodoPago.values()[random.nextInt(MetodoPago.values().length)];
+            String[] metodos = {"TARJETA_CREDITO", "YAPE", "PLIN", "TRANSFERENCIA_BANCARIA", "PAGO_CONTRAENTREGA"};
+            String metodo = metodos[random.nextInt(metodos.length)];
+            String procesamiento = "PAGO_CONTRAENTREGA".equals(metodo) ? "CONTRA_ENTREGA"
+                    : ("TARJETA_CREDITO".equals(metodo) ? "SIMULADO" : "VERIFICACION_MANUAL");
             EstadoPago estadoPago = estado == EstadoPedido.CANCELADO ? EstadoPago.RECHAZADO
                     : estado == EstadoPedido.PENDIENTE ? EstadoPago.PENDIENTE : EstadoPago.APROBADO;
-            Pago pago = new Pago(pedido, metodo, estadoPago, total,
+            Pago pago = new Pago(pedido, metodo, procesamiento, estadoPago, total,
                     String.format("TX-DEMO-%06d", i + 1));
-            if (metodo == MetodoPago.YAPE || metodo == MetodoPago.PLIN) {
+            if ("YAPE".equals(metodo) || "PLIN".equals(metodo)) {
                 pago.setReferenciaComprobante("OP-" + (100000 + random.nextInt(900000)));
             }
             pago.setFechaPago(fecha.plusMinutes(5 + random.nextInt(115)));

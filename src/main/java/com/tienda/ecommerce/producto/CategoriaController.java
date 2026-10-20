@@ -34,7 +34,7 @@ public class CategoriaController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('CATEGORIAS_GESTIONAR')")
     public ResponseEntity<ApiResponse<CategoriaResponse>> crear(@Valid @RequestBody CategoriaRequest request) {
         CategoriaResponse creada = categoriaService.crear(request);
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -42,7 +42,7 @@ public class CategoriaController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('CATEGORIAS_GESTIONAR')")
     public ResponseEntity<ApiResponse<CategoriaResponse>> actualizar(
             @PathVariable Long id,
             @Valid @RequestBody CategoriaRequest request
@@ -52,7 +52,7 @@ public class CategoriaController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('CATEGORIAS_GESTIONAR')")
     public ResponseEntity<ApiResponse<Void>> eliminar(@PathVariable Long id) {
         categoriaService.eliminar(id);
         return ResponseEntity.ok(ApiResponse.exito("Categoría eliminada exitosamente", null));

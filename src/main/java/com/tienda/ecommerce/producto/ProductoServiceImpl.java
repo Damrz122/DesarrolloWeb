@@ -6,6 +6,7 @@ import com.tienda.ecommerce.common.RecursoNoEncontradoException;
 import com.tienda.ecommerce.producto.dto.ProductoRequest;
 import com.tienda.ecommerce.producto.dto.ProductoResponse;
 import com.tienda.ecommerce.reporte.dto.ProductoBajoStockDTO;
+import com.tienda.ecommerce.configuracion.MonedaRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -20,10 +21,14 @@ public class ProductoServiceImpl implements ProductoService {
 
     private final ProductoRepository productoRepository;
     private final CategoriaRepository categoriaRepository;
+    private final MonedaRepository monedaRepository;
+    private final com.tienda.ecommerce.configuracion.MonetarioService dinero;
 
-    public ProductoServiceImpl(ProductoRepository productoRepository, CategoriaRepository categoriaRepository) {
+    public ProductoServiceImpl(ProductoRepository productoRepository, CategoriaRepository categoriaRepository, MonedaRepository monedaRepository, com.tienda.ecommerce.configuracion.MonetarioService dinero) {
         this.productoRepository = productoRepository;
         this.categoriaRepository = categoriaRepository;
+        this.monedaRepository = monedaRepository;
+        this.dinero = dinero;
     }
 
     @Override
@@ -71,6 +76,9 @@ public class ProductoServiceImpl implements ProductoService {
         producto.setNombre(request.getNombre().trim());
         producto.setDescripcion(request.getDescripcion());
         producto.setPrecio(request.getPrecio());
+        producto.setMonedaCodigo(validarMoneda(request.getMonedaCodigo()));
+        dinero.validarPrecio(request.getPrecio(), producto.getMonedaCodigo());
+        if (request.getPrecioOferta() != null) dinero.validarPrecio(request.getPrecioOferta(), producto.getMonedaCodigo());
         producto.setStock(request.getStock());
         List<String> galeria = resolverGaleria(request);
         producto.setImagenUrl(galeria.isEmpty() ? null : galeria.get(0));
@@ -97,6 +105,9 @@ public class ProductoServiceImpl implements ProductoService {
         producto.setNombre(request.getNombre().trim());
         producto.setDescripcion(request.getDescripcion());
         producto.setPrecio(request.getPrecio());
+        producto.setMonedaCodigo(validarMoneda(request.getMonedaCodigo()));
+        dinero.validarPrecio(request.getPrecio(), producto.getMonedaCodigo());
+        if (request.getPrecioOferta() != null) dinero.validarPrecio(request.getPrecioOferta(), producto.getMonedaCodigo());
         producto.setStock(request.getStock());
         List<String> galeria = resolverGaleria(request);
         producto.setImagenUrl(galeria.isEmpty() ? null : galeria.get(0));
@@ -173,7 +184,14 @@ public class ProductoServiceImpl implements ProductoService {
         );
         dto.setEtiqueta(p.getEtiqueta());
         dto.setPrecioOferta(p.getPrecioOferta());
+        dto.setMonedaCodigo(p.getMonedaCodigo());
         return dto;
+    }
+
+    private String validarMoneda(String codigo) {
+        String valor = codigo == null || codigo.isBlank() ? "PEN" : codigo.trim().toUpperCase();
+        dinero.activa(valor);
+        return valor;
     }
 
     /**

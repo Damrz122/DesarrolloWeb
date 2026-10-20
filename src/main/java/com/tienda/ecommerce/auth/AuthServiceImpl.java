@@ -21,17 +21,20 @@ public class AuthServiceImpl implements AuthService {
     private final CarritoService carritoService;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final com.tienda.ecommerce.configuracion.AccesoService acceso;
 
     public AuthServiceImpl(
             UsuarioRepository usuarioRepository,
             CarritoService carritoService,
             PasswordEncoder passwordEncoder,
-            JwtService jwtService
+            JwtService jwtService,
+            com.tienda.ecommerce.configuracion.AccesoService acceso
     ) {
         this.usuarioRepository = usuarioRepository;
         this.carritoService = carritoService;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+        this.acceso = acceso;
     }
 
     @Override
@@ -82,7 +85,9 @@ public class AuthServiceImpl implements AuthService {
         carritoService.obtenerOCrearCarritoEntity(guardado.getId());
 
         String token = jwtService.generarToken(guardado);
-        return new AuthResponse(token, guardado.getId(), guardado.getNombre(), guardado.getEmail(), guardado.getRol());
+        AuthResponse respuesta = new AuthResponse(token, guardado.getId(), guardado.getNombre(), guardado.getEmail(), guardado.getRol());
+        respuesta.setPermisos(acceso.permisos(guardado));
+        return respuesta;
     }
 
     @Override
@@ -96,13 +101,16 @@ public class AuthServiceImpl implements AuthService {
         if (!usuario.isActivo()) {
             throw new BadRequestException("Tu cuenta se encuentra inactiva. Contacta al administrador.");
         }
+        if (!acceso.rolActivo(usuario)) throw new BadRequestException("El rol de tu cuenta se encuentra inactivo");
 
         if (!passwordEncoder.matches(request.getPassword(), usuario.getPasswordHash())) {
             throw new CredencialesInvalidasException("Credenciales incorrectas: email o contraseña no válidos");
         }
 
         String token = jwtService.generarToken(usuario);
-        return new AuthResponse(token, usuario.getId(), usuario.getNombre(), usuario.getEmail(), usuario.getRol());
+        AuthResponse respuesta = new AuthResponse(token, usuario.getId(), usuario.getNombre(), usuario.getEmail(), usuario.getRol());
+        respuesta.setPermisos(acceso.permisos(usuario));
+        return respuesta;
     }
 
     private static String valor(String s) {

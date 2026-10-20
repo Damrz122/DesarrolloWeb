@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Locale;
 
 @Component
 @Order(1)
@@ -24,10 +25,13 @@ public class DataInitializer implements CommandLineRunner {
     @Value("${app.demo-seed.enabled:true}")
     private boolean demoSeedEnabled;
 
-    @Value("${ADMIN_PASSWORD:admin123}")
+    @Value("${ADMIN_PASSWORD:}")
     private String adminPassword;
 
-    @Value("${CLIENTE_PASSWORD:cliente123}")
+    @Value("${ADMIN_EMAIL:Admin@gmail.com}")
+    private String adminEmail;
+
+    @Value("${CLIENTE_PASSWORD:}")
     private String clientePassword;
 
     private final CategoriaRepository categoriaRepository;
@@ -98,16 +102,16 @@ public class DataInitializer implements CommandLineRunner {
             productoRepository.saveAll(productosIniciales);
         }
 
-        if (usuarioRepository.count() == 0) {
+        if (usuarioRepository.count() == 0 && demoSeedEnabled) {
             // Seed demo: solo si esta habilitado (desactivado en prod)
-            if (!demoSeedEnabled) {
-                return;
+            if (adminPassword.isBlank() || clientePassword.isBlank()) {
+                throw new IllegalStateException("Define ADMIN_PASSWORD y CLIENTE_PASSWORD para crear usuarios demo");
             }
             Usuario admin = new Usuario(
                     null,
                     "Administrador", "Sistema", null,
                     TipoDocumento.DNI, "00000001",
-                    "admin@tienda.com",
+                    normalizarEmailAdministrador(),
                     passwordEncoder.encode(adminPassword),
                     Rol.ADMIN,
                     true
@@ -126,5 +130,58 @@ public class DataInitializer implements CommandLineRunner {
             usuarioRepository.save(admin);
             usuarioRepository.save(cliente);
         }
+
+        asegurarAdministradorConfigurado();
+    }
+
+    /**
+     * Mantiene la cuenta administradora indicada en las variables de entorno.
+     * No toca cuentas de clientes ni elimina datos existentes.
+     */
+    private void asegurarAdministradorConfigurado() {
+        if (adminPassword == null || adminPassword.isBlank()) {
+            return;
+        }
+
+        String email = normalizarEmailAdministrador();
+        // Una cuenta ya configurada se gestiona desde el panel, no se resetea al reiniciar.
+        if (usuarioRepository.findByEmail(email).filter(u -> u.getRol().equals(Rol.ADMIN)).isPresent()) return;
+        List<Usuario> administradores = usuarioRepository.findByRol(Rol.ADMIN);
+        // Si la cuenta configurada ya es administradora, se elige siempre esa
+        // cuenta. Evita depender del orden no garantizado de la consulta.
+        Usuario admin = administradores.stream()
+                .filter(usuario -> email.equalsIgnoreCase(usuario.getEmail()))
+                .findFirst()
+                .orElse(administradores.stream().findFirst().orElse(null));
+
+        if (admin == null) {
+            if (usuarioRepository.existsByEmail(email)) {
+                throw new IllegalStateException("El correo configurado para ADMIN_EMAIL ya pertenece a otro usuario");
+            }
+            admin = new Usuario(
+                    null, "Administrador", "Sistema", null,
+                    TipoDocumento.DNI, "00000001", email,
+                    passwordEncoder.encode(adminPassword), Rol.ADMIN, true
+            );
+        } else {
+            Usuario conMismoEmail = usuarioRepository.findByEmail(email).orElse(null);
+            if (conMismoEmail != null && !conMismoEmail.getId().equals(admin.getId())) {
+                throw new IllegalStateException("El correo configurado para ADMIN_EMAIL ya pertenece a otro usuario");
+            }
+            admin.setEmail(email);
+            if (!passwordEncoder.matches(adminPassword, admin.getPasswordHash())) {
+                admin.setPasswordHash(passwordEncoder.encode(adminPassword));
+            }
+            admin.setActivo(true);
+        }
+
+        usuarioRepository.save(admin);
+    }
+
+    private String normalizarEmailAdministrador() {
+        if (adminEmail == null || adminEmail.isBlank()) {
+            throw new IllegalStateException("Define ADMIN_EMAIL para configurar la cuenta administradora");
+        }
+        return adminEmail.trim().toLowerCase(Locale.ROOT);
     }
 }

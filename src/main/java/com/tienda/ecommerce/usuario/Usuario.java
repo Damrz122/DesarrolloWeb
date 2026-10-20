@@ -34,8 +34,8 @@ public class Usuario {
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
+    @Convert(converter = RolConverter.class)
+    @Column(nullable = false, length = 40)
     private Rol rol;
 
     @Column(nullable = false)

@@ -8,6 +8,7 @@ export const api = {
     },
 
     setToken(token, persistir = true) {
+        (persistir ? sessionStorage : localStorage).removeItem('ecommerce_token');
         if (persistir) {
             localStorage.setItem('ecommerce_token', token);
         } else {

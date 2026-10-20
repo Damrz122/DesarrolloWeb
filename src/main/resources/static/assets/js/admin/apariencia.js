@@ -2,7 +2,7 @@
 import { auth } from '/assets/js/auth.js';
 import { renderAdminShell } from '/assets/js/ui/adminShell.js?v=2';
 import { showToast } from '/assets/js/ui/toast.js';
-import { limpiarCacheSitio } from '/assets/js/sitio.js?v=4';
+import { limpiarCacheSitio } from '/assets/js/sitio.js?v=5';
 
 renderAdminShell('apariencia');
 

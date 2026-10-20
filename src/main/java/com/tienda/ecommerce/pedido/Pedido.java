@@ -32,9 +32,17 @@ public class Pedido {
     @Column(nullable = false, length = 30)
     private EstadoPedido estado = EstadoPedido.PENDIENTE;
 
-    @Column(nullable = false, precision = 10, scale = 2)
+    @Column(nullable = false, precision = 19, scale = 4)
     @Min(value = 0, message = "El total no puede ser negativo")
     private BigDecimal total;
+    @Column(name = "moneda_codigo", nullable = false, length = 3)
+    private String monedaCodigo = "PEN";
+    @Column(name = "total_base_pen", precision = 19, scale = 4) private BigDecimal totalBasePen;
+    @Column(name = "cotizacion_id", unique = true, length = 36) private String cotizacionId;
+    @Column(name = "cambio_snapshot", columnDefinition = "TEXT") private String cambioSnapshot;
+    public BigDecimal getTotalBasePen() { return totalBasePen; } public void setTotalBasePen(BigDecimal v) { totalBasePen = v; }
+    public String getCotizacionId() { return cotizacionId; } public void setCotizacionId(String v) { cotizacionId = v; }
+    public String getCambioSnapshot() { return cambioSnapshot; } public void setCambioSnapshot(String v) { cambioSnapshot = v; }
 
     @Column(name = "direccion_envio", length = 255)
     private String direccionEnvio;
@@ -98,6 +106,8 @@ public class Pedido {
     public void setTotal(BigDecimal total) {
         this.total = total;
     }
+    public String getMonedaCodigo() { return monedaCodigo; }
+    public void setMonedaCodigo(String monedaCodigo) { this.monedaCodigo = monedaCodigo; }
 
     public String getDireccionEnvio() {
         return direccionEnvio;

@@ -12,11 +12,22 @@ public class CrearPedidoRequest {
 
     /**
      * Método de pago seleccionado en el checkout (pasarela simulada).
-     * Valores del enum {@code MetodoPago}: TARJETA_CREDITO, TARJETA_DEBITO,
-     * YAPE, PLIN, TRANSFERENCIA_BANCARIA, PAGO_CONTRAENTREGA.
-     * Opcional por compatibilidad: si viene vacío se usa TARJETA_CREDITO.
+     * Código del catálogo metodos_pago_config. Se exige un método activo,
+     * compatible con la moneda y la versión de formulario seleccionadas.
      */
     private String metodoPago;
+
+    /**
+     * N° de operación / comprobante Yape-Plin-Transferencia (opcional).
+     * Obligatorio en frontend para YAPE, PLIN y TRANSFERENCIA_BANCARIA.
+     */
+    private String referenciaComprobante;
+    private String cotizacionToken;
+    private String versionMetodo;
+    private java.util.Map<String,String> datosPago;
+    public String getCotizacionToken() { return cotizacionToken; } public void setCotizacionToken(String v) { cotizacionToken = v; }
+    public String getVersionMetodo() { return versionMetodo; } public void setVersionMetodo(String v) { versionMetodo = v; }
+    public java.util.Map<String,String> getDatosPago() { return datosPago; } public void setDatosPago(java.util.Map<String,String> v) { datosPago = v; }
 
     public CrearPedidoRequest() {
     }
@@ -48,5 +59,13 @@ public class CrearPedidoRequest {
 
     public void setMetodoPago(String metodoPago) {
         this.metodoPago = metodoPago;
+    }
+
+    public String getReferenciaComprobante() {
+        return referenciaComprobante;
+    }
+
+    public void setReferenciaComprobante(String referenciaComprobante) {
+        this.referenciaComprobante = referenciaComprobante;
     }
 }

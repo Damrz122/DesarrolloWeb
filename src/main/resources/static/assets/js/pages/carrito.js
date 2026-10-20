@@ -1,4 +1,5 @@
 import { auth } from '/assets/js/auth.js';
+import { formatoMoneda } from '/assets/js/money.js';
         import { cart } from '/assets/js/cart.js';
         import { renderNavbar } from '/assets/js/ui/navbar.js';
 
@@ -42,12 +43,14 @@ import { auth } from '/assets/js/auth.js';
                     return;
                 }
 
-                const totalFormateado = new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(datos.total);
+                const moneda = datos.monedaCodigo || 'PEN';
+                const formato = valor => formatoMoneda(valor,moneda);
+                const totalFormateado = formato(datos.total);
 
                 let itemsHTML = '';
                 datos.items.forEach(item => {
-                    const precioUnit = new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(item.precioUnitario);
-                    const subtotal = new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(item.subtotal);
+                    const precioUnit = formato(item.precioUnitario);
+                    const subtotal = formato(item.subtotal);
                     const fallbackImg = 'https://images.unsplash.com/photo-1526738549149-8e07eca6c147?w=600&auto=format&fit=crop&q=80';
 
                     itemsHTML += `

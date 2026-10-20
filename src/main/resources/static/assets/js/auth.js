@@ -16,6 +16,7 @@ export const auth = {
 
     setUser(usuario, persistir = true) {
         const storage = persistir ? localStorage : sessionStorage;
+        (persistir ? sessionStorage : localStorage).removeItem('ecommerce_user');
         storage.setItem('ecommerce_user', JSON.stringify(usuario));
     },
 
@@ -38,8 +39,12 @@ export const auth = {
     },
 
     isAdmin() {
-        const user = this.getUser();
-        return user && user.rol === 'ADMIN';
+        return this.tienePermiso('ADMIN_ACCESO');
+    },
+    tienePermiso(codigo) { return (this.getUser()?.permisos || []).includes(codigo); },
+    inicioAdmin() {
+        const rutas = [['REPORTES_VER','dashboard'],['PEDIDOS_GESTIONAR','dashboard'],['PRODUCTOS_VER','productos'],['INVENTARIO_GESTIONAR','productos'],['PRODUCTOS_GESTIONAR','productos'],['CONFIGURACION_GESTIONAR','configuracion'],['USUARIOS_GESTIONAR','usuarios'],['CHAT_ATENDER','chat'],['APARIENCIA_GESTIONAR','apariencia']];
+        return '/admin/' + (rutas.find(([p]) => this.tienePermiso(p))?.[1] || 'dashboard') + '.html';
     },
 
     async login(email, password, recordar = true) {
@@ -51,7 +56,8 @@ export const auth = {
                     id: res.datos.id,
                     nombre: res.datos.nombre,
                     email: res.datos.email,
-                    rol: res.datos.rol
+                    rol: res.datos.rol,
+                    permisos: res.datos.permisos || []
                 }, recordar);
                 showToast('¡Bienvenido de vuelta, ' + res.datos.nombre + '!', 'success');
                 return res.datos;
@@ -77,7 +83,8 @@ export const auth = {
                     id: res.datos.id,
                     nombre: res.datos.nombre,
                     email: res.datos.email,
-                    rol: res.datos.rol
+                    rol: res.datos.rol,
+                    permisos: res.datos.permisos || []
                 }, true);
                 showToast('¡Cuenta creada exitosamente!', 'success');
                 return res.datos;
@@ -102,10 +109,18 @@ export const auth = {
     },
 
     protegerRutaAdmin() {
-        if (!this.isAuthenticated() || !this.isAdmin()) {
+        const pagina = location.pathname.split('/').pop();
+        const permisos = {
+            'productos.html': ['PRODUCTOS_VER','PRODUCTOS_GESTIONAR','INVENTARIO_GESTIONAR'],
+            'categorias.html': ['CATEGORIAS_GESTIONAR'], 'usuarios.html': ['USUARIOS_GESTIONAR'],
+            'pedidos.html': ['PEDIDOS_GESTIONAR'], 'reportes.html': ['REPORTES_VER'],
+            'dashboard.html': ['REPORTES_VER','PEDIDOS_GESTIONAR'], 'chat.html': ['CHAT_ATENDER'],
+            'configuracion.html': ['CONFIGURACION_GESTIONAR'], 'apariencia.html': ['APARIENCIA_GESTIONAR'], 'estudio.html': ['APARIENCIA_GESTIONAR']
+        };
+        if (!this.isAuthenticated() || !this.isAdmin() || !(permisos[pagina] || []).some(p => this.tienePermiso(p))) {
             showToast('Acceso restringido: Se requieren permisos de Administrador', 'error');
             setTimeout(() => {
-                window.location.href = '/login.html?redirect=' + encodeURIComponent(window.location.pathname);
+                window.location.href = this.isAuthenticated() ? '/index.html' : '/login.html?redirect=' + encodeURIComponent(window.location.pathname);
             }, 800);
             return false;
         }
@@ -123,3 +138,12 @@ export const auth = {
         return true;
     }
 };
+
+// Los permisos y el estado se refrescan en cada navegación; el backend hace lo
+// mismo en cada petición. Un token antiguo no conserva privilegios retirados.
+if (api.getToken() && auth.isAuthenticated()) {
+    try {
+        const r = await api.get('/api/usuarios/me');
+        if (r.exito && r.datos) auth.setUser(r.datos, !!localStorage.getItem('ecommerce_user'));
+    } catch (e) { if (e.status === 401 || e.status === 403) auth.logout(false); }
+}

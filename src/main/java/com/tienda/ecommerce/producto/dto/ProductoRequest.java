@@ -17,6 +17,7 @@ public class ProductoRequest {
     @NotNull(message = "El precio es obligatorio")
     @Positive(message = "El precio debe ser mayor a 0")
     private BigDecimal precio;
+    private String monedaCodigo = "PEN";
 
     @NotNull(message = "El stock es obligatorio")
     @PositiveOrZero(message = "El stock no puede ser negativo")
@@ -90,6 +91,8 @@ public class ProductoRequest {
     public void setPrecio(BigDecimal precio) {
         this.precio = precio;
     }
+    public String getMonedaCodigo() { return monedaCodigo; }
+    public void setMonedaCodigo(String monedaCodigo) { this.monedaCodigo = monedaCodigo; }
 
     public Integer getStock() {
         return stock;

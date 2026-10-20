@@ -28,13 +28,13 @@ public class SitioController {
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('APARIENCIA_GESTIONAR')")
     public ResponseEntity<ApiResponse<Map<String, String>>> obtenerTodo() {
         return ResponseEntity.ok(ApiResponse.exito("Configuración del sitio", sitioService.obtenerTodo()));
     }
 
     @PutMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('APARIENCIA_GESTIONAR')")
     public ResponseEntity<ApiResponse<Map<String, String>>> guardar(
             @RequestBody Map<String, String> cambios
     ) {

@@ -18,9 +18,14 @@ import java.util.List;
 public class ChatAuthChannelInterceptor implements ChannelInterceptor {
 
     private final JwtService jwtService;
+    private final com.tienda.ecommerce.usuario.UsuarioRepository usuarios;
+    private final com.tienda.ecommerce.configuracion.AccesoService acceso;
+    private final ConversacionChatRepository conversaciones;
 
-    public ChatAuthChannelInterceptor(JwtService jwtService) {
+    public ChatAuthChannelInterceptor(JwtService jwtService, com.tienda.ecommerce.usuario.UsuarioRepository usuarios,
+            com.tienda.ecommerce.configuracion.AccesoService acceso, ConversacionChatRepository conversaciones) {
         this.jwtService = jwtService;
+        this.usuarios=usuarios;this.acceso=acceso;this.conversaciones=conversaciones;
     }
 
     @Override
@@ -35,6 +40,18 @@ public class ChatAuthChannelInterceptor implements ChannelInterceptor {
                             new UsernamePasswordAuthenticationToken(email, null, List.of());
                     accessor.setUser(auth);
                 }
+            }
+            if(accessor.getUser()==null) throw new org.springframework.security.access.AccessDeniedException("Sesión requerida");
+        }
+        if (accessor != null && accessor.getCommand() != null && accessor.getCommand() != StompCommand.DISCONNECT) {
+            Principal principal=accessor.getUser();
+            var usuario=principal==null?null:usuarios.findByEmail(principal.getName()).orElse(null);
+            if(usuario==null || !usuario.isActivo() || !acceso.rolActivo(usuario)) throw new org.springframework.security.access.AccessDeniedException("Sesión inactiva");
+            if(accessor.getCommand()==StompCommand.SUBSCRIBE) {
+                String destino=accessor.getDestination();
+                if(destino==null || !destino.matches("/topic/chat/[0-9]+")) throw new org.springframework.security.access.AccessDeniedException("Destino no autorizado");
+                var conversacion=conversaciones.findById(Long.valueOf(destino.substring(destino.lastIndexOf('/')+1))).orElseThrow();
+                if(!conversacion.getCliente().getId().equals(usuario.getId()) && !acceso.tiene(usuario,"CHAT_ATENDER")) throw new org.springframework.security.access.AccessDeniedException("Conversación no autorizada");
             }
         }
         return message;

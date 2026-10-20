@@ -38,6 +38,8 @@ class CarritoServiceTest {
 
     @Mock
     private UsuarioRepository usuarioRepository;
+    @Mock private com.tienda.ecommerce.configuracion.MonetarioService dinero;
+    @Mock private jakarta.persistence.EntityManager entityManager;
 
     @InjectMocks
     private CarritoServiceImpl carritoService;
@@ -48,6 +50,8 @@ class CarritoServiceTest {
 
     @BeforeEach
     void setUp() {
+        lenient().when(dinero.tasa(any(),any())).thenReturn(BigDecimal.ONE);
+        lenient().when(dinero.redondear(any(),any())).thenAnswer(i -> i.getArgument(0));
         usuario = new Usuario(1L, "Juan Pérez", "juan@ejemplo.com", "pass123", Rol.CLIENTE, true);
         Categoria cat = new Categoria(1L, "Audio", "Audífonos");
         producto = new Producto(10L, "Audífonos Sony", "Inalámbricos", BigDecimal.valueOf(200.00), 5, "audio.jpg", cat, true);

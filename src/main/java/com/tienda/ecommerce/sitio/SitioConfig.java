@@ -16,7 +16,9 @@ public class SitioConfig {
     @Column(length = 80)
     private String clave;
 
-    @Column(length = 20000)
+    // Los diseños visuales contienen capas y ajustes; VARCHAR(20000) los truncaba
+    // silenciosamente al publicar una sección con varias tarjetas.
+    @Column(columnDefinition = "TEXT")
     private String valor;
 
     @Column(name = "actualizado", nullable = false)

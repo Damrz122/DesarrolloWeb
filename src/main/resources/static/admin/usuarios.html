@@ -19,7 +19,7 @@
         <div class="adm-pagehead">
             <div>
                 <h1 class="adm-title">Usuarios registrados</h1>
-                <p class="adm-subtitle">Cambia roles y activa o desactiva cuentas</p>
+                <p class="adm-subtitle">Crea cuentas, cambia roles, activa o desactiva y elimina usuarios</p>
             </div>
             <div class="adm-actions">
                 <div>
@@ -33,6 +33,12 @@
                 <div>
                     <label class="adm-label adm-etiqueta-ajustada" for="filtro-buscar">Buscar</label>
                     <input id="filtro-buscar" class="adm-input" type="text" placeholder="Ej. nombre o correo…" />
+                </div>
+                <div style="align-self:flex-end">
+                    <button id="btn-nuevo-usuario" class="adm-btn adm-btn-primary" type="button">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                        Nuevo usuario
+                    </button>
                 </div>
             </div>
         </div>
@@ -65,6 +71,62 @@
     <footer class="adm-footer">
         <p>© 2026 ELECTRONIX — Módulo de Administración.</p>
     </footer>
+
+    <div id="modal-usuario" class="adm-modal-backdrop hidden">
+        <div class="adm-modal adm-modal--ancho">
+            <div class="adm-modal-head">
+                <h3 class="adm-modal-title" id="modal-usr-title">Nuevo usuario</h3>
+                <button id="modal-usr-close" class="adm-close" aria-label="Cerrar" type="button">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <form id="form-nuevo-usuario" class="adm-form-grid" novalidate>
+                <input id="nu-id" type="hidden" value="" />
+                <div class="adm-field">
+                    <label class="adm-label" for="nu-nombres">Nombres *</label>
+                    <input id="nu-nombres" class="adm-input" type="text" required minlength="2" maxlength="100" placeholder="Ej. Maria" />
+                </div>
+                <div class="adm-field">
+                    <label class="adm-label" for="nu-paterno">Apellido paterno *</label>
+                    <input id="nu-paterno" class="adm-input" type="text" required minlength="2" maxlength="100" placeholder="Ej. Gomez" />
+                </div>
+                <div class="adm-field">
+                    <label class="adm-label" for="nu-materno">Apellido materno</label>
+                    <input id="nu-materno" class="adm-input" type="text" maxlength="100" placeholder="Opcional" />
+                </div>
+                <div class="adm-field" id="nu-rol-wrap">
+                    <label class="adm-label" for="nu-rol">Rol *</label>
+                    <select id="nu-rol" class="adm-select">
+                        <option value="CLIENTE">Cliente</option>
+                        <option value="ADMIN">Admin</option>
+                    </select>
+                </div>
+                <div class="adm-field">
+                    <label class="adm-label" for="nu-tipodoc">Tipo documento *</label>
+                    <select id="nu-tipodoc" class="adm-select">
+                        <option value="DNI">DNI</option>
+                        <option value="CE">CE</option>
+                    </select>
+                </div>
+                <div class="adm-field">
+                    <label class="adm-label" for="nu-doc">N° documento *</label>
+                    <input id="nu-doc" class="adm-input" type="text" required placeholder="8 dígitos DNI / 9 CE" />
+                </div>
+                <div class="adm-field adm-field--full">
+                    <label class="adm-label" for="nu-email">Email *</label>
+                    <input id="nu-email" class="adm-input" type="email" required placeholder="usuario@correo.com" />
+                </div>
+                <div class="adm-field adm-field--full">
+                    <label class="adm-label" for="nu-pass" id="nu-pass-label">Contraseña * (mín. 6)</label>
+                    <input id="nu-pass" class="adm-input" type="password" required minlength="6" placeholder="••••••••" />
+                </div>
+                <div class="adm-modal-foot adm-field--full">
+                    <button type="button" id="modal-usr-cancel" class="adm-btn adm-btn-ghost">Cancelar</button>
+                    <button type="submit" id="btn-crear-usuario" class="adm-btn adm-btn-primary">Crear usuario</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <script type="module" src="/assets/js/admin/usuarios.js?v=2"></script>
 </body>

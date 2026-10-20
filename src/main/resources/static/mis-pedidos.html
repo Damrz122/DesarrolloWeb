@@ -11,6 +11,7 @@
     <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
     <link rel="stylesheet" href="/assets/css/ui/ui-inline.css">
     <link rel="stylesheet" href="/assets/css/pages/figma-home.css">
+    <link rel="stylesheet" href="/assets/css/pages/mis-pedidos-timeline.css">
 </head>
 <body class="bg-[#ededed] text-neutral-800 min-h-screen flex flex-col antialiased">
 
@@ -134,17 +135,20 @@
         </div>
     </main>
 
-    <div id="order-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-neutral-900/70 backdrop-blur-sm">
-        <div class="bg-white w-full max-w-2xl rounded-2xl border border-neutral-200 shadow-2xl p-6 sm:p-8 max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center border-b border-neutral-200 pb-4 mb-6">
-                <div>
+    <div id="order-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-neutral-950/70 backdrop-blur-md">
+        <div class="bg-white w-full max-w-3xl rounded-2xl border border-neutral-200 shadow-2xl p-6 sm:p-8 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-start border-b border-neutral-200 pb-4 mb-5 gap-3">
+                <div class="min-w-0">
                     <h3 id="modal-order-title" class="text-lg font-black text-neutral-900 uppercase">Detalle de Pedido</h3>
-                    <span id="modal-order-date" class="text-xs text-neutral-500"></span>
+                    <span id="modal-order-date" class="text-xs text-neutral-500 block"></span>
+                    <div id="modal-order-badges" class="flex flex-wrap gap-2 mt-2"></div>
                 </div>
-                <button id="modal-close-btn" class="text-neutral-400 hover:text-neutral-700 p-1 rounded-lg">
+                <button id="modal-close-btn" class="text-neutral-400 hover:text-neutral-700 p-1 rounded-lg flex-shrink-0">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
+
+            <div id="modal-order-timeline" class="mb-5"></div>
 
             <div id="modal-order-content" class="space-y-4 text-sm">
             </div>

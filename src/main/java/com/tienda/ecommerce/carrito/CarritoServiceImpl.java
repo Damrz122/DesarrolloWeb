@@ -24,23 +24,30 @@ public class CarritoServiceImpl implements CarritoService {
     private final ItemCarritoRepository itemCarritoRepository;
     private final ProductoRepository productoRepository;
     private final UsuarioRepository usuarioRepository;
+    private final com.tienda.ecommerce.configuracion.MonetarioService dinero;
+    private final jakarta.persistence.EntityManager entityManager;
 
     public CarritoServiceImpl(
             CarritoRepository carritoRepository,
             ItemCarritoRepository itemCarritoRepository,
             ProductoRepository productoRepository,
-            UsuarioRepository usuarioRepository
+            UsuarioRepository usuarioRepository,
+            com.tienda.ecommerce.configuracion.MonetarioService dinero,
+            jakarta.persistence.EntityManager entityManager
     ) {
         this.carritoRepository = carritoRepository;
         this.itemCarritoRepository = itemCarritoRepository;
         this.productoRepository = productoRepository;
         this.usuarioRepository = usuarioRepository;
+        this.dinero = dinero;
+        this.entityManager = entityManager;
     }
 
     @Override
     @Transactional
     public CarritoResponse obtenerCarrito(Long usuarioId) {
         Carrito carrito = obtenerOCrearCarritoEntity(usuarioId);
+
         return mapearADto(carrito);
     }
 
@@ -57,6 +64,8 @@ public class CarritoServiceImpl implements CarritoService {
         Carrito carrito = obtenerOCrearCarritoEntity(usuarioId);
 
         // Buscar si ya existe el producto en el carrito
+        entityManager.lock(carrito, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
+        entityManager.refresh(carrito);
         ItemCarrito itemExistente = carrito.getItems().stream()
                 .filter(i -> i.getProducto().getId().equals(producto.getId()))
                 .findFirst()
@@ -90,6 +99,8 @@ public class CarritoServiceImpl implements CarritoService {
         }
 
         Carrito carrito = obtenerOCrearCarritoEntity(usuarioId);
+        entityManager.lock(carrito, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
+        entityManager.refresh(carrito);
 
         ItemCarrito item = carrito.getItems().stream()
                 .filter(i -> i.getId().equals(itemId))
@@ -112,6 +123,8 @@ public class CarritoServiceImpl implements CarritoService {
     @Transactional
     public CarritoResponse removerItem(Long usuarioId, Long itemId) {
         Carrito carrito = obtenerOCrearCarritoEntity(usuarioId);
+        entityManager.lock(carrito, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
+        entityManager.refresh(carrito);
 
         ItemCarrito item = carrito.getItems().stream()
                 .filter(i -> i.getId().equals(itemId))
@@ -127,6 +140,8 @@ public class CarritoServiceImpl implements CarritoService {
     @Transactional
     public void vaciarCarrito(Long usuarioId) {
         Carrito carrito = obtenerOCrearCarritoEntity(usuarioId);
+        entityManager.lock(carrito, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
+        entityManager.refresh(carrito);
         carrito.getItems().clear();
         carritoRepository.save(carrito);
     }
@@ -147,10 +162,12 @@ public class CarritoServiceImpl implements CarritoService {
         List<ItemCarritoResponse> itemsDto = new ArrayList<>();
         BigDecimal total = BigDecimal.ZERO;
         int cantidadTotal = 0;
+        String monedaTotal = carrito.getItems() == null || carrito.getItems().isEmpty() ? "PEN" : carrito.getItems().get(0).getProducto().getMonedaCodigo();
 
         if (carrito.getItems() != null) {
             for (ItemCarrito item : carrito.getItems()) {
-                BigDecimal precioVigente = item.getProducto().getPrecioVigente();
+                BigDecimal precioVigente = dinero.redondear(item.getProducto().getPrecioVigente().multiply(
+                        dinero.tasa(item.getProducto().getMonedaCodigo(), monedaTotal)), monedaTotal);
                 BigDecimal subtotal = precioVigente.multiply(BigDecimal.valueOf(item.getCantidad()));
                 total = total.add(subtotal);
                 cantidadTotal += item.getCantidad();
@@ -167,6 +184,11 @@ public class CarritoServiceImpl implements CarritoService {
             }
         }
 
-        return new CarritoResponse(carrito.getId(), itemsDto, total, cantidadTotal);
+        CarritoResponse respuesta = new CarritoResponse(carrito.getId(), itemsDto, total, cantidadTotal);
+        String moneda = "PEN";
+        if (carrito.getItems() != null && !carrito.getItems().isEmpty()) moneda = carrito.getItems().get(0).getProducto().getMonedaCodigo();
+        respuesta.setMonedaCodigo(moneda);
+        for (ItemCarritoResponse item : itemsDto) item.setMonedaCodigo(moneda);
+        return respuesta;
     }
 }

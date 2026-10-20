@@ -29,17 +29,27 @@ public class Pago {
     @JoinColumn(name = "pedido_id", nullable = false, unique = true)
     private Pedido pedido;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "metodo_pago", nullable = false, length = 30)
-    private MetodoPago metodoPago;
+    @Column(name = "metodo_pago", nullable = false, length = 50)
+    private String metodoPago;
+
+    @Column(name = "procesamiento_pago", nullable = false, length = 30)
+    private String procesamientoPago;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "estado_pago", nullable = false, length = 30)
     private EstadoPago estadoPago = EstadoPago.PENDIENTE;
 
-    @Column(nullable = false, precision = 10, scale = 2)
+    @Column(nullable = false, precision = 19, scale = 4)
     @Min(value = 0, message = "El monto no puede ser negativo")
     private BigDecimal monto;
+    @Column(name = "moneda_codigo", nullable = false, length = 3)
+    private String monedaCodigo = "PEN";
+    @Column(name = "metodo_nombre", length = 100) private String metodoNombre;
+    @Column(name = "formulario_snapshot", columnDefinition = "TEXT") private String formularioSnapshot;
+    @Column(name = "datos_pago_json", columnDefinition = "TEXT") private String datosPagoJson;
+    public String getMetodoNombre() { return metodoNombre; } public void setMetodoNombre(String v) { metodoNombre = v; }
+    public String getFormularioSnapshot() { return formularioSnapshot; } public void setFormularioSnapshot(String v) { formularioSnapshot = v; }
+    public String getDatosPagoJson() { return datosPagoJson; } public void setDatosPagoJson(String v) { datosPagoJson = v; }
 
     @Column(name = "codigo_transaccion", length = 100, unique = true)
     private String codigoTransaccion;
@@ -53,13 +63,24 @@ public class Pago {
     public Pago() {
     }
 
-    public Pago(Pedido pedido, MetodoPago metodoPago, EstadoPago estadoPago, BigDecimal monto, String codigoTransaccion) {
+    public Pago(Pedido pedido, String metodoPago, String procesamientoPago, EstadoPago estadoPago, BigDecimal monto, String codigoTransaccion) {
         this.pedido = pedido;
         this.metodoPago = metodoPago;
+        this.procesamientoPago = procesamientoPago;
         this.estadoPago = estadoPago;
         this.monto = monto;
         this.codigoTransaccion = codigoTransaccion;
         this.fechaPago = LocalDateTime.now();
+    }
+
+    /** Compatibilidad con código y pruebas anteriores; no se usa en el checkout nuevo. */
+    @Deprecated
+    public Pago(Pedido pedido, MetodoPago metodoPago, EstadoPago estadoPago, BigDecimal monto, String codigoTransaccion) {
+        this(pedido, metodoPago.name(),
+                metodoPago == MetodoPago.PAGO_CONTRAENTREGA ? "CONTRA_ENTREGA"
+                        : (metodoPago == MetodoPago.YAPE || metodoPago == MetodoPago.PLIN || metodoPago == MetodoPago.TRANSFERENCIA_BANCARIA
+                        ? "VERIFICACION_MANUAL" : "SIMULADO"),
+                estadoPago, monto, codigoTransaccion);
     }
 
     public Long getId() {
@@ -78,13 +99,16 @@ public class Pago {
         this.pedido = pedido;
     }
 
-    public MetodoPago getMetodoPago() {
+    public String getMetodoPago() {
         return metodoPago;
     }
 
-    public void setMetodoPago(MetodoPago metodoPago) {
+    public void setMetodoPago(String metodoPago) {
         this.metodoPago = metodoPago;
     }
+
+    public String getProcesamientoPago() { return procesamientoPago; }
+    public void setProcesamientoPago(String procesamientoPago) { this.procesamientoPago = procesamientoPago; }
 
     public EstadoPago getEstadoPago() {
         return estadoPago;
@@ -101,6 +125,8 @@ public class Pago {
     public void setMonto(BigDecimal monto) {
         this.monto = monto;
     }
+    public String getMonedaCodigo() { return monedaCodigo; }
+    public void setMonedaCodigo(String monedaCodigo) { this.monedaCodigo = monedaCodigo; }
 
     public String getCodigoTransaccion() {
         return codigoTransaccion;

@@ -13,4 +13,5 @@ public interface PedidoService {
     PedidoResponse obtenerPorId(Long pedidoId, Long usuarioId, boolean esAdmin);
     PaginaResponse<PedidoResponse> listarParaAdmin(EstadoPedido estado, Pageable pageable);
     PedidoResponse cambiarEstado(Long pedidoId, EstadoPedido nuevoEstado);
+    PedidoResponse verificarPago(Long pedidoId, com.tienda.ecommerce.pago.EstadoPago estadoPago);
 }

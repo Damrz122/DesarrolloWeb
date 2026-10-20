@@ -1,4 +1,4 @@
-# NovaStore — Sistema de Comercio Electrónico
+# Electronix — Sistema de Comercio Electrónico
 
 Plataforma web integral de comercio electrónico para pequeños y medianos comercios, desarrollada bajo principios de calidad **SOLID**, **Clean Code**, arquitectura por capas (*package-by-feature*) y empaquetado autónomo en un único artefacto ejecutable (`.jar`).
 
@@ -10,11 +10,11 @@ Plataforma web integral de comercio electrónico para pequeños y medianos comer
 |---|---|
 | **Backend** | Java 21 LTS, Spring Boot 3.3.4 (Web, Validation, Data JPA, Security, WebSocket) |
 | **ORM / Persistencia** | Hibernate 6 + PostgreSQL 16 (con soporte H2 para pruebas automatizadas) |
-| **Seguridad** | Stateless JWT (JJWT 0.12.6), contraseñas con hashing BCrypt, control por roles (`ADMIN`, `CLIENTE`) |
+| **Seguridad** | Stateless JWT (JJWT 0.12.6), contraseñas con hashing BCrypt, roles y permisos configurables en PostgreSQL (roles base `ADMIN`, `CLIENTE`) |
 | **Tiempo Real** | Spring WebSocket con protocolo STOMP sobre SockJS |
 | **Frontend** | HTML5 semántico, CSS3 con Tailwind CSS, JavaScript ES6+ modular |
 | **Construcción** | Apache Maven 3.9+ |
-| **Contenedores** | Docker Compose (PostgreSQL 16) |
+| **Contenedores** | Docker Compose (aplicación, PostgreSQL 16 y Adminer) |
 
 ---
 
@@ -22,7 +22,7 @@ Plataforma web integral de comercio electrónico para pequeños y medianos comer
 
 ```
 SISTEMA WEB/
-├── docker-compose.yml              # Contenedor PostgreSQL 16 local
+├── docker-compose.yml              # App, PostgreSQL 16 y Adminer
 ├── pom.xml                         # Dependencias Maven y configuración del build
 ├── API_CATALOGO.md                 # Especificación de endpoints de catálogo (APF1)
 ├── src/
@@ -31,7 +31,8 @@ SISTEMA WEB/
 │   │   │   ├── config/             # SecurityConfig, WebSocketConfig, AppConfig, JwtProperties, DataInitializer
 │   │   │   ├── common/             # ApiResponse<T>, GlobalExceptionHandler, PaginaResponse<T>, Excepciones de negocio
 │   │   │   ├── auth/               # AuthController, AuthService (+impl), JwtService, JwtAuthFilter, DTOs
-│   │   │   ├── usuario/            # Usuario (Entity), Rol (Enum), UsuarioRepository, UsuarioService (+impl), UsuarioController, DTOs
+│   │   │   ├── usuario/            # Usuario, Rol (compatibilidad), UsuarioService (+impl), UsuarioController, DTOs
+│   │   │   ├── configuracion/      # Monedas, cotizaciones, métodos de pago, roles y permisos
 │   │   │   ├── producto/           # Producto, Categoria (Entities), Repositorios, Servicios (+impl), Controllers, DTOs
 │   │   │   ├── carrito/            # Carrito, ItemCarrito (Entities), Repositorios, CarritoService (+impl), CarritoController, DTOs
 │   │   │   ├── pedido/             # Pedido, DetallePedido (Entities), EstadoPedido (Enum), PedidoService (+impl), PedidoController, DTOs
@@ -45,7 +46,7 @@ SISTEMA WEB/
 │   │           ├── carrito.html          # Vista y gestión de ítems del carrito
 │   │           ├── checkout.html         # Formulario de despacho y generación de orden
 │   │           ├── mis-pedidos.html      # Historial de compras y seguimiento
-│   │           ├── login.html            # Inicio de sesión con accesos rápidos de prueba
+│   │           ├── login.html            # Inicio de sesión (sin cuentas demo)
 │   │           ├── registro.html         # Registro de nuevos clientes
 │   │           ├── admin/
 │   │           │   ├── dashboard.html    # Panel de métricas y resumen general
@@ -53,6 +54,8 @@ SISTEMA WEB/
 │   │           │   ├── categorias.html   # Gestión de categorías
 │   │           │   ├── pedidos.html      # Gestión logística y cambio de estados
 │   │           │   ├── reportes.html     # Reporte de ingresos y alerta de stock bajo
+│   │           │   ├── configuracion.html # Monedas, cotizaciones, métodos, roles y permisos
+│   │           │   ├── usuarios.html     # Alta, edición y estado de usuarios
 │   │           │   └── chat.html         # Consola de atención al cliente en tiempo real
 │   │           └── assets/
 │   │               ├── css/              # output.css y tokens visuales
@@ -62,39 +65,64 @@ SISTEMA WEB/
 
 ---
 
-## 3. Credenciales de Demostración Sembradas
+## 3. Cuenta administrativa
 
-Al iniciar por primera vez, el sistema precarga automáticamente datos iniciales (`DataInitializer`):
+El administrador se crea o conserva a partir de `ADMIN_EMAIL` y `ADMIN_PASSWORD` definidos en `.env` (nunca se exponen en el frontend). La cuenta actual es `Admin@gmail.com`; la contraseña se administra en `.env`.
 
-| Rol | Email | Contraseña |
-|---|---|---|
-| **Administrador** | `admin@tienda.com` | `admin123` |
-| **Cliente Demo** | `cliente@tienda.com` | `cliente123` |
+No existen cuentas de demostración ni botones de acceso rápido. Los clientes se registran desde **Regístrate aquí** en la pantalla de inicio de sesión.
 
-*(La pantalla `login.html` incluye botones directos para cargar estas credenciales con un solo clic).*
+La configuración de monedas, cotizaciones, métodos de pago, formularios, roles y permisos se puede hacer desde **Admin → Configuración** o directamente por SQL. Consulta [docs/configuracion-comercial.md](docs/configuracion-comercial.md) para las reglas, ejemplos y respaldo.
 
 ---
 
 ## 4. Guía de Ejecución Local
 
-### Paso 1: Levantar la Base de Datos con Docker Compose
-```bash
-docker compose up -d
-```
-Esto iniciará un contenedor PostgreSQL 16 en el puerto `5432` con la base de datos `ecommerce`.
+### Paso 1: Crear el archivo `.env`
+Copia la plantilla y cambia los valores marcados como ejemplo:
 
-### Paso 2: Ejecutar el Backend
+```powershell
+Copy-Item .env.example .env
+```
+
+En Linux/macOS:
+
 ```bash
+cp .env.example .env
+```
+
+Edita `.env` y define como mínimo `POSTGRES_PASSWORD`, `JWT_SECRET` y `ADMIN_PASSWORD`. No subas `.env` al repositorio.
+
+### Paso 2: Levantar la aplicación con Docker Compose
+
+```bash
+docker compose up -d --build
+```
+
+Esto inicia:
+
+- Aplicación: [http://localhost:8090](http://localhost:8090)
+- Adminer: [http://localhost:8091](http://localhost:8091)
+- PostgreSQL 16: puerto `5435` del equipo
+
+La cuenta administradora se crea con `ADMIN_EMAIL` y `ADMIN_PASSWORD` del `.env`. La contraseña nunca se muestra en el frontend y no hay cuentas demo por defecto.
+
+### Paso 3: Ejecutar el backend fuera de Docker (opcional)
+
+Si prefieres usar Maven en el equipo, levanta solo PostgreSQL:
+
+```bash
+docker compose up -d ecommerce-postgres
 mvn spring-boot:run
 ```
 
-O ejecutando directamente el archivo `.jar` compilado:
+En ese caso la aplicación escucha en `http://localhost:8080` y `DB_URL` debe apuntar a `jdbc:postgresql://localhost:5435/ecommerce` (ya está así en `.env.example`).
+
+También puedes ejecutar el `.jar` compilado:
+
 ```bash
+mvn clean package
 java -jar target/ecommerce-0.0.1-SNAPSHOT.jar
 ```
-
-### Paso 3: Abrir la Aplicación en el Navegador
-Abre [http://localhost:8080](http://localhost:8080) para acceder al catálogo público.
 
 ---
 
@@ -157,7 +185,7 @@ El proyecto está preparado para desplegarse como un único servicio web utiliza
 |---|---|---|
 | `PORT` | Puerto de escucha | `8080` |
 | `DB_URL` | URL JDBC de PostgreSQL | `jdbc:postgresql://host:5432/ecommerce` |
-| `DB_USER` | Usuario de base de datos | `postgres` |
+| `DB_USER` | Usuario de base de datos | `ecommerce_user` |
 | `DB_PASSWORD` | Contraseña de base de datos | `secreto` |
 | `JWT_SECRET` | Clave secreta HMAC para firmar JWT | `cadena-hex-o-base64-segura-de-256-bits` |
 | `JWT_EXPIRATION` | Tiempo de vida del JWT en milisegundos | `86400000` |

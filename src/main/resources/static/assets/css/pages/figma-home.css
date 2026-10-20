@@ -736,6 +736,19 @@ a.fx-card:hover { transform: translateY(-5px); box-shadow: 0 18px 36px rgba(28,5
 .fx-foot-legal a:hover { text-decoration: underline; }
 .fx-foot-sep { color: #d2d2d7; }
 .fx-foot-country { margin-left: auto; color: #424245; }
+.elx-vacio {
+  grid-column: 1 / -1;
+  min-height: 320px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 3rem 1rem;
+}
+.elx-vacio-icono { margin: 0 0 .75rem; color: #6b7280; }
+.elx-vacio-titulo { font-size: 1rem; font-weight: 800; color: #1f2937; }
+.elx-vacio-sub { font-size: .875rem; color: #6b7280; margin-top: 4px; max-width: 290px; }
 @media (max-width: 760px) {
   .fx-dir-grid { grid-template-columns: repeat(2, 1fr); }
   .fx-foot-country { margin-left: 0; width: 100%; }

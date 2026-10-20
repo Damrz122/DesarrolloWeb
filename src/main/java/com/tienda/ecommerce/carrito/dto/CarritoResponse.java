@@ -10,6 +10,7 @@ public class CarritoResponse {
     private List<ItemCarritoResponse> items = new ArrayList<>();
     private BigDecimal total = BigDecimal.ZERO;
     private int cantidadTotal = 0;
+    private String monedaCodigo = "PEN";
 
     public CarritoResponse() {
     }
@@ -52,4 +53,6 @@ public class CarritoResponse {
     public void setCantidadTotal(int cantidadTotal) {
         this.cantidadTotal = cantidadTotal;
     }
+    public String getMonedaCodigo() { return monedaCodigo; }
+    public void setMonedaCodigo(String monedaCodigo) { this.monedaCodigo = monedaCodigo; }
 }

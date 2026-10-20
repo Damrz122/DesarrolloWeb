@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/carrito")
-@PreAuthorize("hasRole('CLIENTE') or hasRole('ADMIN')")
+@PreAuthorize("hasAuthority('COMPRAR')")
 public class CarritoController {
 
     private final CarritoService carritoService;

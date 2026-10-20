@@ -1,4 +1,5 @@
 ﻿import { api } from '/assets/js/api.js';
+import { formatoMoneda } from '/assets/js/money.js';
         import { auth } from '/assets/js/auth.js';
         import { renderAdminShell } from '/assets/js/ui/adminShell.js?v=2';
         import { showToast } from '/assets/js/ui/toast.js';
@@ -11,7 +12,7 @@
             cargarDashboard();
         }
 
-        const fmt = v => new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(v);
+        const fmt = v => formatoMoneda(Number(v) || 0, 'PEN');
         const fmtFecha = iso => new Date(iso).toLocaleString('es-PE', {
             month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
         });
@@ -27,15 +28,29 @@
                 const repRes = await api.get('/api/reportes/ventas');
                 if (repRes.exito && repRes.datos) {
                     const r = repRes.datos;
-                    document.getElementById('stat-ventas').textContent  = fmt(r.totalVentas);
-                    document.getElementById('stat-pedidos').textContent = r.totalPedidos;
-                    document.getElementById('stat-ticket').textContent  = fmt(r.ticketPromedio);
+                    document.getElementById('stat-ventas').textContent  = fmt(r.totalVentas ?? 0);
+                    document.getElementById('stat-pedidos').textContent = r.totalPedidos ?? 0;
+                    document.getElementById('stat-ticket').textContent  = fmt(r.ticketPromedio ?? 0);
                     document.getElementById('stat-stock-bajo').textContent =
                         r.productosBajoStock ? r.productosBajoStock.length : 0;
 
-                    // Sparkline en tarjeta de ticket
-                    if (r.ventasPorDia && r.ventasPorDia.length > 0) {
-                        renderSparklineSvg(r.ventasPorDia);
+                    let aviso = document.getElementById('db-aviso-monedas');
+                    if (!aviso) {
+                        aviso = document.createElement('p');
+                        aviso.id = 'db-aviso-monedas';
+                        aviso.setAttribute('role', 'status');
+                        aviso.style.cssText = 'margin: 12px 0 0; padding: 9px 12px; border: 1px solid #fcd34d; border-radius: 8px; background: #fffbeb; color: #92400e; font-size: 12px;';
+                        document.querySelector('.db-kpi-grid').after(aviso);
+                    }
+                    aviso.hidden = !r.pedidosSinConversionHistorica;
+                    aviso.textContent = r.pedidosSinConversionHistorica
+                        ? `${r.pedidosSinConversionHistorica} pedido(s) antiguos en otra moneda no tienen conversión histórica y no se suman al total en PEN.`
+                        : '';
+
+                    // Sparkline en tarjeta de ticket (backend envía ventasPorFecha)
+                    const serie = r.ventasPorFecha ?? r.ventasPorDia ?? [];
+                    if (serie && serie.length > 0) {
+                        renderSparklineSvg(serie);
                     }
                 }
 
@@ -52,7 +67,7 @@
                             <tr>
                                 <td><span class="db-order-id">#${esc(p.id)}</span></td>
                                 <td><span class="db-client-name">${esc(p.usuarioNombre) || 'Cliente'}</span></td>
-                                <td class="num"><span class="db-amount">${fmt(p.total)}</span></td>
+                                <td class="num"><span class="db-amount">${formatoMoneda(p.total,p.monedaCodigo)}</span></td>
                                 <td>${badge(p.estado)}</td>
                                 <td class="db-date-cell">${fmtFecha(p.fecha)}</td>
                                 <td>
@@ -137,7 +152,7 @@
         // sparkline: es para dibujar la mini grafica del ticket
         function renderSparklineSvg(datos) {
             const W = 120, H = 36;
-            const vals = datos.map(d => d.total);
+            const vals = datos.map(d => Number(d.total) || 0);
             const max  = Math.max(...vals, 1);
             const step = W / Math.max(vals.length - 1, 1);
 

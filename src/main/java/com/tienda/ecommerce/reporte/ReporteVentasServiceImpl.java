@@ -96,6 +96,10 @@ public class ReporteVentasServiceImpl implements ReporteVentasService {
         // 3. Productos con bajo stock (umbral <= 5 unidades)
         List<ProductoBajoStockDTO> productosBajoStock = productoService.obtenerProductosBajoStock(5);
 
-        return new ReporteVentasResponse(totalVentas, totalPedidos, ticketPromedio, ventasPorFecha, productosBajoStock);
+        ReporteVentasResponse respuesta = new ReporteVentasResponse(totalVentas, totalPedidos, ticketPromedio, ventasPorFecha, productosBajoStock);
+        respuesta.setVentasPorMoneda(pedidoRepository.ventasPorMoneda(dtDesde, dtHasta).stream()
+                .map(r -> new ReporteVentasResponse.TotalMoneda((String)r[0], new BigDecimal(r[1].toString()), ((Number)r[2]).longValue())).toList());
+        respuesta.setPedidosSinConversionHistorica(pedidoRepository.sinConversionHistorica(dtDesde, dtHasta));
+        return respuesta;
     }
 }

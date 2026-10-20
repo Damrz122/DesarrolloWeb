@@ -1,4 +1,5 @@
 import { api } from '/assets/js/api.js';
+import { formatoMoneda } from '/assets/js/money.js';
 import { cart } from '/assets/js/cart.js';
 import { renderNavbar } from '/assets/js/ui/navbar.js';
 import { renderProductCard } from '/assets/js/ui/productCard.js';
@@ -18,10 +19,6 @@ function esc(value) {
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#39;');
-}
-
-function formatoPEN(valor) {
-    return new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(valor);
 }
 
 if (!productId) {
@@ -50,9 +47,9 @@ async function cargarDetalle(id) {
         const esOferta = String(p.etiqueta || '').trim().toUpperCase() === 'OFERTA'
             && Number.isFinite(precioOfertaNum) && precioOfertaNum > 0 && Number(p.precio) > precioOfertaNum;
         const precioVigente = esOferta ? precioOfertaNum : Number(p.precio);
-        const precioFormateado = formatoPEN(p.precio);
-        const precioVigenteFmt = formatoPEN(precioVigente);
-        const cuota = formatoPEN(precioVigente / 6);
+        const precioFormateado = formatoMoneda(p.precio, p.monedaCodigo);
+        const precioVigenteFmt = formatoMoneda(precioVigente, p.monedaCodigo);
+        const cuota = formatoMoneda(precioVigente / 6, p.monedaCodigo);
         const tieneStock = p.stock > 0;
         const esEnvioGratis = precioVigente >= 199;
         const imagenFallback = 'https://images.unsplash.com/photo-1526738549149-8e07eca6c147?w=600&auto=format&fit=crop&q=80';

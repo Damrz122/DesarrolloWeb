@@ -11,6 +11,14 @@ public class ReporteVentasResponse {
     private BigDecimal ticketPromedio = BigDecimal.ZERO;
     private List<VentaPorFechaDTO> ventasPorFecha = new ArrayList<>();
     private List<ProductoBajoStockDTO> productosBajoStock = new ArrayList<>();
+    public record TotalMoneda(String monedaCodigo, BigDecimal total, long pedidos) {}
+    private List<TotalMoneda> ventasPorMoneda = new ArrayList<>();
+    private long pedidosSinConversionHistorica;
+    public String getMonedaBase() { return "PEN"; }
+    public List<TotalMoneda> getVentasPorMoneda() { return ventasPorMoneda; }
+    public void setVentasPorMoneda(List<TotalMoneda> v) { ventasPorMoneda = v; }
+    public long getPedidosSinConversionHistorica() { return pedidosSinConversionHistorica; }
+    public void setPedidosSinConversionHistorica(long v) { pedidosSinConversionHistorica = v; }
 
     public ReporteVentasResponse() {
     }

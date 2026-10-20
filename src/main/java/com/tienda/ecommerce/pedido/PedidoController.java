@@ -39,7 +39,7 @@ public class PedidoController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('CLIENTE') or hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('COMPRAR')")
     public ResponseEntity<ApiResponse<PedidoResponse>> crearPedido(
             Authentication authentication,
             @Valid @RequestBody CrearPedidoRequest request
@@ -51,7 +51,7 @@ public class PedidoController {
     }
 
     @GetMapping("/mios")
-    @PreAuthorize("hasRole('CLIENTE') or hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('COMPRAR')")
     public ResponseEntity<ApiResponse<List<PedidoResponse>>> listarMisPedidos(Authentication authentication) {
         Usuario usuario = obtenerUsuarioAutenticado(authentication);
         List<PedidoResponse> pedidos = pedidoService.listarMisPedidos(usuario.getId());
@@ -65,13 +65,13 @@ public class PedidoController {
             @PathVariable Long id
     ) {
         Usuario usuario = obtenerUsuarioAutenticado(authentication);
-        boolean esAdmin = usuario.getRol() == Rol.ADMIN;
+        boolean esAdmin = authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("PEDIDOS_GESTIONAR"));
         PedidoResponse pedido = pedidoService.obtenerPorId(id, usuario.getId(), esAdmin);
         return ResponseEntity.ok(ApiResponse.exito("Detalle del pedido obtenido", pedido));
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('PEDIDOS_GESTIONAR')")
     public ResponseEntity<ApiResponse<PaginaResponse<PedidoResponse>>> listarParaAdmin(
             @RequestParam(required = false) EstadoPedido estado,
             @RequestParam(defaultValue = "0") int page,
@@ -83,12 +83,25 @@ public class PedidoController {
     }
 
     @PatchMapping("/{id}/estado")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('PEDIDOS_GESTIONAR')")
     public ResponseEntity<ApiResponse<PedidoResponse>> cambiarEstado(
             @PathVariable Long id,
             @Valid @RequestBody CambiarEstadoPedidoRequest request
     ) {
         PedidoResponse actualizado = pedidoService.cambiarEstado(id, request.getEstado());
         return ResponseEntity.ok(ApiResponse.exito("Estado del pedido actualizado exitosamente", actualizado));
+    }
+
+    @PatchMapping("/{id}/pago")
+    @PreAuthorize("hasAuthority('PAGOS_VERIFICAR')")
+    public ResponseEntity<ApiResponse<PedidoResponse>> verificarPago(
+            @PathVariable Long id,
+            @Valid @RequestBody com.tienda.ecommerce.pedido.dto.VerificarPagoRequest request
+    ) {
+        PedidoResponse actualizado = pedidoService.verificarPago(id, request.getEstado());
+        String msg = request.getEstado() == com.tienda.ecommerce.pago.EstadoPago.APROBADO
+                ? "Pago verificado y cobrado exitosamente"
+                : "Pago marcado como rechazado";
+        return ResponseEntity.ok(ApiResponse.exito(msg, actualizado));
     }
 }

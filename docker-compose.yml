@@ -4,15 +4,15 @@ services:
     container_name: electronix-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ecommerce
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgrespassword
+      POSTGRES_DB: ${POSTGRES_DB:?Define POSTGRES_DB in .env}
+      POSTGRES_USER: ${POSTGRES_USER:?Define POSTGRES_USER in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD in .env}
     ports:
       - "5435:5432"
     volumes:
       - electronix_postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d ecommerce"]
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -29,14 +29,25 @@ services:
         condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: prod
-      SPRING_DATASOURCE_URL: jdbc:postgresql://ecommerce-postgres:5432/ecommerce
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgrespassword
+      SPRING_DATASOURCE_URL: jdbc:postgresql://ecommerce-postgres:5432/${POSTGRES_DB:?Define POSTGRES_DB in .env}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:?Define POSTGRES_USER in .env}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD in .env}
+      JWT_SECRET: ${JWT_SECRET:?Define JWT_SECRET in .env}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-Admin@gmail.com}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      CLIENTE_PASSWORD: ${CLIENTE_PASSWORD:-}
+      DEMO_USER_PASSWORD: ${DEMO_USER_PASSWORD:-}
+      DEMO_SEED_ENABLED: ${DEMO_SEED_ENABLED:-false}
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       SPRING_JPA_SHOW_SQL: "false"
+      # Sirve HTML, CSS, JS e imágenes desde el directorio local montado.
+      # Guarda el archivo y actualiza el navegador (Ctrl+F5) para ver los cambios.
+      SPRING_WEB_RESOURCES_STATIC_LOCATIONS: file:/app/static/,classpath:/static/
+      SPRING_WEB_RESOURCES_CACHE_PERIOD: "0"
       APP_UPLOAD_DIR: /app/uploads
     volumes:
       - electronix_uploads:/app/uploads
+      - ./src/main/resources/static:/app/static:ro
     ports:
       - "8090:8080"
 

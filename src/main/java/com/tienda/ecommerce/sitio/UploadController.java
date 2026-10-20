@@ -37,7 +37,7 @@ public class UploadController {
     }
 
     @PostMapping(value = "/uploads", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('PRODUCTOS_GESTIONAR','APARIENCIA_GESTIONAR')")
     public ResponseEntity<ApiResponse<Map<String, String>>> subir(
             @RequestParam("archivo") MultipartFile archivo
     ) throws IOException {

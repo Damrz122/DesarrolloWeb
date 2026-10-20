@@ -1,6 +1,6 @@
 import { api } from '/assets/js/api.js';
 import { renderNavbar } from '/assets/js/ui/navbar.js';
-import { aplicarSitio } from '/assets/js/sitio.js?v=4';
+import { aplicarSitio } from '/assets/js/sitio.js?v=5';
 
 renderNavbar();
 

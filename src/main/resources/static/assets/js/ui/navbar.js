@@ -5,7 +5,7 @@ import { cart } from '../cart.js';
 import { initFloatingChat } from '../chat.js';
 import { initSideDrawer } from './drawer.js';
 import { api } from '../api.js?v=2';
-import { aplicarSitio } from '../sitio.js?v=4';
+import { aplicarSitio } from '../sitio.js?v=5';
 
 export function getElectronixLogo() {
     return `
@@ -55,7 +55,7 @@ export function renderNavbar() {
                         Conectado como<br/><strong>${escapeHtml(user.email)}</strong>
                     </div>
                     <a href="/mis-pedidos.html">Mis Pedidos</a>
-                    ${isAdmin ? `<a href="/admin/dashboard.html" class="elx-admin-link">Panel Administrador</a>` : ''}
+                    ${isAdmin ? `<a href="${auth.inicioAdmin()}" class="elx-admin-link">Panel Administrativo</a>` : ''}
                     <button id="logout-btn" class="elx-logout-btn">Cerrar Sesión</button>
                 </div>
             </div>

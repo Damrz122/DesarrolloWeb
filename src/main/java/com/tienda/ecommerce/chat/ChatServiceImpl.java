@@ -96,7 +96,7 @@ public class ChatServiceImpl implements ChatService {
                 .orElseThrow(() -> new RecursoNoEncontradoException("Remitente no encontrado con id: " + remitenteAutenticadoId));
 
         // Si un admin responde y no habia admin asignado, se asigna
-        if (remitente.getRol() == Rol.ADMIN && conversacion.getAdmin() == null) {
+        if (esAdmin && conversacion.getAdmin() == null) {
             conversacion.setAdmin(remitente);
             conversacionRepository.save(conversacion);
         }

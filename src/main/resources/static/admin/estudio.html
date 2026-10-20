@@ -7,92 +7,167 @@
     <link rel="icon" type="image/svg+xml" href="/assets/img/logo.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@600;700;800;900&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@500;600;700;800;900&display=swap">
     <link rel="stylesheet" href="/assets/css/output.css">
     <script src="/assets/js/admin-theme.js"></script>
     <link rel="stylesheet" href="/assets/css/admin.css?v=2">
-    <link rel="stylesheet" href="/assets/css/admin/estudio.css?v=1">
+    <link rel="stylesheet" href="/assets/css/admin/estudio.css?v=5">
     <script src="/assets/js/vendor/fabric-6.9.1.min.js"></script>
 </head>
 <body class="adm est-body">
-
     <header class="est-topbar">
-        <a href="/admin/apariencia.html" class="adm-btn adm-btn-ghost adm-btn-sm" title="Volver a Ajustes">← Volver</a>
+        <a href="/admin/apariencia.html" class="adm-btn adm-btn-ghost adm-btn-sm" title="Volver a Apariencia">← Volver</a>
         <div class="est-topbar-title">
-            <strong>Estudio</strong>
-            <span id="est-bloque-nombre">Card</span>
+            <strong>Electronix Studio</strong>
+            <span>Editor visual de tarjetas</span>
         </div>
-        <select id="est-bloque" class="adm-select est-select" aria-label="Bloque"></select>
-        <div class="ap-seg est-vista" role="tablist" aria-label="Comparar">
+        <div class="ap-seg est-mode" role="tablist" aria-label="Modo del estudio">
+            <button type="button" data-mode="editar" class="is-sel" role="tab">Editar</button>
+            <button type="button" data-mode="vista" role="tab">Vista previa</button>
+        </div>
+        <div class="ap-seg est-vista" role="tablist" aria-label="Comparar cambios">
             <button type="button" data-vista="antes" role="tab">Antes</button>
-            <button type="button" data-vista="despues" role="tab" class="is-sel">Después</button>
+            <button type="button" data-vista="despues" class="is-sel" role="tab">Después</button>
         </div>
-        <label class="ap-check"><input type="checkbox" id="est-hover" checked /> Hover</label>
-        <div class="est-zoom">
+        <button type="button" id="est-undo" class="adm-btn adm-btn-ghost adm-btn-sm" title="Deshacer (Ctrl+Z)">↶</button>
+        <button type="button" id="est-redo" class="adm-btn adm-btn-ghost adm-btn-sm" title="Rehacer (Ctrl+Y)">↷</button>
+        <div class="est-zoom" aria-label="Zoom">
             <button type="button" id="est-zoom-out" class="adm-btn adm-btn-ghost adm-btn-sm" title="Reducir zoom">−</button>
             <span id="est-zoom-nivel">100%</span>
+            <button type="button" id="est-zoom-fit" class="adm-btn adm-btn-ghost adm-btn-sm" title="Ajustar a pantalla">Ajustar</button>
             <button type="button" id="est-zoom-in" class="adm-btn adm-btn-ghost adm-btn-sm" title="Ampliar zoom">+</button>
         </div>
-        <button type="button" id="est-add-texto" class="adm-btn adm-btn-ghost adm-btn-sm" title="Agregar texto">+ Texto</button>
-        <button type="button" id="est-borrar" class="adm-btn adm-btn-ghost adm-btn-sm" title="Eliminar seleccionado">🗑</button>
         <button type="button" id="est-guardar" class="adm-btn adm-btn-primary adm-btn-sm">Guardar</button>
     </header>
 
     <main class="est-main">
-        <div class="est-canvas-wrap" id="est-wrap">
-            <canvas id="est-canvas"></canvas>
-        </div>
+        <aside class="est-tools" aria-label="Herramientas">
+            <p class="est-side-label">Herramientas</p>
+            <button type="button" class="est-tool is-active" data-tool="seleccionar" title="Seleccionar y mover"><b><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 3 14 8-6 2-3 6z"/></svg></b><span>Seleccionar</span></button>
+            <button type="button" class="est-tool" data-tool="mano" title="Mover vista (H)"><b><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 11V5a1.5 1.5 0 0 1 3 0v5-7a1.5 1.5 0 0 1 3 0v7-5a1.5 1.5 0 0 1 3 0v5-3a1.5 1.5 0 0 1 3 0v7c0 4-2.5 7-6.5 7H12a6 6 0 0 1-4.3-1.8L4 15.5A1.5 1.5 0 1 1 6.1 13.4L8 15.3z"/></svg></b><span>Mano</span></button>
+            <button type="button" class="est-tool" id="est-add-texto" title="Agregar texto"><b><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14M12 5v14M8 19h8M8 5l-3 14M16 5l3 14"/></svg></b><span>Texto</span></button>
+            <button type="button" class="est-tool" id="est-add-imagen" title="Agregar imagen"><b><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4" width="17" height="16" rx="2"/><circle cx="9" cy="9" r="1.5"/><path d="m5 18 5-5 3.5 3 2-2 3.5 4"/></svg></b><span>Imagen</span></button>
+            <button type="button" class="est-tool" id="est-crop" title="Encuadrar imagen"><b><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3v14a4 4 0 0 0 4 4h10M17 21V7a4 4 0 0 0-4-4H3"/></svg></b><span>Encuadrar</span></button>
+            <button type="button" class="est-tool" id="est-duplicar" title="Duplicar seleccionado"><b><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="4" width="11" height="13" rx="2"/><path d="M16 20H6a2 2 0 0 1-2-2V8"/></svg></b><span>Duplicar</span></button>
+            <button type="button" class="est-tool est-tool--danger" id="est-borrar" title="Eliminar seleccionado"><b><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v5M14 11v5M6 7l1 13h10l1-13M9 7V4h6v3"/></svg></b><span>Eliminar</span></button>
+            <span class="est-tool-sep"></span>
+            <button type="button" class="est-tool" id="est-card-fondo" title="Editar fondo de la tarjeta"><b><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m5 17 4-4 3 3 2-2 5 5"/></svg></b><span>Fondo</span></button>
+            <button type="button" class="est-tool" id="est-card-boton" title="Editar botón"><b><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="10" rx="5"/><path d="M9 12h6"/></svg></b><span>Botón</span></button>
+        </aside>
 
-        <aside class="est-panel" aria-label="Propiedades">
-            <p class="ap-group"><span></span>Seleccionado</p>
-            <p class="est-sel-nombre" id="est-sel-nombre">Nada seleccionado</p>
-            <div class="ap-grid2">
+        <section class="est-workspace" aria-label="Mesa de trabajo">
+            <div class="est-workspace-head">
                 <div>
-                    <div class="ap-row"><span>X</span><span class="ap-val" data-v-x></span></div>
-                    <input type="range" id="est-x" min="0" max="100" step="0.5" />
+                    <strong id="est-section-title">EQUIPOS ELECTRÓNICOS</strong>
+                    <span id="est-status">Selecciona un elemento para editarlo</span>
                 </div>
-                <div>
-                    <div class="ap-row"><span>Y</span><span class="ap-val" data-v-y></span></div>
-                    <input type="range" id="est-y" min="0" max="100" step="0.5" />
-                </div>
-                <div>
-                    <div class="ap-row"><span>Ancho</span><span class="ap-val" data-v-w></span></div>
-                    <input type="range" id="est-w" min="5" max="100" step="0.5" />
-                </div>
-                <div>
-                    <div class="ap-row"><span>Rotación</span><span class="ap-val" data-v-rot></span></div>
-                    <input type="range" id="est-rot" min="-45" max="45" step="1" />
+                <label class="ap-check"><input type="checkbox" id="est-hover" checked> Simular hover</label>
+            </div>
+            <div class="est-card-switcher" id="est-card-switcher" aria-label="Elegir tarjeta"></div>
+            <div class="est-stage-scroll" id="est-wrap">
+                <div class="est-board-sizer" id="est-board-sizer">
+                    <div class="est-board" id="est-board">
+                        <h1 id="est-board-title">EQUIPOS ELECTRÓNICOS</h1>
+                        <div class="est-cards" id="est-cards" aria-label="Tarjetas de equipos"></div>
+                    </div>
                 </div>
             </div>
-            <div id="est-texto-props" hidden>
-                <div class="ap-row"><span>Tamaño letra</span><span class="ap-val" data-v-size></span></div>
-                <input type="range" id="est-size" min="8" max="40" step="1" />
-                <div class="ap-row"><span>Alineación</span></div>
-                <div class="ap-seg" id="est-align">
-                    <button type="button" data-al="left">Izq</button>
-                    <button type="button" data-al="center">Centro</button>
-                    <button type="button" data-al="right">Der</button>
+        </section>
+
+        <aside class="est-panel" aria-label="Propiedades y capas">
+            <section class="est-legacy-selector">
+                <p class="ap-group"><span></span>Tarjeta activa</p>
+                <select id="est-bloque" class="adm-select est-select" aria-label="Tarjeta activa"></select>
+            </section>
+
+            <details id="est-card-props" class="est-inspector">
+                <summary>Fondo y velo</summary>
+                <div class="est-inspector-content">
+                <label class="adm-label" for="est-fondo-url">Imagen de fondo</label>
+                <div class="est-inline-input">
+                    <input id="est-fondo-url" class="adm-input" type="url" placeholder="https://… o /uploads/…">
+                    <button type="button" id="est-fondo-usar" class="adm-btn adm-btn-ghost adm-btn-sm">Usar</button>
                 </div>
-            </div>
-            <p class="ap-group"><span></span>Velo y fondo</p>
-            <div class="ap-grid2">
-                <div>
-                    <div class="ap-row"><span>Oscuro</span><span class="ap-val" data-v-velo></span></div>
-                    <input type="range" id="est-velo" min="0" max="95" step="1" />
+                <label class="est-upload-btn" for="est-fondo-file">Subir fondo<input id="est-fondo-file" type="file" accept="image/png,image/jpeg,image/webp" hidden></label>
+                <div class="ap-row"><span>Color base</span><input id="est-fondo-color" class="est-color" type="color"></div>
+                <div class="ap-grid2">
+                    <label><span class="ap-row"><span>Velo</span><span class="ap-val" data-v-velo></span></span><input type="range" id="est-velo" min="0" max="95" step="1"></label>
+                    <label><span class="ap-row"><span>Hover</span><span class="ap-val" data-v-veloHover></span></span><input type="range" id="est-veloHover" min="0" max="95" step="1"></label>
                 </div>
-                <div>
-                    <div class="ap-row"><span>Claro hover</span><span class="ap-val" data-v-veloHover></span></div>
-                    <input type="range" id="est-veloHover" min="0" max="95" step="1" />
+                <div class="ap-row"><span>Color del velo</span><input id="est-veloColor" class="est-color" type="color"></div>
+                <div class="ap-row"><span>Desenfoque</span><span class="ap-val" data-v-fondoBlur></span></div>
+                <input type="range" id="est-fondoBlur" min="0" max="12" step="1">
                 </div>
-            </div>
-            <div class="ap-row"><span>Color sombra</span><span class="ap-val" data-v-veloColor></span></div>
-            <div class="ap-color-row"><input type="color" id="est-veloColor" class="ap-color" /></div>
-            <div class="ap-row"><span>Desenfoque</span><span class="ap-val" data-v-fondoBlur></span></div>
-            <input type="range" id="est-fondoBlur" min="0" max="12" step="1" />
-            <p class="adm-sub est-hint">Tip: doble click en un texto para escribir ahí mismo · rueda del mouse = zoom · Supr = eliminar</p>
+            </details>
+
+            <section id="est-selection-props">
+                <p class="ap-group"><span></span><span id="est-sel-nombre">Nada seleccionado</span></p>
+                <div class="ap-grid2">
+                    <label><span class="ap-row"><span>X</span><span class="ap-val" data-v-x>—</span></span><input type="range" id="est-x" min="0" max="100" step="0.5" disabled></label>
+                    <label><span class="ap-row"><span>Y</span><span class="ap-val" data-v-y>—</span></span><input type="range" id="est-y" min="0" max="100" step="0.5" disabled></label>
+                    <label><span class="ap-row"><span>Ancho</span><span class="ap-val" data-v-w>—</span></span><input type="range" id="est-w" min="4" max="150" step="0.5" disabled></label>
+                    <label><span class="ap-row"><span>Rotación</span><span class="ap-val" data-v-rot>—</span></span><input type="range" id="est-rot" min="-180" max="180" step="1" disabled></label>
+                </div>
+                <div class="ap-row"><span>Opacidad</span><span class="ap-val" data-v-opacity>—</span></div>
+                <input type="range" id="est-opacity" min="0" max="100" step="1" disabled>
+                <div class="est-action-row">
+                    <button type="button" id="est-flip-x" class="adm-btn adm-btn-ghost adm-btn-sm" disabled>↔ Voltear</button>
+                    <button type="button" id="est-flip-y" class="adm-btn adm-btn-ghost adm-btn-sm" disabled>↕ Voltear</button>
+                    <button type="button" id="est-front" class="adm-btn adm-btn-ghost adm-btn-sm" disabled>Al frente</button>
+                </div>
+            </section>
+
+            <details id="est-texto-props" class="est-inspector" hidden open>
+                <summary>Texto</summary>
+                <div class="est-inspector-content">
+                <textarea id="est-texto" class="adm-input est-textarea" rows="3" placeholder="Escribe el texto"></textarea>
+                <div class="ap-grid2">
+                    <label class="adm-label">Fuente<select id="est-font" class="adm-select"><option value="Montserrat">Montserrat</option><option value="Inter">Inter</option><option value="Arial">Arial</option><option value="Georgia">Georgia</option></select></label>
+                    <label class="adm-label">Color<input id="est-texto-color" class="est-color est-color--full" type="color"></label>
+                </div>
+                <div class="ap-row"><span>Tamaño</span><span class="ap-val" data-v-size>—</span></div>
+                <input type="range" id="est-size" min="8" max="56" step="1">
+                <div class="ap-seg" id="est-align"><button type="button" data-al="left">Izq</button><button type="button" data-al="center">Centro</button><button type="button" data-al="right">Der</button></div>
+                </div>
+            </details>
+
+            <details id="est-image-props" class="est-inspector" hidden open>
+                <summary>Imagen y ajustes</summary>
+                <div class="est-inspector-content">
+                <label class="adm-label" for="est-imagen-url">Reemplazar imagen</label>
+                <div class="est-inline-input"><input id="est-imagen-url" class="adm-input" type="url" placeholder="https://…"><button type="button" id="est-imagen-usar" class="adm-btn adm-btn-ghost adm-btn-sm">Usar</button></div>
+                <label class="est-upload-btn" for="est-imagen-file">Subir imagen<input id="est-imagen-file" type="file" accept="image/png,image/jpeg,image/webp" hidden></label>
+                <p class="est-hint">Para recortar, selecciona la imagen, pulsa <b>Recortar</b> y ajusta tamaño y posición dentro de la tarjeta.</p>
+                <div class="est-adjustments">
+                    <label><span class="ap-row"><span>Brillo</span><span class="ap-val" data-v-brightness>0</span></span><input type="range" id="est-brightness" min="-100" max="100" value="0"></label>
+                    <label><span class="ap-row"><span>Contraste</span><span class="ap-val" data-v-contrast>0</span></span><input type="range" id="est-contrast" min="-100" max="100" value="0"></label>
+                    <label><span class="ap-row"><span>Saturación</span><span class="ap-val" data-v-saturation>0</span></span><input type="range" id="est-saturation" min="-100" max="100" value="0"></label>
+                    <label><span class="ap-row"><span>Desenfoque</span><span class="ap-val" data-v-imgBlur>0px</span></span><input type="range" id="est-imgBlur" min="0" max="12" value="0"></label>
+                </div>
+                <div class="est-action-row"><button type="button" id="est-grayscale" class="adm-btn adm-btn-ghost adm-btn-sm">B/N</button><button type="button" id="est-sepia" class="adm-btn adm-btn-ghost adm-btn-sm">Sepia</button><button type="button" id="est-reset-image" class="adm-btn adm-btn-ghost adm-btn-sm">Restablecer</button></div>
+                </div>
+            </details>
+
+            <details id="est-button-props" class="est-inspector" hidden open>
+                <summary>Botón</summary>
+                <div class="est-inspector-content">
+                <label class="adm-label" for="est-cta-texto">Texto del botón</label>
+                <input id="est-cta-texto" class="adm-input" type="text" maxlength="50">
+                <label class="adm-label" for="est-cta-categoria">Destino al hacer clic</label>
+                <select id="est-cta-categoria" class="adm-select"><option value="">Todas las categorías</option></select>
+                <div class="ap-grid2"><label class="adm-label">Fondo<input id="est-cta-fondo" class="est-color est-color--full" type="color"></label><label class="adm-label">Texto<input id="est-cta-color" class="est-color est-color--full" type="color"></label></div>
+                <div class="ap-grid2"><label class="adm-label">Borde<input id="est-cta-borde-color" class="est-color est-color--full" type="color"></label><label><span class="ap-row"><span>Grosor</span><span class="ap-val" data-v-ctaBorde>0px</span></span><input id="est-cta-borde" type="range" min="0" max="12" step="1"></label></div>
+                <div class="ap-row"><span>Redondeado</span><span class="ap-val" data-v-radius>—</span></div><input id="est-cta-radius" type="range" min="0" max="999" step="1">
+                </div>
+            </details>
+
+            <details class="est-inspector" open>
+                <summary>Capas</summary>
+                <div class="est-inspector-content est-layers" id="est-layers"><p class="adm-sub">Selecciona una tarjeta.</p></div>
+            </details>
         </aside>
     </main>
-
-    <script type="module" src="/assets/js/admin/estudio.js?v=6"></script>
+    <input id="est-add-imagen-file" type="file" accept="image/png,image/jpeg,image/webp" hidden>
+    <script type="module" src="/assets/js/admin/estudio.js?v=11"></script>
 </body>
 </html>

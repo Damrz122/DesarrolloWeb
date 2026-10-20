@@ -20,6 +20,7 @@ public class ChatWebSocketController {
     private final ChatService chatService;
     private final SimpMessagingTemplate messagingTemplate;
     private final UsuarioRepository usuarioRepository;
+    @org.springframework.beans.factory.annotation.Autowired private com.tienda.ecommerce.configuracion.AccesoService acceso;
 
     public ChatWebSocketController(ChatService chatService, SimpMessagingTemplate messagingTemplate,
                                    UsuarioRepository usuarioRepository) {
@@ -36,7 +37,8 @@ public class ChatWebSocketController {
         }
         Usuario usuario = usuarioRepository.findByEmail(principal.getName())
                 .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado con email: " + principal.getName()));
-        boolean esAdmin = usuario.getRol() == Rol.ADMIN;
+        if(!usuario.isActivo() || !acceso.rolActivo(usuario)) throw new AccessDeniedException("Cuenta inactiva");
+        boolean esAdmin = acceso.tiene(usuario, "CHAT_ATENDER");
         // Seguridad WS: guarda con el id autenticado, no el del payload
         MensajeChatResponse mensajeGuardado = chatService.procesarYGuardarMensaje(request, usuario.getId(), esAdmin);
 

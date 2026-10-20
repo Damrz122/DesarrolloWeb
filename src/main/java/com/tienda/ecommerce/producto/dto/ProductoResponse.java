@@ -10,6 +10,7 @@ public class ProductoResponse {
     private String nombre;
     private String descripcion;
     private BigDecimal precio;
+    private String monedaCodigo;
     private int stock;
     private String imagenUrl;
     /** 4FN: galería completa ordenada. imagenUrl es la portada (elemento 0 si existe). */
@@ -76,6 +77,8 @@ public class ProductoResponse {
     public void setPrecio(BigDecimal precio) {
         this.precio = precio;
     }
+    public String getMonedaCodigo() { return monedaCodigo; }
+    public void setMonedaCodigo(String monedaCodigo) { this.monedaCodigo = monedaCodigo; }
 
     public int getStock() {
         return stock;

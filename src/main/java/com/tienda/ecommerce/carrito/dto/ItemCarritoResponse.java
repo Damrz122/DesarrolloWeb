@@ -11,6 +11,7 @@ public class ItemCarritoResponse {
     private int cantidad;
     private BigDecimal subtotal;
     private String imagenUrl;
+    private String monedaCodigo;
 
     public ItemCarritoResponse() {
     }
@@ -80,4 +81,6 @@ public class ItemCarritoResponse {
     public void setImagenUrl(String imagenUrl) {
         this.imagenUrl = imagenUrl;
     }
+    public String getMonedaCodigo() { return monedaCodigo; }
+    public void setMonedaCodigo(String monedaCodigo) { this.monedaCodigo = monedaCodigo; }
 }

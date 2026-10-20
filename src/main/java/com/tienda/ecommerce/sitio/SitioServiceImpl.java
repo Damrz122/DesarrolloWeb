@@ -52,8 +52,10 @@ public class SitioServiceImpl implements SitioService {
                     continue;
                 }
                 String valor = e.getValue() == null ? "" : e.getValue();
-                if (valor.length() > 20000) {
-                    valor = valor.substring(0, 20000);
+                // No se trunca el JSON: un diseño parcial rompe la sección al leerlo.
+                // TEXT permite conservar una sección completa con sus cinco tarjetas.
+                if (valor.length() > 150000) {
+                    throw new IllegalArgumentException("La configuración visual supera el límite de 150000 caracteres");
                 }
                 SitioConfig fila = sitioConfigRepository.findById(e.getKey())
                         .orElse(new SitioConfig(e.getKey(), valor));

@@ -94,7 +94,7 @@ export function initFloatingChat() {
 
     const user = auth.getUser();
     // No mostrar el widget en vistas de admin
-    if (window.location.pathname.includes('/admin/')) return;
+    if (window.location.pathname.includes('/admin/') || window.location.pathname === '/login.html') return;
 
     const widgetHTML = `
         <div id="floating-chat-container" class="elx-chat-float">

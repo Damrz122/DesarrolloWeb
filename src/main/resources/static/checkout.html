@@ -250,7 +250,7 @@
                     </h2>
                     <p class="text-[11px] text-neutral-400 mb-4">Pasarela de prueba de Electronix: ningún cargo es real.</p>
 
-                    <div class="space-y-2" role="radiogroup" aria-label="Método de pago">
+                    <div id="payment-methods" class="space-y-2" role="radiogroup" aria-label="Método de pago">
                         <label class="pay-option flex items-center gap-3 p-3.5 rounded-xl border-2 border-neutral-200 cursor-pointer transition-colors hover:border-neutral-300" data-pay="PAGO_CONTRAENTREGA">
                             <input type="radio" name="paymethod" value="PAGO_CONTRAENTREGA" checked class="accent-[#3564C9]">
                             <span class="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center flex-shrink-0">
@@ -317,7 +317,13 @@
                                 <input id="yape-phone" type="tel" inputmode="numeric" placeholder="Ej. 987654321" maxlength="9"
                                     class="w-full bg-neutral-50 border border-neutral-300 rounded-lg px-4 py-2 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:border-[#742284] transition-colors" />
                             </div>
-                            <p class="text-[11px] text-neutral-500 bg-[#742284]/5 border border-[#742284]/20 rounded-lg p-2.5">Aprueba el cobro desde tu app Yape. Simulación: se aprueba automáticamente.</p>
+                            <div>
+                                <label for="yape-op" class="block text-xs font-bold text-neutral-700 mb-1">N° de operación Yape *</label>
+                                <input id="yape-op" type="text" inputmode="numeric" placeholder="Ej. 12345678 (lo ves en tu app Yape)" maxlength="20"
+                                    class="w-full bg-neutral-50 border border-neutral-300 rounded-lg px-4 py-2 text-sm tracking-widest text-neutral-900 placeholder-neutral-400 focus:outline-none focus:border-[#742284] transition-colors" />
+                                <p class="text-[11px] text-neutral-500 mt-1">Yapea al número de Electronix y pega aquí el código. El admin lo verificará.</p>
+                            </div>
+                            <p class="text-[11px] text-neutral-500 bg-[#742284]/5 border border-[#742284]/20 rounded-lg p-2.5">Tu pedido quedará “Por verificar” hasta que confirmemos el cobro.</p>
                         </div>
 
                         <label class="pay-option flex items-center gap-3 p-3.5 rounded-xl border-2 border-neutral-200 cursor-pointer transition-colors hover:border-neutral-300" data-pay="PLIN">
@@ -335,7 +341,33 @@
                                 <input id="plin-phone" type="tel" inputmode="numeric" placeholder="Ej. 987654321" maxlength="9"
                                     class="w-full bg-neutral-50 border border-neutral-300 rounded-lg px-4 py-2 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:border-[#00A1DF] transition-colors" />
                             </div>
-                            <p class="text-[11px] text-neutral-500 bg-[#00A1DF]/5 border border-[#00A1DF]/20 rounded-lg p-2.5">Confirma el cobro desde tu app. Simulación: se aprueba automáticamente.</p>
+                            <div>
+                                <label for="plin-op" class="block text-xs font-bold text-neutral-700 mb-1">N° de operación Plin *</label>
+                                <input id="plin-op" type="text" inputmode="numeric" placeholder="Ej. 87654321 (lo ves en tu banca móvil)" maxlength="20"
+                                    class="w-full bg-neutral-50 border border-neutral-300 rounded-lg px-4 py-2 text-sm tracking-widest text-neutral-900 placeholder-neutral-400 focus:outline-none focus:border-[#00A1DF] transition-colors" />
+                                <p class="text-[11px] text-neutral-500 mt-1">Paga a la cuenta de Electronix y pega aquí el código. El admin lo verificará.</p>
+                            </div>
+                            <p class="text-[11px] text-neutral-500 bg-[#00A1DF]/5 border border-[#00A1DF]/20 rounded-lg p-2.5">Tu pedido quedará “Por verificar” hasta que confirmemos el cobro.</p>
+                        </div>
+
+                        <label class="pay-option flex items-center gap-3 p-3.5 rounded-xl border-2 border-neutral-200 cursor-pointer transition-colors hover:border-neutral-300" data-pay="TRANSFERENCIA_BANCARIA">
+                            <input type="radio" name="paymethod" value="TRANSFERENCIA_BANCARIA" class="accent-emerald-700">
+                            <span class="w-10 h-10 rounded-lg bg-emerald-700 text-white flex items-center justify-center flex-shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                            </span>
+                            <span>
+                                <span class="block text-sm font-bold text-neutral-900">Transferencia bancaria</span>
+                                <span class="block text-[11px] text-neutral-500">CCI / Interbancaria · se verifica manual</span>
+                            </span>
+                        </label>
+
+                        <div id="pay-transfer-panel" class="hidden ml-1 pl-4 border-l-2 border-emerald-700/40 space-y-3 py-1">
+                            <div>
+                                <label for="transfer-op" class="block text-xs font-bold text-neutral-700 mb-1">N° de operación / CCI *</label>
+                                <input id="transfer-op" type="text" placeholder="Ej. OP-20251006-1234" maxlength="40"
+                                    class="w-full bg-neutral-50 border border-neutral-300 rounded-lg px-4 py-2 text-sm tracking-wider text-neutral-900 placeholder-neutral-400 focus:outline-none focus:border-emerald-700 transition-colors" />
+                                <p class="text-[11px] text-neutral-500 mt-1">Transfiere a la cuenta de Electronix y pega el comprobante. El admin lo verificará.</p>
+                            </div>
                         </div>
                     </div>
                 </section>

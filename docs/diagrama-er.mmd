@@ -1,0 +1,103 @@
+```mermaid
+erDiagram
+    CATEGORIAS ||--o{ PRODUCTOS : "agrupa"
+    PRODUCTOS ||--o{ PRODUCTO_IMAGENES : "galería 4FN"
+    USUARIOS ||--|| CARRITOS : "tiene"
+    CARRITOS ||--o{ ITEMS_CARRITO : "contiene"
+    PRODUCTOS ||--o{ ITEMS_CARRITO : "referencia"
+    USUARIOS ||--o{ PEDIDOS : "realiza"
+    PEDIDOS ||--o{ DETALLES_PEDIDO : "incluye"
+    PRODUCTOS ||--o{ DETALLES_PEDIDO : "referencia"
+    PEDIDOS ||--|| PAGOS : "cobra"
+    PEDIDOS ||--|| ENVIOS : "despacha"
+    USUARIOS ||--o{ CONVERSACIONES_CHAT : "cliente abre"
+    USUARIOS ||--o{ CONVERSACIONES_CHAT : "admin atiende"
+    CONVERSACIONES_CHAT ||--o{ CHAT_MENSAJES : "contiene"
+    USUARIOS ||--o{ CHAT_MENSAJES : "escribe"
+
+    USUARIOS {
+        bigint id PK
+        varchar nombres
+        varchar apellido_paterno
+        varchar apellido_materno
+        varchar tipo_documento "DNI|CE"
+        varchar numero_documento UK
+        varchar email UK
+        varchar rol "ADMIN|CLIENTE"
+        boolean activo
+        timestamp fecha_registro
+    }
+    CATEGORIAS {
+        bigint id PK
+        varchar nombre UK
+        varchar descripcion
+    }
+    PRODUCTOS {
+        bigint id PK
+        varchar nombre
+        decimal precio
+        int stock
+        varchar imagen_url "portada, caché"
+        bigint categoria_id FK
+        boolean activo
+    }
+    PRODUCTO_IMAGENES {
+        bigint id PK
+        bigint producto_id FK
+        varchar url
+        int orden "0=portada"
+    }
+    CARRITOS {
+        bigint id PK
+        bigint usuario_id FK_UK
+    }
+    ITEMS_CARRITO {
+        bigint id PK
+        bigint carrito_id FK
+        bigint producto_id FK
+        int cantidad
+    }
+    PEDIDOS {
+        bigint id PK
+        bigint usuario_id FK
+        varchar estado
+        decimal total "derivado"
+        varchar direccion_envio "snapshot"
+        timestamp fecha
+    }
+    DETALLES_PEDIDO {
+        bigint id PK
+        bigint pedido_id FK
+        bigint producto_id FK
+        int cantidad
+        decimal precio_unitario "histórico"
+    }
+    PAGOS {
+        bigint id PK
+        bigint pedido_id FK_UK
+        varchar metodo_pago
+        varchar estado_pago
+        decimal monto "snapshot"
+        varchar codigo_transaccion UK
+    }
+    ENVIOS {
+        bigint id PK
+        bigint pedido_id FK_UK
+        varchar estado_envio
+        varchar numero_guia UK
+        varchar direccion_destino
+    }
+    CONVERSACIONES_CHAT {
+        bigint id PK
+        bigint cliente_id FK
+        bigint admin_id FK
+        varchar estado
+    }
+    CHAT_MENSAJES {
+        bigint id PK
+        bigint conversacion_id FK
+        bigint remitente_id FK
+        varchar contenido
+        timestamp fecha_envio
+    }
+```

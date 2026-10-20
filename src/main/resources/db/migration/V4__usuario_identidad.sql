@@ -11,12 +11,25 @@ ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS apellido_materno VARCHAR(100);
 ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS tipo_documento VARCHAR(5);
 ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS numero_documento VARCHAR(12);
 
--- Backfill: divide "Nombre ApPaterno ApMaterno..." en partes
-UPDATE usuarios
-SET nombres = (string_to_array(TRIM(nombre), ' '))[1],
-    apellido_paterno = COALESCE(NULLIF((string_to_array(TRIM(nombre), ' '))[2], ''), '-'),
-    apellido_materno = NULLIF(array_to_string((string_to_array(TRIM(nombre), ' '))[3:], ' '), '')
-WHERE nombres IS NULL;
+-- Backfill: divide "Nombre ApPaterno ApMaterno..." en partes.
+-- Algunas bases ya fueron creadas sin la columna antigua `nombre`, por lo
+-- que el backfill solo corresponde cuando dicha columna todavía existe.
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM information_schema.columns
+        WHERE table_schema = 'public'
+          AND table_name = 'usuarios'
+          AND column_name = 'nombre'
+    ) THEN
+        UPDATE usuarios
+        SET nombres = (string_to_array(TRIM(nombre), ' '))[1],
+            apellido_paterno = COALESCE(NULLIF((string_to_array(TRIM(nombre), ' '))[2], ''), '-'),
+            apellido_materno = NULLIF(array_to_string((string_to_array(TRIM(nombre), ' '))[3:], ' '), '')
+        WHERE nombres IS NULL;
+    END IF;
+END $$;
 
 -- La cuenta administrador no es una persona: identidad del sistema
 UPDATE usuarios

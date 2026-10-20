@@ -7,12 +7,18 @@ spring:
     multipart:
       max-file-size: 5MB
       max-request-size: 5MB
+  web:
+    resources:
+      cache:
+        cachecontrol:
+          no-cache: true
+          must-revalidate: true
 
 server:
   port: ${PORT:8080}
 
 jwt:
-  secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+  secret: ${JWT_SECRET}
   expiration-ms: ${JWT_EXPIRATION:86400000} # 24h en ms
 
 app:
@@ -29,9 +35,9 @@ spring:
     activate:
       on-profile: dev
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/ecommerce}
-    username: ${DB_USER:postgres}
-    password: ${DB_PASSWORD:postgres}
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -55,9 +61,9 @@ spring:
     activate:
       on-profile: prod
   datasource:
-    url: ${SPRING_DATASOURCE_URL:${DB_URL:jdbc:postgresql://ecommerce-postgres:5432/ecommerce}}
-    username: ${SPRING_DATASOURCE_USERNAME:${DB_USER:postgres}}
-    password: ${SPRING_DATASOURCE_PASSWORD:${DB_PASSWORD:postgres}}
+    url: ${SPRING_DATASOURCE_URL:${DB_URL}}
+    username: ${SPRING_DATASOURCE_USERNAME:${DB_USER}}
+    password: ${SPRING_DATASOURCE_PASSWORD:${DB_PASSWORD}}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -72,9 +78,6 @@ spring:
     baseline-version: 0
     locations: classpath:db/migration
     validate-on-migrate: false # V1 fue editado (sin comentarios); checksum no coincide, migración ya aplicada
-jwt:
-  secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
-  expiration-ms: ${JWT_EXPIRATION:86400000} # 24h en ms
 app:
   demo-seed:
-    enabled: false
+    enabled: ${DEMO_SEED_ENABLED:false}

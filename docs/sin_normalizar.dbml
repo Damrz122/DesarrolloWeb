@@ -1,0 +1,71 @@
+// Modelo SIN normalizar (0FN) - NovaStore
+// Para pegar en https://dbdiagram.io
+// Es el "antes" feo. El "después" 3FN está en docs/diagrama-er.dbml
+// NO usar en código, solo para sustentación.
+//
+// Violaciones que demuestra:
+//  - 1FN: grupos repetidos producto1/2/3, mensaje1/2/3, imagenes "url1,url2,url3"
+//  - 3FN: cliente_email, categoria_nombre/descripcion duplicados en cada fila
+//  - 3FN: total, estado_pago, courier dependen entre sí, no de la PK
+
+Table productos_plano {
+  producto_id bigint [pk, increment]
+  nombre varchar
+  descripcion varchar
+  precio decimal
+  stock int
+  imagenes varchar [note: 'url1,url2,url3 con comas - viola 1FN, debería ser producto_imagenes']
+  categoria_nombre varchar [note: 'Transitivo, debería ser categoria_id FK']
+  categoria_descripcion varchar [note: 'Se repite por cada producto']
+}
+
+Table usuarios_plano {
+  usuario_id bigint [pk, increment]
+  nombres varchar
+  apellido_paterno varchar
+  apellido_materno varchar
+  email varchar
+  rol varchar
+  carrito_producto1 varchar [note: 'Carrito metido en usuario - viola 1FN']
+  carrito_cantidad1 int
+  carrito_producto2 varchar
+  carrito_cantidad2 int
+  carrito_producto3 varchar
+  carrito_cantidad3 int
+}
+
+Table pedidos_plano {
+  pedido_id bigint [pk, increment]
+  fecha timestamp
+  estado varchar
+  cliente_nombre varchar [note: 'Duplicado por pedido - debería ser usuario_id FK']
+  cliente_email varchar
+  cliente_telefono varchar
+  cliente_direccion varchar
+  categoria_nombre varchar
+  producto1_nombre varchar [note: 'Grupo repetido - viola 1FN, ¿y si hay 4 productos?']
+  producto1_cantidad int
+  producto1_precio decimal
+  producto2_nombre varchar
+  producto2_cantidad int
+  producto2_precio decimal
+  producto3_nombre varchar
+  producto3_cantidad int
+  producto3_precio decimal
+  total decimal [note: 'Derivado']
+  metodo_pago varchar
+  estado_pago varchar
+  empresa_courier varchar
+  numero_guia varchar
+  direccion_destino varchar
+}
+
+Table chat_plano {
+  conversacion_id bigint [pk, increment]
+  cliente_nombre varchar
+  admin_nombre varchar
+  estado varchar
+  mensaje1 varchar [note: 'Mensajes como columnas - viola 1FN, deberían ser filas hijas']
+  mensaje2 varchar
+  mensaje3 varchar
+}

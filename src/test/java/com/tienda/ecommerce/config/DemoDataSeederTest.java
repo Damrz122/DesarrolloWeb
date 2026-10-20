@@ -47,7 +47,7 @@ class DemoDataSeederTest {
     private DemoDataSeeder seederPequeno() {
         return new DemoDataSeeder(usuarioRepository, categoriaRepository, productoRepository,
                 carritoRepository, pedidoRepository, conversacionChatRepository,
-                new BCryptPasswordEncoder(), 10, 2, 12, 8, 10, 4);
+                new BCryptPasswordEncoder(), "clave-solo-para-pruebas", 10, 2, 12, 8, 10, 4);
     }
 
     @Test

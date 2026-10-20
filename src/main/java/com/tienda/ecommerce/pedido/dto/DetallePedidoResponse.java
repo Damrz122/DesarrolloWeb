@@ -10,6 +10,7 @@ public class DetallePedidoResponse {
     private int cantidad;
     private BigDecimal precioUnitario;
     private BigDecimal subtotal;
+    private String monedaCodigo;
 
     public DetallePedidoResponse() {
     }
@@ -70,4 +71,6 @@ public class DetallePedidoResponse {
     public void setSubtotal(BigDecimal subtotal) {
         this.subtotal = subtotal;
     }
+    public String getMonedaCodigo() { return monedaCodigo; }
+    public void setMonedaCodigo(String monedaCodigo) { this.monedaCodigo = monedaCodigo; }
 }

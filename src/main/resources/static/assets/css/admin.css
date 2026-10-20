@@ -584,6 +584,18 @@ table.adm-table tbody tr:hover {
     background: #fde3e9;
 }
 
+.btn-eliminar {
+    background: #fff;
+    color: #1f2937;
+    border: 1px solid #e5e7eb;
+}
+
+.btn-eliminar:hover {
+    background: #111827;
+    color: #fff;
+    border-color: #111827;
+}
+
 /* diseno formularios: es para el apartado de formularios */
 
 .adm-label {
@@ -635,6 +647,23 @@ table.adm-table tbody tr:hover {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 12px;
+}
+
+.adm-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.adm-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+.adm-field--full {
+    grid-column: 1 / -1;
 }
 
 @media (max-width: 560px) {

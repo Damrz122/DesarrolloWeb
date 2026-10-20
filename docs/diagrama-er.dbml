@@ -1,0 +1,179 @@
+// Diagrama ER ordenado — NovaStore (ecommerce)
+// Cómo verlo bonito: pega este archivo en https://dbdiagram.io
+// y exporta en PNG/PDF para tu documento.
+// (El esquema de Adminer se dibuja solo y no se puede reordenar;
+//  este archivo ES tu diagrama oficial ordenado por módulos.)
+
+Table usuarios {
+  id bigint [pk, increment]
+  nombres varchar(100) [not null]
+  apellido_paterno varchar(100) [not null]
+  apellido_materno varchar(100)
+  tipo_documento varchar(5) [not null, note: 'DNI | CE']
+  numero_documento varchar(12) [unique, not null, note: 'DNI 8 dígitos | CE 9 alfanum']
+  email varchar(150) [unique, not null]
+  password_hash varchar(255) [not null]
+  rol varchar(20) [not null, note: 'ADMIN | CLIENTE: cliente = usuario con rol CLIENTE, sin tabla aparte']
+  activo boolean [not null, default: true]
+  fecha_registro timestamp [not null]
+}
+
+Table categorias {
+  id bigint [pk, increment]
+  nombre varchar(100) [unique, not null]
+  descripcion varchar(255)
+}
+
+Table productos {
+  id bigint [pk, increment]
+  nombre varchar(150) [not null]
+  descripcion varchar(1000)
+  precio decimal(10,2) [not null, note: '>= 0']
+  stock int [not null, note: '>= 0']
+  imagen_url varchar(500) [note: 'Portada (caché de orden = 0). Fuente de verdad: producto_imagenes']
+  etiqueta varchar(20) [note: 'NUEVO | OFERTA | TENDENCIA | NULL sin etiqueta (V6)']
+  categoria_id bigint [not null, ref: > categorias.id]
+  activo boolean [not null, default: true]
+  fecha_creacion timestamp [not null]
+
+  indexes {
+    (nombre, categoria_id) [unique, name: 'uk_productos_nombre_categoria']
+    categoria_id [name: 'idx_producto_categoria']
+  }
+}
+
+// 4FN: galería multivaluada (producto ->> url), una fila por imagen
+Table producto_imagenes {
+  id bigint [pk, increment]
+  producto_id bigint [not null, ref: > productos.id]
+  url varchar(500) [not null]
+  orden int [not null, default: 0, note: '0 = portada']
+
+  indexes {
+    (producto_id, url) [unique, name: 'uk_producto_imagen_url']
+    (producto_id, orden) [name: 'idx_producto_imagen_producto']
+  }
+}
+
+Table carritos {
+  id bigint [pk, increment]
+  usuario_id bigint [unique, not null, ref: > usuarios.id]
+}
+
+Table items_carrito {
+  id bigint [pk, increment]
+  carrito_id bigint [not null, ref: > carritos.id]
+  producto_id bigint [not null, ref: > productos.id]
+  cantidad int [not null, note: '> 0']
+
+  indexes {
+    (carrito_id, producto_id) [unique, name: 'uk_items_carrito_carrito_producto']
+  }
+}
+
+Table pedidos {
+  id bigint [pk, increment]
+  usuario_id bigint [not null, ref: > usuarios.id]
+  estado varchar(30) [not null, note: 'PENDIENTE | EN_PROCESO | ENVIADO | ENTREGADO | CANCELADO']
+  total decimal(10,2) [not null, note: 'Derivado SUM(detalles). Se conserva por rendimiento']
+  direccion_envio varchar(255) [note: 'Snapshot de compra. Verdad logística: envios.direccion_destino']
+  telefono varchar(30)
+  fecha timestamp [not null]
+
+  indexes {
+    (usuario_id, fecha) [name: 'idx_pedido_usuario_fecha']
+  }
+}
+
+Table detalles_pedido {
+  id bigint [pk, increment]
+  pedido_id bigint [not null, ref: > pedidos.id]
+  producto_id bigint [not null, ref: > productos.id]
+  cantidad int [not null, note: '> 0']
+  precio_unitario decimal(10,2) [not null, note: 'Precio histórico congelado, NO se recalcula']
+
+  indexes {
+    pedido_id [name: 'idx_detalle_pedido_id']
+    producto_id [name: 'idx_detalle_producto_id']
+  }
+}
+
+Table pagos {
+  id bigint [pk, increment]
+  pedido_id bigint [unique, not null, ref: - pedidos.id]
+  metodo_pago varchar(30) [not null, note: 'YAPE | PLIN | TARJETA_* | TRANSFERENCIA | CONTRAENTREGA']
+  estado_pago varchar(30) [not null, note: 'PENDIENTE | APROBADO | RECHAZADO | REEMBOLSADO']
+  monto decimal(10,2) [not null, note: 'Snapshot de cobro (= pedidos.total al pagar)']
+  codigo_transaccion varchar(100) [unique]
+  referencia_comprobante varchar(100)
+  fecha_pago timestamp [not null]
+}
+
+Table envios {
+  id bigint [pk, increment]
+  pedido_id bigint [unique, not null, ref: - pedidos.id]
+  estado_envio varchar(30) [not null, note: 'PREPARANDO | EN_TRANSITO | EN_DISTRIBUCION | ENTREGADO | DEVUELTO']
+  empresa_courier varchar(100)
+  numero_guia varchar(100) [unique]
+  direccion_destino varchar(255) [not null, note: 'Fuente de verdad logística']
+  fecha_despacho timestamp
+  fecha_estimada_entrega timestamp
+  fecha_entrega_real timestamp
+  observaciones varchar(255)
+}
+
+Table conversaciones_chat {
+  id bigint [pk, increment]
+  cliente_id bigint [not null, ref: > usuarios.id]
+  admin_id bigint [ref: > usuarios.id]
+  estado varchar(30) [not null, note: 'ACTIVA | CERRADA | ARCHIVADA']
+  fecha_creacion timestamp [not null]
+}
+
+Table chat_mensajes {
+  id bigint [pk, increment]
+  conversacion_id bigint [not null, ref: > conversaciones_chat.id]
+  remitente_id bigint [not null, ref: > usuarios.id]
+  contenido varchar(1000) [not null]
+  fecha_envio timestamp [not null]
+
+  indexes {
+    (conversacion_id, fecha_envio) [name: 'idx_chat_mensaje_conversacion_fecha']
+  }
+}
+
+// Parámetros editables de la portada (clave-valor). Sin FK: es configuración, no dominio relacional
+Table sitio_config {
+  clave varchar(80) [pk, note: 'Ej: hero.titulo, hero.color, logo.url']
+  valor varchar(20000) [note: 'Texto, JSON o URL según la clave']
+  actualizado timestamp [not null]
+}
+
+// Grupos = así queda ORDENADO por módulos en dbdiagram.io
+TableGroup catalogo {
+  categorias
+  productos
+  producto_imagenes
+}
+
+TableGroup comercio {
+  usuarios
+  carritos
+  items_carrito
+  pedidos
+  detalles_pedido
+  pagos
+}
+
+TableGroup logistica {
+  envios
+}
+
+TableGroup soporte {
+  conversaciones_chat
+  chat_mensajes
+}
+
+TableGroup sitio {
+  sitio_config
+}

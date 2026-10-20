@@ -15,6 +15,7 @@ public class UsuarioResponse {
     private String numeroDocumento;
     private String email;
     private Rol rol;
+    private java.util.Set<String> permisos = java.util.Set.of();
     private boolean activo;
     private LocalDateTime fechaRegistro;
 
@@ -113,6 +114,8 @@ public class UsuarioResponse {
     public Rol getRol() {
         return rol;
     }
+    public java.util.Set<String> getPermisos() { return permisos; }
+    public void setPermisos(java.util.Set<String> permisos) { this.permisos = permisos; }
 
     public void setRol(Rol rol) {
         this.rol = rol;

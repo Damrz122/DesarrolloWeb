@@ -1,4 +1,5 @@
 // productCard.js - Tarjeta de producto estilo tienda (imagen compacta, precio bajo el nombre)
+import { formatoMoneda } from '../money.js';
 
 function escapeHtml(value) {
     return String(value ?? '')
@@ -9,15 +10,11 @@ function escapeHtml(value) {
         .replace(/'/g, '&#39;');
 }
 
-function formatoPEN(valor) {
-    return new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(valor);
-}
-
 export function renderProductCard(producto, onAddToCart) {
     const card = document.createElement('div');
     card.className = 'elx-product-card';
 
-    const precioFormateado = formatoPEN(producto.precio);
+    const precioFormateado = formatoMoneda(producto.precio, producto.monedaCodigo);
     const tieneStock = producto.stock > 0;
     const imagenFallback = 'https://images.unsplash.com/photo-1526738549149-8e07eca6c147?w=600&auto=format&fit=crop&q=80';
 
@@ -36,7 +33,7 @@ export function renderProductCard(producto, onAddToCart) {
     };
     const etiqueta = ETIQUETAS[etiquetaUp];
     const bloquePrecio = esOferta
-        ? `<div class="elx-product-price"><s class="elx-old-price">${precioFormateado}</s> <span class="elx-offer-price">${formatoPEN(precioOfertaNum)}</span></div>`
+        ? `<div class="elx-product-price"><s class="elx-old-price">${precioFormateado}</s> <span class="elx-offer-price">${formatoMoneda(precioOfertaNum, producto.monedaCodigo)}</span></div>`
         : `<div class="elx-product-price">${precioFormateado}</div>`;
 
     card.innerHTML = `

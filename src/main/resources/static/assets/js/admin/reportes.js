@@ -1,4 +1,5 @@
 ﻿import { api } from '/assets/js/api.js';
+import { formatoMoneda } from '/assets/js/money.js';
         import { auth } from '/assets/js/auth.js';
         import { renderAdminShell } from '/assets/js/ui/adminShell.js?v=2';
         import { showToast } from '/assets/js/ui/toast.js';
@@ -23,7 +24,7 @@
                 .replace(/&/g, '&amp;').replace(/</g, '&lt;')
                 .replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
         }
-        const fmt = v => new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(v);
+        const fmt = v => formatoMoneda(v, 'PEN');
 
         function initReportes() {
             const hoy     = new Date().toISOString().split('T')[0];
@@ -48,6 +49,9 @@
                 const res = await api.get(url);
                 if (res.exito && res.datos) {
                     const r = res.datos;
+                    let desglose=document.getElementById('rep-monedas');
+                    if(!desglose){desglose=document.createElement('section');desglose.id='rep-monedas';desglose.className='adm-card';desglose.style.padding='20px';form.after(desglose);}
+                    desglose.innerHTML='<h2>Ventas cobradas por moneda</h2><p>Los indicadores consolidados usan el equivalente histórico en PEN, no el tipo de cambio actual.</p>'+(r.ventasPorMoneda||[]).map(m=>`<p><strong>${esc(formatoMoneda(m.total,m.monedaCodigo))}</strong> · ${m.pedidos} pedidos</p>`).join('')+(r.pedidosSinConversionHistorica?`<p role="alert">${r.pedidosSinConversionHistorica} pedidos antiguos no tienen conversión histórica: están separados y no se incluyen en el importe consolidado.</p>`:'');
 
                     document.getElementById('rep-total-ventas').textContent    = fmt(r.totalVentas);
                     document.getElementById('rep-cant-pedidos').textContent    = r.totalPedidos;

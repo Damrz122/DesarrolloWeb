@@ -64,17 +64,19 @@ public class SecurityConfig {
 
                         // Endpoints públicos de catálogo
                         .requestMatchers(HttpMethod.GET, "/api/categorias/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/pagos/metodos").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/monedas").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/sitio/publico").permitAll()
                         .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/productos/admin").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/productos/admin").hasAnyAuthority("PRODUCTOS_VER", "PRODUCTOS_GESTIONAR", "INVENTARIO_GESTIONAR")
                         .requestMatchers(HttpMethod.GET, "/api/productos/**").permitAll()
 
                         // Handshake de WebSocket
                         .requestMatchers("/ws-chat/**").permitAll()
 
                         // Endpoints administrativos
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/reportes/**").hasRole("ADMIN")
+                        .requestMatchers("/api/admin/**").hasAuthority("CONFIGURACION_GESTIONAR")
+                        .requestMatchers("/api/reportes/**").hasAuthority("REPORTES_VER")
 
                         // Cualquier otra petición requiere autenticación
                         .anyRequest().authenticated()

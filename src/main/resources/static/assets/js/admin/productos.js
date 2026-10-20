@@ -1,4 +1,5 @@
 ﻿import { api } from '/assets/js/api.js';
+import { formatoMoneda } from '/assets/js/money.js';
         import { auth } from '/assets/js/auth.js';
         import { renderAdminShell } from '/assets/js/ui/adminShell.js?v=2';
         import { showToast } from '/assets/js/ui/toast.js';
@@ -51,7 +52,9 @@
         }
 
         async function initProductosAdmin() {
+            btnNuevo.hidden = !(auth.tienePermiso('PRODUCTOS_GESTIONAR') && auth.tienePermiso('PRECIOS_GESTIONAR'));
             await cargarCategoriasSelect();
+            await cargarMonedasSelect();
             await cargarTablaProductos(0);
 
             btnNuevo.addEventListener('click', () => {
@@ -67,6 +70,15 @@
                 e.preventDefault();
                 await guardarProducto();
             });
+        }
+
+        async function cargarMonedasSelect() {
+            const select = document.getElementById('prod-moneda');
+            try {
+                const res = await api.get('/api/monedas');
+                const monedas = (res.exito ? res.datos : []).filter(m => m.activa);
+                select.innerHTML = monedas.map(m => `<option value="${esc(m.codigo)}">${esc(m.codigo)} · ${esc(m.nombre)}</option>`).join('');
+            } catch (err) { select.innerHTML = '<option value="PEN">PEN</option>'; }
         }
 
         function pintarTileProd() {
@@ -207,10 +219,10 @@
 
             if (lista.length > 0) {
                 lista.forEach(p => {
-                        const precio = new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(p.precio);
+                        const precio = formatoMoneda(p.precio, p.monedaCodigo);
                         const esOferta = String(p.etiqueta || '').toUpperCase() === 'OFERTA' && Number(p.precioOferta) > 0;
                         const precioOferta = esOferta
-                            ? new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(p.precioOferta)
+                            ? formatoMoneda(p.precioOferta, p.monedaCodigo)
                             : null;
                         const fallback = 'https://images.unsplash.com/photo-1526738549149-8e07eca6c147?w=600&auto=format&fit=crop&q=80';
 
@@ -246,9 +258,16 @@
                             </td>
                         `;
 
+                        tr.querySelector('.btn-editar').hidden = !(auth.tienePermiso('PRODUCTOS_GESTIONAR') && auth.tienePermiso('PRECIOS_GESTIONAR'));
                         tr.querySelector('.btn-editar').addEventListener('click', () => abrirModalEditar(p));
+                        if(auth.tienePermiso('INVENTARIO_GESTIONAR')) {
+                            const stockBtn=document.createElement('button');stockBtn.className='adm-btn adm-btn-sm';stockBtn.textContent='Stock';
+                            stockBtn.onclick=async()=>{const valor=prompt('Nuevo stock para '+p.nombre,p.stock);if(valor===null)return;if(!/^\d+$/.test(valor)){showToast('Ingresa un entero no negativo','warning');return;}try{await api.patch(`/api/productos/${p.id}/stock`,{stock:Number(valor)});await cargarTablaProductos();}catch(e){showToast(e.message,'error');}};
+                            tr.querySelector('.num').append(stockBtn);
+                        }
                         const btnElim = tr.querySelector('.btn-eliminar');
                         if (btnElim) {
+                            btnElim.hidden = !auth.tienePermiso('PRODUCTOS_GESTIONAR');
                             btnElim.addEventListener('click', () => desactivarProducto(p.id, p.nombre));
                         }
 
@@ -271,6 +290,7 @@
             document.getElementById('prod-nombre').value = '';
             document.getElementById('prod-categoria').value = '';
             document.getElementById('prod-precio').value = '';
+            document.getElementById('prod-moneda').value = 'PEN';
             document.getElementById('prod-stock').value = '';
             document.getElementById('prod-imagen').value = '';
             document.getElementById('prod-etiqueta').value = '';
@@ -289,6 +309,7 @@
             document.getElementById('prod-nombre').value = p.nombre;
             document.getElementById('prod-categoria').value = p.categoriaId;
             document.getElementById('prod-precio').value = p.precio;
+            document.getElementById('prod-moneda').value = p.monedaCodigo || 'PEN';
             document.getElementById('prod-stock').value = p.stock;
             document.getElementById('prod-imagen').value = p.imagenUrl || '';
             document.getElementById('prod-etiqueta').value = p.etiqueta || '';
@@ -322,6 +343,7 @@
                 nombre: document.getElementById('prod-nombre').value.trim(),
                 categoriaId: parseInt(document.getElementById('prod-categoria').value),
                 precio,
+                monedaCodigo: document.getElementById('prod-moneda').value,
                 stock: parseInt(document.getElementById('prod-stock').value),
                 imagenUrl: document.getElementById('prod-imagen').value.trim(),
                 etiqueta,
