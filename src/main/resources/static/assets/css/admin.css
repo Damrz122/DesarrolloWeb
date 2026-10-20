@@ -1884,6 +1884,9 @@ body.adm {
 .adm-profile-menu {
     z-index: 60;
 }
+/* El menú se mueve a body para evitar recortes; debe quedar por encima del
+   sidebar flotante (z-index 100), no detrás de él. */
+body > .adm-profile-menu { z-index:190; }
 
 /* Tablas: más aire, números tabulares, encabezado sobrio */
 table.adm-table {
@@ -1992,6 +1995,23 @@ html[data-theme="light"] body.adm .db-date-cell,html[data-theme="mixed"] body.ad
 html[data-theme="light"] body.adm .db-action-sub,html[data-theme="mixed"] body.adm .db-action-sub { color:#7a8494; }
 html[data-theme="light"] body.adm .db-action-item,html[data-theme="mixed"] body.adm .db-action-item { color:#394454; }
 html[data-theme="light"] body.adm .db-action-item:hover,html[data-theme="mixed"] body.adm .db-action-item:hover { background:#f5f7fa; border-color:#e3e8ef; color:#202634; }
+
+/* Reportes también define paneles oscuros propios. Estos overrides mantienen
+   el modo oscuro intacto y vuelven claras las superficies en Claro/Mixto. */
+html[data-theme="light"] body.adm .rp-filter-bar,html[data-theme="mixed"] body.adm .rp-filter-bar,
+html[data-theme="light"] body.adm .rp-panel,html[data-theme="mixed"] body.adm .rp-panel { background:#fff; border:1px solid #e1e6ef; box-shadow:0 10px 24px rgba(31,41,55,.08); }
+html[data-theme="light"] body.adm .rp-filter-label,html[data-theme="mixed"] body.adm .rp-filter-label { color:#667286; }
+html[data-theme="light"] body.adm .rp-filter-input,html[data-theme="mixed"] body.adm .rp-filter-input { background:#f7f8fb; border-color:#dce2eb; color:#202634; color-scheme:light; }
+html[data-theme="light"] body.adm .rp-filter-btn,html[data-theme="mixed"] body.adm .rp-filter-btn { background:var(--adm-teal); border-color:var(--adm-teal); color:#fff; box-shadow:none; }
+html[data-theme="light"] body.adm .rp-panel-head,html[data-theme="mixed"] body.adm .rp-panel-head { border-bottom-color:#e8ebf1; }
+html[data-theme="light"] body.adm .rp-panel-title,html[data-theme="mixed"] body.adm .rp-panel-title { color:#202634; }
+html[data-theme="light"] body.adm .rp-panel-title small,html[data-theme="mixed"] body.adm .rp-panel-title small,
+html[data-theme="light"] body.adm .rp-sub-text,html[data-theme="mixed"] body.adm .rp-sub-text,
+html[data-theme="light"] body.adm .rp-muted,html[data-theme="mixed"] body.adm .rp-muted { color:#748094; }
+html[data-theme="light"] body.adm .rp-table thead th,html[data-theme="mixed"] body.adm .rp-table thead th { color:#687386; background:#f7f8fb; border-bottom-color:#e8ebf1; }
+html[data-theme="light"] body.adm .rp-table tbody td,html[data-theme="mixed"] body.adm .rp-table tbody td { color:#3b4657; border-bottom-color:#edf0f4; }
+html[data-theme="light"] body.adm .rp-table tbody tr:hover,html[data-theme="mixed"] body.adm .rp-table tbody tr:hover { background:#f7fbfb; box-shadow:inset 3px 0 0 rgba(20,99,92,.45); }
+html[data-theme="light"] body.adm .rp-date-strong,html[data-theme="mixed"] body.adm .rp-date-strong { color:#202634; }
 
 html[data-theme="dark"] body.adm .adm-card:hover {
     box-shadow: 0 14px 36px rgba(0,0,0,0.55);
