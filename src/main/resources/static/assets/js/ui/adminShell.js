@@ -22,6 +22,20 @@ const LINKS = [
 ];
 const permisosNav = { dashboard:['REPORTES_VER','PEDIDOS_GESTIONAR'], productos:['PRODUCTOS_VER','PRODUCTOS_GESTIONAR','INVENTARIO_GESTIONAR'], categorias:['CATEGORIAS_GESTIONAR'], pedidos:['PEDIDOS_GESTIONAR'], usuarios:['USUARIOS_GESTIONAR'], configuracion:['CONFIGURACION_GESTIONAR'], reportes:['REPORTES_VER'], chat:['CHAT_ATENDER'] };
 function escapeHtml(value) { return String(value ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function colorValido(value, respaldo) { return /^#[0-9a-f]{6}$/i.test(String(value || '').trim()) ? String(value).trim() : respaldo; }
+function rgb(hex) { const n=parseInt(hex.slice(1),16); return `${n>>16} ${(n>>8)&255} ${n&255}`; }
+function aclarar(hex, proporcion=.16) { const n=parseInt(hex.slice(1),16), c=i=>Math.round(((n>>i)&255)+(255-((n>>i)&255))*proporcion).toString(16).padStart(2,'0'); return `#${c(16)}${c(8)}${c(0)}`; }
+function aplicarMarcaAdmin(cfg) {
+    const primario=colorValido(cfg?.['tema.primario'],'#3564C9');
+    const secundario=colorValido(cfg?.['tema.secundario'],'#000000');
+    // Se escribe en body para prevalecer sobre los valores de los temas oscuro
+    // y mixto, sin alterar sus fondos ni sus contrastes.
+    document.body.style.setProperty('--adm-teal',primario);
+    document.body.style.setProperty('--adm-teal-bright',aclarar(primario));
+    document.body.style.setProperty('--adm-teal-soft',`rgb(${rgb(primario)} / .13)`);
+    document.body.style.setProperty('--adm-accent-rgb',rgb(primario));
+    document.body.style.setProperty('--adm-secondary',secundario);
+}
 
 export function getAdminTheme() { try { const t=localStorage.getItem(ADMIN_THEME_KEY); return ['light','dark','mixed'].includes(t) ? t : 'light'; } catch { return 'light'; } }
 export function setAdminTheme(theme) {
@@ -51,5 +65,5 @@ export function renderAdminShell(active) {
     document.querySelectorAll('[data-admin-theme]').forEach(b=>b.addEventListener('click',()=>setAdminTheme(b.dataset.adminTheme)));
     document.getElementById('adm-logout-btn')?.addEventListener('click',()=>auth.logout(true));
     const toggle=()=>document.body.classList.toggle('adm-sidebar-open'); document.getElementById('adm-sidebar-toggle')?.addEventListener('click',toggle);document.getElementById('adm-side-overlay')?.addEventListener('click',toggle);
-    obtenerSitio().then(cfg=>{if(!cfg)return;const logo=String(cfg['site.logo']||'').trim(), name=String(cfg['site.nombre']||'').trim();if(logo){const img=header.querySelector('.adm-brand-logo-img');if(img)pintarLogo(img,logo,name||'Electronix');}if(name){const brand=header.querySelector('.adm-brand-name');if(brand)brand.textContent=name;}}).catch(()=>{});
+    obtenerSitio().then(cfg=>{aplicarMarcaAdmin(cfg);if(!cfg)return;const logo=String(cfg['site.logo']||'').trim(), name=String(cfg['site.nombre']||'').trim();if(logo){const img=header.querySelector('.adm-brand-logo-img');if(img)pintarLogo(img,logo,name||'Electronix');}if(name){const brand=header.querySelector('.adm-brand-name');if(brand)brand.textContent=name;}}).catch(()=>aplicarMarcaAdmin(null));
 }
