@@ -93,14 +93,18 @@ CREATE TABLE IF NOT EXISTS metodo_pago_monedas (
     PRIMARY KEY (metodo_codigo, moneda_codigo)
 );
 
+ALTER TABLE metodos_pago_config ALTER COLUMN creado_en SET DEFAULT CURRENT_TIMESTAMP;
+ALTER TABLE metodos_pago_config ALTER COLUMN actualizado_en SET DEFAULT CURRENT_TIMESTAMP;
+ALTER TABLE metodos_pago_config ALTER COLUMN formulario_json SET DEFAULT '[]';
+
 INSERT INTO metodos_pago_config
-    (codigo, nombre, descripcion, procesamiento, requiere_referencia, etiqueta_referencia, prefijo_transaccion, icono, orden, activo)
+    (codigo, nombre, descripcion, procesamiento, requiere_referencia, etiqueta_referencia, prefijo_transaccion, icono, formulario_json, orden, activo, creado_en, actualizado_en)
 VALUES
-    ('PAGO_CONTRAENTREGA', 'Pago contra entrega', 'Pagas al recibir tu pedido.', 'CONTRA_ENTREGA', FALSE, NULL, 'COD-', 'ENTREGA', 10, TRUE),
-    ('TARJETA_CREDITO', 'Tarjeta de crédito o débito', 'Pasarela simulada sin cargos reales.', 'SIMULADO', FALSE, NULL, 'TX-', 'TARJETA', 20, TRUE),
-    ('YAPE', 'Yape', 'Registra tu número de operación para verificación.', 'VERIFICACION_MANUAL', TRUE, 'N° de operación Yape', 'YAPE-', 'YAPE', 30, TRUE),
-    ('PLIN', 'Plin', 'Registra tu número de operación para verificación.', 'VERIFICACION_MANUAL', TRUE, 'N° de operación Plin', 'PLIN-', 'PLIN', 40, TRUE),
-    ('TRANSFERENCIA_BANCARIA', 'Transferencia bancaria', 'Registra tu comprobante para verificación.', 'VERIFICACION_MANUAL', TRUE, 'N° de operación o comprobante', 'TRF-', 'TRANSFERENCIA', 50, TRUE)
+    ('PAGO_CONTRAENTREGA', 'Pago contra entrega', 'Pagas al recibir tu pedido.', 'CONTRA_ENTREGA', FALSE, NULL, 'COD-', 'ENTREGA', '[]', 10, TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('TARJETA_CREDITO', 'Tarjeta de crédito o débito', 'Pasarela simulada sin cargos reales.', 'SIMULADO', FALSE, NULL, 'TX-', 'TARJETA', '[]', 20, TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('YAPE', 'Yape', 'Registra tu número de operación para verificación.', 'VERIFICACION_MANUAL', TRUE, 'N° de operación Yape', 'YAPE-', 'YAPE', '[]', 30, TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('PLIN', 'Plin', 'Registra tu número de operación para verificación.', 'VERIFICACION_MANUAL', TRUE, 'N° de operación Plin', 'PLIN-', 'PLIN', '[]', 40, TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('TRANSFERENCIA_BANCARIA', 'Transferencia bancaria', 'Registra tu comprobante para verificación.', 'VERIFICACION_MANUAL', TRUE, 'N° de operación o comprobante', 'TRF-', 'TRANSFERENCIA', '[]', 50, TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
 ON CONFLICT (codigo) DO NOTHING;
 
 INSERT INTO metodo_pago_monedas (metodo_codigo, moneda_codigo)
