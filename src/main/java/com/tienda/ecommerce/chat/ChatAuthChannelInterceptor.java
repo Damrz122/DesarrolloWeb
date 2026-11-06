@@ -47,10 +47,20 @@ public class ChatAuthChannelInterceptor implements ChannelInterceptor {
             Principal principal=accessor.getUser();
             var usuario=principal==null?null:usuarios.findByEmail(principal.getName()).orElse(null);
             if(usuario==null || !usuario.isActivo() || !acceso.rolActivo(usuario)) throw new org.springframework.security.access.AccessDeniedException("Sesión inactiva");
+            String token = extraerToken(accessor);
+            if (token != null && usuario.getPasswordModificadoEn() != null) {
+                java.util.Date iat = jwtService.extraerIssuedAt(token);
+                long modificadoMs = usuario.getPasswordModificadoEn().atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli();
+                if (iat != null && iat.getTime() < modificadoMs - 1000) {
+                    throw new org.springframework.security.access.AccessDeniedException("Sesión revocada");
+                }
+            }
             if(accessor.getCommand()==StompCommand.SUBSCRIBE) {
                 String destino=accessor.getDestination();
                 if(destino==null || !destino.matches("/topic/chat/[0-9]+")) throw new org.springframework.security.access.AccessDeniedException("Destino no autorizado");
-                var conversacion=conversaciones.findById(Long.valueOf(destino.substring(destino.lastIndexOf('/')+1))).orElseThrow();
+                Long conversacionId = Long.valueOf(destino.substring(destino.lastIndexOf('/') + 1));
+                var conversacion = conversaciones.findById(conversacionId)
+                        .orElseThrow(() -> new org.springframework.security.access.AccessDeniedException("Conversación inexistente o no autorizada"));
                 if(!conversacion.getCliente().getId().equals(usuario.getId()) && !acceso.tiene(usuario,"CHAT_ATENDER")) throw new org.springframework.security.access.AccessDeniedException("Conversación no autorizada");
             }
         }
