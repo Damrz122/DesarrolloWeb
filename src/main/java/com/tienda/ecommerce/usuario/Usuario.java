@@ -41,6 +41,9 @@ public class Usuario {
     @Column(nullable = false)
     private boolean activo = true;
 
+    @Column(name = "password_modificado_en")
+    private LocalDateTime passwordModificadoEn;
+
     @Column(name = "fecha_registro", nullable = false, updatable = false)
     private LocalDateTime fechaRegistro = LocalDateTime.now();
 
@@ -207,6 +210,14 @@ public class Usuario {
 
     public void setActivo(boolean activo) {
         this.activo = activo;
+    }
+
+    public LocalDateTime getPasswordModificadoEn() {
+        return passwordModificadoEn;
+    }
+
+    public void setPasswordModificadoEn(LocalDateTime passwordModificadoEn) {
+        this.passwordModificadoEn = passwordModificadoEn;
     }
 
     public LocalDateTime getFechaRegistro() {

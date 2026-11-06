@@ -45,6 +45,7 @@ services:
       SPRING_WEB_RESOURCES_STATIC_LOCATIONS: file:/app/static/,classpath:/static/
       SPRING_WEB_RESOURCES_CACHE_PERIOD: "0"
       APP_UPLOAD_DIR: /app/uploads
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8080,http://localhost:3000,http://localhost:8090,https://*.trycloudflare.com,https://*.loca.lt}
     volumes:
       - electronix_uploads:/app/uploads
       - ./src/main/resources/static:/app/static:ro

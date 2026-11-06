@@ -50,6 +50,16 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             var usuario = id == null ? null : usuarios.findById(id).orElse(null);
             if (usuario != null && usuario.isActivo() && acceso.rolActivo(usuario)
                     && SecurityContextHolder.getContext().getAuthentication() == null) {
+
+                // Revocación: Si la contraseña fue modificada con posterioridad a la emisión del JWT
+                java.util.Date iat = jwtService.extraerIssuedAt(jwt);
+                if (usuario.getPasswordModificadoEn() != null && iat != null) {
+                    long modificadoMs = usuario.getPasswordModificadoEn().atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli();
+                    if (iat.getTime() < modificadoMs - 1000) {
+                        filterChain.doFilter(request, response);
+                        return;
+                    }
+                }
                 var authorities = new java.util.ArrayList<SimpleGrantedAuthority>();
                 acceso.permisos(usuario).forEach(p -> authorities.add(new SimpleGrantedAuthority(p)));
                 authorities.add(new SimpleGrantedAuthority("ROLE_" + usuario.getRol().name()));

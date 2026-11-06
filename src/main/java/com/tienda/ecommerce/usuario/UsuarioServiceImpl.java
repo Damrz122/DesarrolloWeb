@@ -89,7 +89,14 @@ public class UsuarioServiceImpl implements UsuarioService {
             usuario.setNombre(request.getNombre().trim());
         }
         if (request.getPassword() != null && !request.getPassword().trim().isEmpty()) {
+            if (request.getPasswordActual() == null || request.getPasswordActual().trim().isEmpty()) {
+                throw new BadRequestException("Para cambiar tu contraseña debes ingresar tu contraseña actual");
+            }
+            if (!passwordEncoder.matches(request.getPasswordActual().trim(), usuario.getPasswordHash())) {
+                throw new BadRequestException("La contraseña actual no es correcta");
+            }
             usuario.setPasswordHash(passwordEncoder.encode(request.getPassword().trim()));
+            usuario.setPasswordModificadoEn(java.time.LocalDateTime.now());
         }
 
         Usuario guardado = usuarioRepository.save(usuario);
@@ -120,6 +127,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         usuario.setEmail(email);
         if (request.getPassword() != null && !request.getPassword().trim().isEmpty()) {
             usuario.setPasswordHash(passwordEncoder.encode(request.getPassword().trim()));
+            usuario.setPasswordModificadoEn(java.time.LocalDateTime.now());
         }
 
         Usuario guardado = usuarioRepository.save(usuario);

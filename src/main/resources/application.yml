@@ -23,7 +23,7 @@ jwt:
 
 app:
   cors:
-    allowed-origins: ${CORS_ORIGINS:http://localhost:8080,http://localhost:3000}
+    allowed-origins: ${CORS_ORIGINS:http://localhost:8080,http://localhost:3000,http://localhost:8090,https://*.trycloudflare.com,https://*.loca.lt}
   demo-seed:
     enabled: ${DEMO_SEED_ENABLED:true}
   upload-dir: ${APP_UPLOAD_DIR:uploads}

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Electronix</string>
+    <!-- URL por defecto: cambiar por la URL del túnel (ej. https://xxx.trycloudflare.com) o IP local -->
+    <string name="default_server_url">https://sophisticated-acne-thumbnail-colored.trycloudflare.com</string>
+    <string name="error_connection_title">Sin conexión con el servidor</string>
+    <string name="error_connection_desc">No pudimos conectar con Electronix. Verifica que el túnel o el servidor backend esté activo y presiona reintentar.</string>
+    <string name="retry">Reintentar</string>
+    <string name="change_url">Cambiar URL</string>
+    <string name="save">Guardar</string>
+    <string name="cancel">Cancelar</string>
+    <string name="url_dialog_title">Configurar URL del Servidor / Túnel</string>
+    <string name="url_dialog_hint">https://tunel.trycloudflare.com</string>
+</resources>

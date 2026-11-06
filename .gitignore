@@ -47,3 +47,14 @@ logs/
 ### Uploads locales (fondos y PNG de apariencia) ###
 uploads/
 
+### Binarios locales y Android ###
+scripts/bin/
+.gradle/
+android/.gradle/
+android/app/build/
+android/build/
+android/local.properties
+local.properties
+*.apk
+
+

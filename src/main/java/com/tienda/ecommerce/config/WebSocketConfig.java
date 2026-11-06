@@ -24,14 +24,19 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        // Endpoint WS: solo origenes configurados, con JWT en CONNECT
+        String[] patterns = java.util.Arrays.stream(allowedOrigins)
+                .flatMap(s -> java.util.Arrays.stream(s.split(",")))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .toArray(String[]::new);
+
+        // Endpoint WS: origenes configurados (incluye tuneles), con JWT en CONNECT
         registry.addEndpoint("/ws-chat")
-                .setAllowedOriginPatterns(allowedOrigins)
+                .setAllowedOriginPatterns(patterns)
                 .withSockJS();
 
-        // Endpoint WS: solo origenes configurados, con JWT en CONNECT
         registry.addEndpoint("/ws-chat")
-                .setAllowedOriginPatterns(allowedOrigins);
+                .setAllowedOriginPatterns(patterns);
     }
 
     @Override

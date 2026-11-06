@@ -21,6 +21,8 @@ public class ActualizarUsuarioRequest {
     @Size(min = 6, message = "Si desea cambiar la contraseña, debe tener al menos 6 caracteres")
     private String password;
 
+    private String passwordActual;
+
     public ActualizarUsuarioRequest() {
     }
 
@@ -67,5 +69,13 @@ public class ActualizarUsuarioRequest {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getPasswordActual() {
+        return passwordActual;
+    }
+
+    public void setPasswordActual(String passwordActual) {
+        this.passwordActual = passwordActual;
     }
 }
