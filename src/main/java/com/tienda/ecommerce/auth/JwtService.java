@@ -60,6 +60,10 @@ public class JwtService {
         }
     }
 
+    public Date extraerIssuedAt(String token) {
+        return extraerClaims(token).getIssuedAt();
+    }
+
     public String extraerEmail(String token) {
         return extraerClaims(token).getSubject();
     }
