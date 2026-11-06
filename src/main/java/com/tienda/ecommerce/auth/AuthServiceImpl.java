@@ -22,6 +22,24 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final com.tienda.ecommerce.configuracion.AccesoService acceso;
+    private final LoginAttemptService loginAttemptService;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public AuthServiceImpl(
+            UsuarioRepository usuarioRepository,
+            CarritoService carritoService,
+            PasswordEncoder passwordEncoder,
+            JwtService jwtService,
+            com.tienda.ecommerce.configuracion.AccesoService acceso,
+            LoginAttemptService loginAttemptService
+    ) {
+        this.usuarioRepository = usuarioRepository;
+        this.carritoService = carritoService;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
+        this.acceso = acceso;
+        this.loginAttemptService = loginAttemptService != null ? loginAttemptService : new LoginAttemptService();
+    }
 
     public AuthServiceImpl(
             UsuarioRepository usuarioRepository,
@@ -30,11 +48,7 @@ public class AuthServiceImpl implements AuthService {
             JwtService jwtService,
             com.tienda.ecommerce.configuracion.AccesoService acceso
     ) {
-        this.usuarioRepository = usuarioRepository;
-        this.carritoService = carritoService;
-        this.passwordEncoder = passwordEncoder;
-        this.jwtService = jwtService;
-        this.acceso = acceso;
+        this(usuarioRepository, carritoService, passwordEncoder, jwtService, acceso, new LoginAttemptService());
     }
 
     @Override
@@ -95,8 +109,14 @@ public class AuthServiceImpl implements AuthService {
     public AuthResponse login(LoginRequest request) {
         String email = request.getEmail().trim().toLowerCase();
 
-        Usuario usuario = usuarioRepository.findByEmail(email)
-                .orElseThrow(() -> new CredencialesInvalidasException("Credenciales incorrectas: email o contraseña no válidos"));
+        // Control de fuerza bruta / DoS
+        loginAttemptService.verificarBloqueo(email);
+
+        Usuario usuario = usuarioRepository.findByEmail(email).orElse(null);
+        if (usuario == null) {
+            loginAttemptService.registrarFallo(email);
+            throw new CredencialesInvalidasException("Credenciales incorrectas: email o contraseña no válidos");
+        }
 
         if (!usuario.isActivo()) {
             throw new BadRequestException("Tu cuenta se encuentra inactiva. Contacta al administrador.");
@@ -104,8 +124,12 @@ public class AuthServiceImpl implements AuthService {
         if (!acceso.rolActivo(usuario)) throw new BadRequestException("El rol de tu cuenta se encuentra inactivo");
 
         if (!passwordEncoder.matches(request.getPassword(), usuario.getPasswordHash())) {
+            loginAttemptService.registrarFallo(email);
             throw new CredencialesInvalidasException("Credenciales incorrectas: email o contraseña no válidos");
         }
+
+        // Login exitoso: reiniciar contador de fallos
+        loginAttemptService.registrarExito(email);
 
         String token = jwtService.generarToken(usuario);
         AuthResponse respuesta = new AuthResponse(token, usuario.getId(), usuario.getNombre(), usuario.getEmail(), usuario.getRol());
