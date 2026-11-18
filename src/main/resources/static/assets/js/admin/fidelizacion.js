@@ -324,3 +324,4 @@ async function guardarNivel(e) {
         btn.disabled = false;
     }
 }
+import '/assets/js/ui/crm-dialogs.js';

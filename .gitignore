@@ -59,4 +59,10 @@ android/local.properties
 local.properties
 *.apk
 
+### Estado y credenciales locales de infraestructura ###
+terraform/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
 

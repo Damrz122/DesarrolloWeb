@@ -21,10 +21,27 @@ public class CrmPublicoController {
 
     private final CrmService crmService;
     private final UsuarioRepository usuarioRepository;
+    private final PuntosConfigRepository puntosConfigRepository;
 
-    public CrmPublicoController(CrmService crmService, UsuarioRepository usuarioRepository) {
+    public CrmPublicoController(CrmService crmService, UsuarioRepository usuarioRepository,
+                               PuntosConfigRepository puntosConfigRepository) {
         this.crmService = crmService;
         this.usuarioRepository = usuarioRepository;
+        this.puntosConfigRepository = puntosConfigRepository;
+    }
+
+    public record ReglasPublicas(boolean activo, int puntosBienvenida, int minimoPuntosCanje,
+                                 int maxCoberturaPorcentaje, java.math.BigDecimal valorPenPorPunto,
+                                 java.math.BigDecimal factorSolPorPunto) {}
+
+    @GetMapping("/puntos/reglas")
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public ApiResponse<ReglasPublicas> reglasPublicas() {
+        // Solo reglas del programa: nunca expone billeteras, clientes ni configuración administrativa.
+        PuntosConfig c = puntosConfigRepository.findById(1).orElseGet(PuntosConfig::new);
+        return ApiResponse.exito(new ReglasPublicas(c.isActivo(), c.getPuntosBienvenida(),
+                c.getMinimoPuntosCanje(), c.getMaxCoberturaPorcentaje(), c.getValorPenPorPunto(),
+                c.getFactorSolPorPunto()));
     }
 
     private Usuario obtenerUsuarioAutenticado(Authentication authentication) {

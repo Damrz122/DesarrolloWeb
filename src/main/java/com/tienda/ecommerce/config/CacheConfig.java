@@ -32,7 +32,7 @@ import java.util.Map;
  */
 @Configuration
 @EnableCaching
-@Profile("!test")
+@Profile("!test | redis-test")
 public class CacheConfig implements CachingConfigurer {
 
     private static final Logger log = LoggerFactory.getLogger(CacheConfig.class);
@@ -43,37 +43,17 @@ public class CacheConfig implements CachingConfigurer {
 
     @Bean
     public RedisCacheManager cacheManager(RedisConnectionFactory connectionFactory) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        
-        // Prevención de RCE (Deserialización segura con lista blanca estricta)
-        PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator.builder()
-                .allowIfBaseType(Object.class)
-                .allowIfSubType("com.tienda.ecommerce.")
-                .allowIfSubType("java.util.")
-                .allowIfSubType("java.time.")
-                .allowIfSubType("java.math.")
-                .allowIfSubType("java.lang.")
-                .build();
-
-        objectMapper.activateDefaultTyping(
-                ptv,
-                ObjectMapper.DefaultTyping.NON_FINAL,
-                JsonTypeInfo.As.PROPERTY
-        );
-
-        GenericJackson2JsonRedisSerializer jsonSerializer = new GenericJackson2JsonRedisSerializer(objectMapper);
+        GenericJackson2JsonRedisSerializer jsonSerializer = catalogSerializer();
 
         RedisCacheConfiguration defaultConfig = RedisCacheConfiguration.defaultCacheConfig()
+                .computePrefixWith(name -> "electronix:v2:" + name + "::")
                 .entryTtl(Duration.ofMinutes(10))
                 .disableCachingNullValues()
                 .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(jsonSerializer));
 
         Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
-        // Categorías cambian con muy poca frecuencia: TTL 30 minutos
         cacheConfigurations.put(CACHE_CATEGORIAS, defaultConfig.entryTtl(Duration.ofMinutes(30)));
-        // Catálogo de productos: TTL 10 minutos
         cacheConfigurations.put(CACHE_PRODUCTOS, defaultConfig.entryTtl(Duration.ofMinutes(10)));
         cacheConfigurations.put(CACHE_PRODUCTOS_DESTACADOS, defaultConfig.entryTtl(Duration.ofMinutes(5)));
 
@@ -81,6 +61,32 @@ public class CacheConfig implements CachingConfigurer {
                 .cacheDefaults(defaultConfig)
                 .withInitialCacheConfigurations(cacheConfigurations)
                 .build();
+    }
+
+    public static GenericJackson2JsonRedisSerializer catalogSerializer() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        // Nunca autorizar Object como tipo base: anularía la lista de subtipos.
+        PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator.builder()
+                .allowIfSubType(com.tienda.ecommerce.producto.dto.ProductoResponse.class)
+                .allowIfSubType(com.tienda.ecommerce.producto.dto.CategoriaResponse.class)
+                .allowIfSubType(java.util.ArrayList.class)
+                .allowIfSubType("java.util.ImmutableCollections$")
+                .allowIfSubType(java.math.BigDecimal.class)
+                .allowIfSubType(java.time.LocalDateTime.class)
+                .allowIfSubType(Long.class)
+                .allowIfSubType(Integer.class)
+                .allowIfSubType(Boolean.class)
+                .allowIfSubType(String.class)
+                .build();
+
+        objectMapper.activateDefaultTyping(
+                ptv,
+                ObjectMapper.DefaultTyping.EVERYTHING,
+                JsonTypeInfo.As.PROPERTY
+        );
+
+        return new GenericJackson2JsonRedisSerializer(objectMapper);
     }
 
     /**

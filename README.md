@@ -135,7 +135,8 @@ java -jar target/ecommerce-0.0.1-SNAPSHOT.jar
 
 ## 5. Ejecución de Pruebas Automatizadas
 
-Para correr toda la suite de pruebas unitarias y de integración:
+Para correr toda la suite de pruebas unitarias y de integración, con Docker
+disponible para el Redis desechable:
 ```bash
 mvn clean test
 ```
@@ -185,6 +186,9 @@ mvn clean package
 ---
 
 ## 7. Despliegue en la Nube (Render, Railway, Fly.io)
+
+Para una demostración sin costo, sigue la
+[guía de Render Free + Neon + Upstash](docs/despliegue-gratuito.md).
 
 El proyecto está preparado para desplegarse como un único servicio web utilizando las siguientes variables de entorno:
 

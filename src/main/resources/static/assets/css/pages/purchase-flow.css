@@ -93,6 +93,13 @@
 .flow-checkout-item strong { font-size: 12px; line-height: 1.6; font-weight: 500; }
 .flow-checkout-item p { margin-top: 6px; color: var(--store-muted); font-size: 10px; line-height: 1.7; }
 .flow-checkout-item > span { font-size: 12px; white-space: nowrap; }
+.flow-benefits { margin-top: 24px; padding: 18px 0; border-block: 1px solid var(--store-line); }
+.flow-benefits > summary { font-size: 13px; font-weight: 500; cursor: pointer; }
+.flow-benefits .flow-field { margin-top: 20px; }
+.flow-benefits .flow-link { min-height: 30px; font-size: 11px !important; }
+.flow-apply { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+.flow-apply .store-button { padding-inline: 14px; gap: 0; }
+.flow-totals .flow-saving :is(dt, dd) { color: #41604c; }
 .flow-submit { grid-column: 1; display: flex; flex-direction: column; gap: 16px; margin-top: 0; }
 .flow-submit .store-button { width: 100%; }
 .flow-submit .flow-note a { text-decoration: underline; text-underline-offset: 3px; }

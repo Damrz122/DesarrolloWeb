@@ -43,6 +43,8 @@ class ConfiguracionComercialTest {
     @Autowired JwtService jwt;
     @Autowired MockMvc mvc;
     @Autowired ObjectMapper json;
+    @Autowired com.tienda.ecommerce.crm.CrmService crm;
+    @Autowired com.tienda.ecommerce.crm.PuntosBilleteraRepository billeteras;
     static final AtomicInteger secuencia = new AtomicInteger(900000);
 
     Usuario usuario(Rol rol) {
@@ -69,6 +71,45 @@ class ConfiguracionComercialTest {
         var q=cotizaciones.generar(u.getId(),"USD");
         assertEquals(0,new BigDecimal("125").compareTo(q.datos().total()));
         assertEquals(0,new BigDecimal("450").compareTo(q.datos().totalBasePen()));
+    }
+    @Test void vistaPreviaValidaLaFirmaYNoCreaPedidos() throws Exception {
+        Usuario u=usuario(Rol.CLIENTE);Producto p=producto("PEN","100");
+        carritos.agregarItem(u.getId(),new ItemCarritoRequest(p.getId(),1));
+        var q=cotizaciones.generar(u.getId(),"PEN");
+        var token=jwt.generarToken(u);
+        long cantidad=pedidoRepository.count();
+        mvc.perform(post("/api/checkout/beneficios").header("Authorization","Bearer "+token)
+                        .contentType("application/json").content(json.writeValueAsString(Map.of("cotizacionToken",q.token(),"puntosACanjear",0))))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.datos.total").value(100))
+                .andExpect(jsonPath("$.datos.monedaCodigo").value("PEN"));
+        mvc.perform(post("/api/checkout/beneficios").header("Authorization","Bearer "+token)
+                        .contentType("application/json").content(json.writeValueAsString(Map.of("cotizacionToken",q.token()+"alterado","puntosACanjear",0))))
+                .andExpect(status().isBadRequest());
+        assertEquals(cantidad,pedidoRepository.count());
+        assertEquals(20,p.getStock());
+        assertEquals(1,carritos.obtenerCarrito(u.getId()).getItems().size());
+    }
+    @Test void vistaPreviaMultimonedaCoincideConElPedidoYSoloElPedidoConsumePuntos() throws Exception {
+        Usuario u=usuario(Rol.CLIENTE);tasa("USD","PEN","4");
+        Producto p=producto("PEN","100");
+        carritos.agregarItem(u.getId(),new ItemCarritoRequest(p.getId(),1));
+        crm.inicializarBilleteraBienvenida(u);
+        var billetera=billeteras.findByUsuarioId(u.getId()).orElseThrow();
+        billetera.setSaldoPuntos(240);
+        billeteras.saveAndFlush(billetera);
+        var solicitud=request(u,"USD","PAGO_CONTRAENTREGA");
+        solicitud.setPuntosACanjear(100);
+        String respuesta=mvc.perform(post("/api/checkout/beneficios")
+                        .header("Authorization","Bearer "+jwt.generarToken(u)).contentType("application/json")
+                        .content(json.writeValueAsString(Map.of("cotizacionToken",solicitud.getCotizacionToken(),"puntosACanjear",100))))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.datos.total").value(23.75))
+                .andReturn().getResponse().getContentAsString();
+        BigDecimal totalPrevio=json.readTree(respuesta).get("datos").get("total").decimalValue();
+        assertEquals(240,billeteras.findByUsuarioId(u.getId()).orElseThrow().getSaldoPuntos());
+        var pedido=pedidos.crearDesdeCarrito(u.getId(),solicitud);
+        assertEquals(0,totalPrevio.compareTo(pedido.getTotal()));
+        assertEquals("USD",pedido.getMonedaCodigo());
+        assertEquals(140,billeteras.findByUsuarioId(u.getId()).orElseThrow().getSaldoPuntos());
     }
     @Test void aplicaImpuestoSoloAlProductoConfiguradoYLoCongela() {
         Usuario u=usuario(Rol.CLIENTE); Producto p=producto("PEN","100");

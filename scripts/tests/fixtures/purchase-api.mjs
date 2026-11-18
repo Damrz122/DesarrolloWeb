@@ -1,5 +1,20 @@
 // Doble de API para verificar la compra sin usuarios, carritos, pagos ni pedidos reales.
-export const usuarioPrueba = { id: 17, nombre: 'Cliente de prueba', email: 'cliente@example.test', permisos: ['COMPRAR'], rol: 'CLIENTE' };
+export const usuarioPrueba = { id: 17, nombre: 'Cliente de prueba', email: 'cliente@example.test', permisos: ['COMPRAR', 'CRM_VER_PUNTOS'], rol: 'CLIENTE' };
+export const reglasPrueba = { activo: true, puntosBienvenida: 50, minimoPuntosCanje: 100, maxCoberturaPorcentaje: 50, valorPenPorPunto: 0.05, factorSolPorPunto: 5 };
+export const nivelesPrueba = [
+    { codigo: 'BRONCE', nombre: 'Bronce', umbralPenAnual: 0, multiplicador: 1, beneficioEnvio: false, orden: 1 },
+    { codigo: 'PLATA', nombre: 'Plata', umbralPenAnual: 600, multiplicador: 1.25, beneficioEnvio: false, orden: 2 },
+    { codigo: 'ORO', nombre: 'Oro', umbralPenAnual: 1800, multiplicador: 1.5, beneficioEnvio: true, orden: 3 }
+];
+export const billeteraPrueba = {
+    saldoPuntos: 240, equivalentePen: 12, puntosHistoricos: 340, ...reglasPrueba,
+    nivelCodigo: 'PLATA', nivelNombre: 'Plata', multiplicador: 1.25, beneficioEnvioGratis: false,
+    gastoAnualPen: 720, siguienteNivelNombre: 'Oro', montoFaltanteSiguienteNivelPen: 1080, porcentajeProgresoNivel: 40,
+    transacciones: [
+        { id: 2, tipo: 'CANJEADO_PEDIDO', puntos: -100, saldoResultante: 240, pedidoId: 704, descripcion: 'Canje de prueba <especial>', fecha: '2026-11-17T10:00:00' },
+        { id: 1, tipo: 'ACREDITADO_COMPRA', puntos: 290, saldoResultante: 340, pedidoId: 703, descripcion: 'Puntos por compra de prueba', fecha: '2026-11-16T10:00:00' }
+    ]
+};
 export const metodosPrueba = [
     { codigo: 'YAPE', nombre: 'Yape de prueba', descripcion: 'Referencia con verificación manual.', instrucciones: 'Utiliza únicamente referencias de prueba.', procesamiento: 'VERIFICACION_MANUAL', requiereReferencia: true, etiquetaReferencia: 'Referencia de prueba', campos: [], version: 'manual-v1' },
     { codigo: 'PAGO_CONTRAENTREGA', nombre: 'Pago al recibir', descripcion: 'Pendiente hasta la entrega.', procesamiento: 'CONTRA_ENTREGA', requiereReferencia: false, campos: [], version: 'entrega-v1' },
@@ -32,7 +47,10 @@ export async function simularCompras(context, { autenticado = true } = {}) {
             { ...structuredClone(pedidoPrueba), id: 702, estado: 'ENTREGADO', estadoPago: 'APROBADO', procesamientoPago: 'SIMULADO' },
             { ...structuredClone(pedidoPrueba), id: 701, estado: 'CANCELADO', estadoPago: 'APROBADO' }
         ],
+        wallet: structuredClone(billeteraPrueba), rules: structuredClone(reglasPrueba), levels: structuredClone(nivelesPrueba),
         requests: [], quotes: new Map(), quoteNumber: 0,
+        failWallet: false, failRules: false, failLevels: false, beforeWallet: null, beforeBenefits: null,
+        benefitsTotal: null, couponCombines: true,
         failCart: false, failOrders: false, failQuote: false, failCreate: false,
         beforeQuote: null, beforeMutation: null, beforeCreate: null, quoteTotal: null,
         expiresIn: 300000
@@ -45,6 +63,25 @@ export async function simularCompras(context, { autenticado = true } = {}) {
             sessionStorage.setItem('ecommerce_user', JSON.stringify(user));
         }
     }, state.user);
+    function simularPuntos(puntos, subtotal) {
+        if (!state.rules.activo || puntos < state.rules.minimoPuntosCanje || puntos > state.wallet.saldoPuntos) {
+            return { valido: false, mensaje: 'Saldo insuficiente, mínimo no alcanzado o programa inactivo.' };
+        }
+        const permitidos = Math.min(puntos, Math.floor(subtotal * state.rules.maxCoberturaPorcentaje / 100 / state.rules.valorPenPorPunto));
+        if (permitidos < state.rules.minimoPuntosCanje) return { valido: false, mensaje: 'El importe no permite el canje mínimo.' };
+        return { valido: true, puntosDisponibles: state.wallet.saldoPuntos, puntosSolicitados: puntos,
+            puntosPermitidos: permitidos, descuentoBasePen: permitidos * state.rules.valorPenPorPunto,
+            totalConDescuentoPen: subtotal - permitidos * state.rules.valorPenPorPunto };
+    }
+    function resumen(q, codigo, puntos) {
+        if (codigo && codigo !== 'PRUEBA10') throw new Error('Cupón no válido o vencido.');
+        if (codigo && puntos > 0 && !state.couponCombines) throw new Error('El cupón no se puede combinar con puntos.');
+        const canje = puntos > 0 ? simularPuntos(puntos, q.datos.totalBasePen) : { puntosPermitidos: 0, descuentoBasePen: 0 };
+        if (canje.valido === false) throw new Error(canje.mensaje);
+        const dc = codigo ? 10 / q.datos.tasaPen : 0, dp = canje.descuentoBasePen / q.datos.tasaPen;
+        return { monedaCodigo: q.datos.monedaCodigo, total: state.benefitsTotal ?? Math.max(0, q.datos.total - dc - dp),
+            cuponCodigo: codigo || null, descuentoCupon: dc, puntosCanjeados: canje.puntosPermitidos, descuentoPuntos: dp };
+    }
     await context.route('**/api/**', async route => {
         const req = route.request(), url = new URL(req.url()), method = req.method();
         const body = method !== 'GET' && method !== 'DELETE' ? req.postDataJSON() : null;
@@ -57,6 +94,23 @@ export async function simularCompras(context, { autenticado = true } = {}) {
         if (url.pathname === '/api/sitio/publico') return ok({ 'site.nombre': 'ELECTRONIX' });
         if (url.pathname === '/api/categorias') return ok([{ id: 1, nombre: 'Laptops y Computadoras' }, { id: 15, nombre: 'Software' }]);
         if (url.pathname === '/api/usuarios/me') return ok(state.user);
+        if (url.pathname === '/api/crm/puntos/reglas') return state.failRules ? fail('Reglas no disponibles') : ok(state.rules);
+        if (url.pathname === '/api/crm/niveles') return state.failLevels ? fail('Niveles no disponibles') : ok(state.levels);
+        if (url.pathname === '/api/crm/puntos/mi-billetera') {
+            if (state.beforeWallet) await state.beforeWallet();
+            return state.failWallet ? fail('Billetera no disponible') : ok(state.wallet);
+        }
+        if (url.pathname === '/api/crm/puntos/simular' && method === 'POST') {
+            if (body.subtotalBasePen == null || !Number.isSafeInteger(body.puntosACanjear)) return fail('Contrato de simulación incorrecto', 400);
+            return ok(simularPuntos(body.puntosACanjear, body.subtotalBasePen));
+        }
+        if (url.pathname === '/api/checkout/beneficios' && method === 'POST') {
+            if (state.beforeBenefits) await state.beforeBenefits(body);
+            const q = state.quotes.get(body.cotizacionToken);
+            if (!q || Date.now() >= Date.parse(q.venceEn)) return fail('La cotización venció o no es válida.', 400);
+            try { return ok(resumen(q, body.cuponCodigo, body.puntosACanjear)); }
+            catch (e) { return fail(e.message, 400); }
+        }
         if (url.pathname.startsWith('/api/chat/')) return ok(null);
         if (url.pathname === '/api/auth/login') {
             if (body.email === 'error@example.test') return fail('Credenciales incorrectas <img src=x>', 401);
@@ -93,7 +147,8 @@ export async function simularCompras(context, { autenticado = true } = {}) {
                 impuestoPorcentaje: i.impuestoPorcentaje, impuestoMonto: i.impuestoMonto * factor
             }));
             const q = { token: 'quote-' + ++state.quoteNumber, venceEn: new Date(Date.now() + state.expiresIn).toISOString(),
-                datos: { monedaCodigo: body.monedaCodigo, total: state.quoteTotal ?? state.cart.total * factor, items } };
+                datos: { monedaCodigo: body.monedaCodigo, total: state.quoteTotal ?? state.cart.total * factor,
+                    tasaPen: 1 / factor, totalBasePen: (state.quoteTotal ?? state.cart.total * factor) / factor, items } };
             state.quotes.set(q.token, q);
             return ok(q);
         }
@@ -103,8 +158,15 @@ export async function simularCompras(context, { autenticado = true } = {}) {
             const q = state.quotes.get(body.cotizacionToken);
             const pago = state.methods.find(m => m.codigo === body.metodoPago);
             if (!q || Date.now() >= Date.parse(q.venceEn) || !pago || body.versionMetodo !== pago.version) return fail('Cotización o método no válido.', 400);
+            if (pago.requiereReferencia && (!body.referenciaComprobante || body.referenciaComprobante.length < 6)) return fail('Referencia obligatoria', 400);
+            if ((pago.campos || []).some(c => c.obligatorio && !body.datosPago?.[c.clave])) return fail('Campo de pago obligatorio', 400);
+            let beneficios;
+            try { beneficios = resumen(q, body.cuponCodigoAplicado, body.puntosACanjear || 0); }
+            catch (e) { return fail(e.message, 400); }
             const pedido = {
-                ...structuredClone(pedidoPrueba), id: 705, total: q.datos.total, monedaCodigo: q.datos.monedaCodigo,
+                ...structuredClone(pedidoPrueba), id: 705, total: beneficios.total, monedaCodigo: q.datos.monedaCodigo,
+                cuponCodigo: beneficios.cuponCodigo, descuentoPen: beneficios.descuentoCupon * q.datos.tasaPen,
+                puntosCanjeados: beneficios.puntosCanjeados, descuentoPuntosPen: beneficios.descuentoPuntos * q.datos.tasaPen,
                 direccionEnvio: body.direccionEnvio, telefono: body.telefono, metodoPago: pago.codigo, metodoNombre: pago.nombre,
                 procesamientoPago: pago.procesamiento, estadoPago: pago.procesamiento === 'SIMULADO' ? 'APROBADO' : 'PENDIENTE',
                 referenciaComprobante: body.referenciaComprobante,

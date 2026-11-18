@@ -69,6 +69,16 @@ public class DemoDataSeeder implements CommandLineRunner {
     private final int targetCarritos;
     private final int targetPedidos;
     private final int targetConversaciones;
+    @Value("${ADMIN_EMAIL:Admin@gmail.com}")
+    private String adminEmail = "Admin@gmail.com";
+    @Value("${ADMIN_PASSWORD:}")
+    private String adminPassword = "";
+    @Value("${DEMO_USER_PASSWORD:}")
+    private String demoUserPassword = "";
+    @Value("${DEMO_EMAIL_DOMAIN:gmail.com}")
+    private String demoEmailDomain = "gmail.com";
+    @Value("${app.demo-seed.secure:false}")
+    private boolean secureDemo;
 
     public DemoDataSeeder(
             UsuarioRepository usuarioRepository,
@@ -104,6 +114,13 @@ public class DemoDataSeeder implements CommandLineRunner {
             log.info("DemoDataSeeder: la BD ya contiene datos de negocio; se omite para no duplicar.");
             return;
         }
+        if (secureDemo && (adminPassword.length() < 12 || demoUserPassword.length() < 12
+                || adminEmail.isBlank() || adminPassword.equals(demoUserPassword))) {
+            throw new IllegalStateException("El demo público exige ADMIN_EMAIL y claves distintas de al menos 12 caracteres en ADMIN_PASSWORD y DEMO_USER_PASSWORD");
+        }
+        if (!demoEmailDomain.matches("[a-zA-Z0-9.-]+") || !demoEmailDomain.contains(".")) {
+            throw new IllegalStateException("DEMO_EMAIL_DOMAIN debe ser un dominio válido");
+        }
         log.info("DemoDataSeeder: sembrando datos demo...");
         Random random = new Random(42);
 
@@ -130,7 +147,8 @@ public class DemoDataSeeder implements CommandLineRunner {
                     APELLIDOS[random.nextInt(APELLIDOS.length)],
                     TipoDocumento.DNI,
                     String.format("%08d", 71000000 + i),
-                    String.format("Usuario%d@gmail.com", i), passwordEncoder.encode("User" + i), Rol.CLIENTE, true));
+                    String.format("Usuario%d@%s", i, demoEmailDomain),
+                    passwordEncoder.encode(demoUserPassword.isBlank() ? "User" + i : demoUserPassword), Rol.CLIENTE, true));
         }
         return usuarioRepository.saveAll(nuevos);
     }
@@ -139,7 +157,8 @@ public class DemoDataSeeder implements CommandLineRunner {
         return usuarioRepository.save(new Usuario(null,
                 "Administrador", "Sistema", null,
                 TipoDocumento.DNI, "00000001",
-                "Admin@gmail.com", passwordEncoder.encode("Admin1221:)"), Rol.ADMIN, true));
+                adminEmail.trim().toLowerCase(java.util.Locale.ROOT),
+                passwordEncoder.encode(adminPassword.isBlank() ? "Admin1221:)" : adminPassword), Rol.ADMIN, true));
     }
 
     // ---------------- categorías y productos ----------------

@@ -31,6 +31,18 @@ function escapeHtml(value) {
 }
 
 export function renderNavbar() {
+    const centro = document.querySelector('.store-header .fx-nav-center');
+    if (centro) {
+        let club = centro.querySelector('a[href="/puntos.html"]');
+        if (!club) { club = document.createElement('a'); club.href = '/puntos.html'; club.className = 'fx-nav-link'; centro.appendChild(club); }
+        club.textContent = 'Electronix Club';
+        club.removeAttribute('style');
+        if (location.pathname === '/puntos.html') club.setAttribute('aria-current', 'page');
+        const enlaces = document.querySelector('.fx-mega-smalllinks');
+        if (enlaces && !enlaces.querySelector('a[href="/puntos.html"]')) {
+            const acceso = document.createElement('a'); acceso.href = '/puntos.html'; acceso.textContent = 'Electronix Club'; enlaces.appendChild(acceso);
+        }
+    }
     // marca y colores editables en todas las paginas publicas (no bloquea el resto)
     // La portada espera explícitamente la configuración antes de enlazar sus controles.
     if (!document.body.classList.contains('storefront-home')) aplicarSitio().catch(() => {});
@@ -56,7 +68,7 @@ export function renderNavbar() {
                         Conectado como<br/><strong>${escapeHtml(user.email)}</strong>
                     </div>
                     <a href="/mis-pedidos.html">Mis Pedidos</a>
-                    <a href="/puntos.html">Club Puntos (CMR)</a>
+                    <a href="/puntos.html">Electronix Club</a>
                     ${isAdmin ? `<a href="${auth.inicioAdmin()}" class="elx-admin-link">Panel Administrativo</a>` : ''}
                     <button id="logout-btn" class="elx-logout-btn">Cerrar Sesión</button>
                 </div>

@@ -9,86 +9,18 @@
     <link rel="stylesheet" href="/assets/css/output.css">
     <link rel="stylesheet" href="/assets/css/ui/ui-inline.css">
     <link rel="stylesheet" href="/assets/css/pages/figma-home.css?v=4">
-    <link rel="stylesheet" href="/assets/css/storefront.css?v=4">
-    <link rel="stylesheet" href="/assets/css/pages/purchase-flow.css?v=1">
-    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js" defer></script>
+    <link rel="stylesheet" href="/assets/css/storefront.css?v=5">
+    <link rel="stylesheet" href="/assets/css/pages/purchase-flow.css?v=2">
+    <link rel="stylesheet" href="/assets/css/pages/puntos.css?v=2">
 </head>
 <body class="storefront-flow">
     <a class="store-skip-link" href="#pedidos">Saltar a mis pedidos</a>
     <header id="main-navbar" class="store-header"><div class="fx-topbar"><a href="/index.html" class="fx-brand"><img src="/assets/img/logo.svg" alt="Electronix" class="fx-brand-logo"><span>ELECTRONIX</span></a></div></header>
     <main id="pedidos" class="store-container flow-main">
         <nav class="flow-breadcrumb" aria-label="Ruta de navegación"><a href="/index.html">Inicio</a><span aria-hidden="true">/</span><span aria-current="page">Mis pedidos</span></nav>
-        <header class="flow-heading">
-            <div>
-                <p class="store-eyebrow">Cada paso de tu compra</p>
-                <h1>Tu pedido, más cerca.</h1>
-                <p>Consulta tus compras y el estado registrado por la tienda.</p>
-            </div>
-            <a href="/informacion.html#chat" class="store-text-link">¿Necesitas ayuda?</a>
-        </header>
-
-        <!-- Tarjeta Billetera CRM Club -->
-        <section id="billetera-crm-card" class="flow-summary" style="margin-bottom: 1.5rem; background: linear-gradient(135deg, #18181b 0%, #27272a 60%, #451a03 100%); color: #ffffff; border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 16px; padding: 1.25rem 1.5rem;" hidden>
-            <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem;">
-                <div style="display: flex; align-items: center; gap: 0.75rem;">
-                    <span style="display: inline-flex; width: 2.5rem; height: 2.5rem; border-radius: 10px; background: #f59e0b; color: #18181b; font-weight: 900; align-items: center; justify-content: center; font-size: 1.25rem;">★</span>
-                    <div>
-                        <div style="font-weight: 800; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-                            Electronix Club
-                            <span id="billetera-nivel-badge" style="font-size: 0.6875rem; background: rgba(180, 83, 9, 0.6); color: #fde68a; border: 1px solid rgba(217, 119, 6, 0.5); padding: 2px 8px; border-radius: 9999px; font-weight: 800;">BRONCE</span>
-                            <span id="billetera-multiplicador-badge" style="font-size: 0.6875rem; background: rgba(245, 158, 11, 0.15); color: #fde68a; border: 1px solid rgba(245, 158, 11, 0.3); padding: 2px 8px; border-radius: 9999px; font-weight: 700;">1.00x Pts</span>
-                            <span id="billetera-envio-badge" style="display: none; font-size: 0.6875rem; background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.4); padding: 2px 8px; border-radius: 9999px; font-weight: 700;">Envío Gratis VIP</span>
-                        </div>
-                        <p style="margin: 0.25rem 0 0; font-size: 0.8125rem; color: #d4d4d8;">Acumula puntos en cada compra y canjéalos por descuentos directos en caja.</p>
-                    </div>
-                </div>
-                <div style="display: flex; align-items: center; gap: 1.25rem; background: rgba(9, 9, 11, 0.45); border: 1px solid rgba(245, 158, 11, 0.2); padding: 0.625rem 1rem; border-radius: 12px;">
-                    <div>
-                        <span style="font-size: 0.625rem; text-transform: uppercase; font-weight: 700; color: #a1a1aa; display: block; letter-spacing: 0.05em;">Saldo Disponible</span>
-                        <span id="billetera-saldo-puntos" style="font-size: 1.5rem; font-weight: 900; color: #fbbf24;">0 pts</span>
-                    </div>
-                    <div style="width: 1px; height: 2rem; background: #3f3f46;"></div>
-                    <div>
-                        <span style="font-size: 0.625rem; text-transform: uppercase; font-weight: 700; color: #a1a1aa; display: block; letter-spacing: 0.05em;">Valor Estimado</span>
-                        <span id="billetera-valor-pen" style="font-size: 1.125rem; font-weight: 700; color: #ffffff;">S/ 0.00</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Progreso de Nivel -->
-            <div id="billetera-progreso-nivel-container" style="margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid rgba(63, 63, 70, 0.6);">
-                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; margin-bottom: 0.375rem;">
-                    <span id="billetera-progreso-texto" style="color: #e4e4e7;">Cargando progreso de nivel...</span>
-                    <span id="billetera-progreso-pct" style="font-weight: 700; color: #fbbf24;">0%</span>
-                </div>
-                <div style="width: 100%; height: 6px; background: rgba(9, 9, 11, 0.8); border-radius: 9999px; overflow: hidden; border: 1px solid rgba(63, 63, 70, 0.6);">
-                    <div id="billetera-progreso-barra" style="height: 100%; width: 0%; background: linear-gradient(90deg, #f59e0b, #fde047); border-radius: 9999px; transition: width 0.4s ease;"></div>
-                </div>
-            </div>
-
-            <!-- Historial colapsable -->
-            <div style="margin-top: 0.75rem; padding-top: 0.5rem; border-top: 1px solid rgba(63, 63, 70, 0.6); display: flex; justify-content: space-between; align-items: center;">
-                <span id="billetera-puntos-historicos" style="font-size: 0.75rem; color: #a1a1aa;">Total histórico acumulado: 0 pts</span>
-                <button type="button" id="btn-toggle-historial-puntos" style="background: none; border: none; font-size: 0.75rem; color: #fbbf24; text-decoration: underline; cursor: pointer; font-weight: 700;">Ver movimientos de puntos ▼</button>
-            </div>
-            <div id="historial-puntos-panel" style="margin-top: 0.75rem; max-height: 14rem; overflow-y: auto; background: rgba(9, 9, 11, 0.6); border: 1px solid #27272a; border-radius: 10px; padding: 0.75rem;" hidden>
-                <table style="width: 100%; text-align: left; font-size: 0.75rem; border-collapse: collapse;">
-                    <thead style="color: #a1a1aa; border-bottom: 1px solid #27272a;">
-                        <tr>
-                            <th style="padding: 0.375rem 0.5rem; font-weight: 600;">Fecha</th>
-                            <th style="padding: 0.375rem 0.5rem; font-weight: 600;">Tipo</th>
-                            <th style="padding: 0.375rem 0.5rem; font-weight: 600;">Descripción</th>
-                            <th style="padding: 0.375rem 0.5rem; font-weight: 600; text-align: right;">Puntos</th>
-                            <th style="padding: 0.375rem 0.5rem; font-weight: 600; text-align: right;">Saldo</th>
-                        </tr>
-                    </thead>
-                    <tbody id="historial-puntos-tbody" style="color: #e4e4e7;">
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
+        <header class="flow-heading"><div><p class="store-eyebrow">Cada paso de tu compra</p><h1>Tu pedido, más cerca.</h1><p>Consulta tus compras y el estado registrado por la tienda.</p></div><a href="/informacion.html#chat" class="store-text-link">¿Necesitas ayuda?</a></header>
+        <section id="billetera-crm-card" class="club-wallet club-wallet-compact" aria-label="Resumen de Electronix Club" hidden></section>
+        <p id="orders-wallet-status" class="flow-message" role="status"></p>
         <div class="flow-orders-toolbar">
             <label for="orders-filter">Mostrar <select id="orders-filter"><option value="todos">Todos los pedidos</option><option value="activos">En curso</option><option value="entregados">Entregados</option><option value="cancelados">Cancelados</option></select></label>
             <button type="button" id="orders-refresh" class="flow-link">Actualizar pedidos</button>
@@ -99,6 +31,6 @@
         <noscript><p class="flow-message">Activa JavaScript para consultar los pedidos de tu cuenta.</p></noscript>
     </main>
     <footer data-site-footer></footer>
-    <script type="module" src="/assets/js/pages/mis-pedidos.js?v=4"></script>
+    <script type="module" src="/assets/js/pages/mis-pedidos.js?v=5"></script>
 </body>
 </html>

@@ -9,10 +9,8 @@
     <link rel="stylesheet" href="/assets/css/output.css">
     <link rel="stylesheet" href="/assets/css/ui/ui-inline.css">
     <link rel="stylesheet" href="/assets/css/pages/figma-home.css?v=4">
-    <link rel="stylesheet" href="/assets/css/storefront.css?v=4">
-    <link rel="stylesheet" href="/assets/css/pages/purchase-flow.css?v=1">
-    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js" defer></script>
+    <link rel="stylesheet" href="/assets/css/storefront.css?v=5">
+    <link rel="stylesheet" href="/assets/css/pages/purchase-flow.css?v=2">
 </head>
 <body class="storefront-flow">
     <a class="store-skip-link" href="#confirmacion">Saltar a la confirmación de compra</a>
@@ -59,44 +57,27 @@
                     <h2>Tu pedido.</h2>
                     <div id="checkout-items"><p class="flow-note">Calculando importes…</p></div>
 
-                    <!-- Cupón de Descuento CRM -->
-                    <div class="flow-coupon-wrap" style="margin: 16px 0 12px; padding-top: 14px; border-top: 1px solid var(--flow-border, #e5e7eb);">
-                        <label for="input-cupon" class="flow-note" style="font-weight: 700; display: block; margin-bottom: 6px; color: inherit;">
-                            Cupón de descuento
-                        </label>
-                        <div style="display: flex; gap: 8px;">
-                            <input type="text" id="input-cupon" placeholder="Ej. VERANO2026" maxlength="30" style="flex: 1; text-transform: uppercase; font-family: monospace; font-size: 0.8rem; padding: 8px 10px; border: 1px solid var(--flow-border, #d1d5db); border-radius: 8px; background: transparent;">
-                            <button type="button" id="btn-aplicar-cupon" class="store-button" style="padding: 8px 14px; font-size: 0.78rem;">
-                                Aplicar
-                            </button>
+                    <details class="flow-benefits" open>
+                        <summary>Cupones y puntos</summary>
+                        <div class="flow-field">
+                            <label for="input-cupon">Código de cupón</label>
+                            <div class="flow-apply"><input id="input-cupon" type="text" maxlength="30" placeholder="Tu código" autocomplete="off"><button type="button" id="btn-aplicar-cupon" class="store-button">Aplicar</button></div>
+                            <button type="button" id="quitar-cupon" class="flow-link">Retirar cupón</button>
                         </div>
-                        <div id="cupon-feedback" class="flow-note" style="margin-top: 6px;" hidden></div>
-                    </div>
-
-                    <!-- Canje de Puntos de Fidelización CRM -->
-                    <div id="seccion-puntos-crm" class="flow-points-wrap" style="margin-bottom: 14px; padding-top: 12px; border-top: 1px solid var(--flow-border, #e5e7eb);" hidden>
-                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-                            <label for="input-puntos" class="flow-note" style="font-weight: 700; color: inherit;">
-                                ★ Puntos Electronix Club
-                            </label>
-                            <span id="puntos-disponibles-badge" style="font-size: 0.7rem; font-weight: 800; background: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 20px;">
-                                0 pts
-                            </span>
+                        <div id="seccion-puntos-crm" class="flow-field" hidden>
+                            <label for="input-puntos">Electronix Club · <span id="puntos-disponibles-badge">—</span></label>
+                            <p id="puntos-equivalencia-txt" class="flow-note"></p>
+                            <div class="flow-apply"><input id="input-puntos" type="number" min="0" step="1" placeholder="Puntos a utilizar"><button type="button" id="btn-aplicar-puntos" class="store-button">Revisar</button></div>
+                            <button type="button" id="quitar-puntos" class="flow-link">Retirar puntos</button>
+                            <a href="/puntos.html" class="flow-link">Consultar mi Club</a>
                         </div>
-                        <p id="puntos-equivalencia-txt" class="flow-note" style="margin-bottom: 8px;">Canjea tus puntos acumulados por descuento directo.</p>
-                        <div style="display: flex; gap: 8px;">
-                            <input type="number" id="input-puntos" min="0" step="10" placeholder="Puntos a canjear" style="flex: 1; font-family: monospace; font-size: 0.8rem; padding: 8px 10px; border: 1px solid var(--flow-border, #d1d5db); border-radius: 8px; background: transparent;">
-                            <button type="button" id="btn-aplicar-puntos" class="store-button" style="padding: 8px 14px; font-size: 0.78rem;">
-                                Canjear
-                            </button>
-                        </div>
-                        <div id="puntos-feedback" class="flow-note" style="margin-top: 6px;" hidden></div>
-                    </div>
+                        <p id="beneficios-feedback" class="flow-message" role="status" aria-live="polite"></p>
+                    </details>
 
                     <dl class="flow-totals">
                         <div><dt>Productos sin impuesto</dt><dd id="checkout-subtotal">—</dd></div>
-                        <div id="row-descuento-cupon" hidden><dt id="lbl-descuento-cupon" style="color: #059669;">Descuento Cupón</dt><dd id="checkout-discount" style="color: #059669; font-weight: 700;">-S/ 0.00</dd></div>
-                        <div id="row-descuento-puntos" hidden><dt id="lbl-descuento-puntos" style="color: #d97706;">Descuento Puntos (<span id="txt-puntos-canjeados">0</span> pts)</dt><dd id="checkout-discount-points" style="color: #d97706; font-weight: 700;">-S/ 0.00</dd></div>
+                        <div id="row-descuento-cupon" class="flow-saving" hidden><dt id="lbl-descuento-cupon">Cupón</dt><dd id="checkout-discount">—</dd></div>
+                        <div id="row-descuento-puntos" class="flow-saving" hidden><dt>Puntos (<span id="txt-puntos-canjeados">0</span>)</dt><dd id="checkout-discount-points">—</dd></div>
                         <div><dt>Impuestos</dt><dd id="checkout-tax">—</dd></div>
                         <div class="flow-total"><dt>Total del pedido</dt><dd id="checkout-total">—</dd></div>
                     </dl>
@@ -114,6 +95,6 @@
         <noscript><p class="flow-message">Activa JavaScript para consultar la cotización y confirmar tu compra.</p></noscript>
     </main>
     <footer data-site-footer></footer>
-    <script type="module" src="/assets/js/pages/checkout.js?v=3"></script>
+    <script type="module" src="/assets/js/pages/checkout.js?v=4"></script>
 </body>
 </html>

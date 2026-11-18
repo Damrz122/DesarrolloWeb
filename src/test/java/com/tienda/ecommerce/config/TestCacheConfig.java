@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Profile;
  */
 @Configuration
 @EnableCaching
-@Profile("test")
+@Profile("test & !redis-test")
 public class TestCacheConfig {
 
     @Bean

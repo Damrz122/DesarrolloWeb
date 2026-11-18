@@ -21,6 +21,9 @@ server:
   port: 0
 
 management:
+  health:
+    redis:
+      enabled: false # Las pruebas ordinarias usan TestCacheConfig; redis-test lo reactiva.
   endpoints:
     web:
       exposure:

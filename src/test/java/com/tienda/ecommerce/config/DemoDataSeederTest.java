@@ -50,6 +50,41 @@ class DemoDataSeederTest {
                 new BCryptPasswordEncoder(), 10, 12, 8, 10, 4);
     }
 
+    private DemoDataSeeder seederSeguro(String admin, String cliente) {
+        var seeder = seederPequeno();
+        org.springframework.test.util.ReflectionTestUtils.setField(seeder, "secureDemo", true);
+        org.springframework.test.util.ReflectionTestUtils.setField(seeder, "adminEmail", "expositor@example.test");
+        org.springframework.test.util.ReflectionTestUtils.setField(seeder, "adminPassword", admin);
+        org.springframework.test.util.ReflectionTestUtils.setField(seeder, "demoUserPassword", cliente);
+        org.springframework.test.util.ReflectionTestUtils.setField(seeder, "demoEmailDomain", "example.test");
+        return seeder;
+    }
+
+    @Test
+    void demoPublicoRechazaClavesAusentesCortasOIgualesAntesDeEscribir() {
+        for (var claves : List.of(new String[]{"", ""}, new String[]{"corta", "cliente-seguro-123"},
+                new String[]{"clave-compartida-123", "clave-compartida-123"})) {
+            assertThrows(IllegalStateException.class, () -> seederSeguro(claves[0], claves[1]).run());
+            assertEquals(0, usuarioRepository.count());
+            assertEquals(0, productoRepository.count());
+        }
+    }
+
+    @Test
+    void demoPublicoUsaHashesConfiguradosYSinResetearUsuariosExistentes() {
+        var encoder = new BCryptPasswordEncoder();
+        seederSeguro("admin-exposicion-123", "cliente-exposicion-456").run();
+        var admin = usuarioRepository.findByEmail("expositor@example.test").orElseThrow();
+        var cliente = usuarioRepository.findByEmail("Usuario1@example.test").orElseThrow();
+        assertTrue(encoder.matches("admin-exposicion-123", admin.getPasswordHash()));
+        assertTrue(encoder.matches("cliente-exposicion-456", cliente.getPasswordHash()));
+        assertFalse(encoder.matches("User1", cliente.getPasswordHash()));
+        String hash = admin.getPasswordHash();
+        seederSeguro("", "").run(); // DB poblada: no resetea claves ni valida nuevas.
+        assertEquals(hash, usuarioRepository.findByEmail("expositor@example.test").orElseThrow().getPasswordHash());
+        assertEquals(11, usuarioRepository.count());
+    }
+
     @Test
     @DisplayName("Siembra datos demo respetando invariantes de negocio")
     void siembra_con_invariantes() {

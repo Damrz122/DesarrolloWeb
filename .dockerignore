@@ -1,0 +1,9 @@
+# Solo se envía el código necesario al constructor remoto; nunca .env, dumps o respaldos.
+**
+!pom.xml
+!src/
+!src/**
+!Dockerfile
+!Dockerfile.render
+src/**/*.log
+src/**/target/

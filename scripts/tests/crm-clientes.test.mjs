@@ -28,20 +28,10 @@ test('crm-clientes HTML contains all IDs referenced in JS', () => {
     assert.deepEqual(missing, [], 'Missing IDs in HTML: ' + missing.join(', '));
 });
 
-test('crm-clientes endpoints contract with live server', async (t) => {
+// Opt-in explícito. La suite normal no inicia sesión con cuentas ni contraseñas reales.
+test('crm-clientes endpoints contract with live server', { skip: !process.env.CRM_TEST_TOKEN }, async (t) => {
     try {
-        const loginRes = await fetch('http://localhost:8090/api/auth/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: 'Admin@gmail.com', password: 'cambia_esta_clave_por_una_segura' })
-        });
-        if (loginRes.status !== 200) {
-            t.skip('Live server returned non-200 on login');
-            return;
-        }
-        const loginData = await loginRes.json();
-        const token = loginData.datos?.token || loginData.token;
-        assert.ok(token, 'JWT Token was not returned');
+        const token = process.env.CRM_TEST_TOKEN;
 
         // Test clientes list endpoint
         const resList = await fetch('http://localhost:8090/api/admin/crm/clientes', {

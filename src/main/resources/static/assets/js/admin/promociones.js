@@ -312,3 +312,4 @@ async function abrirModalUsos(id, codigo) {
 function cerrarModalUsos() {
     $('usos-modal').classList.add('hidden');
 }
+import '/assets/js/ui/crm-dialogs.js';

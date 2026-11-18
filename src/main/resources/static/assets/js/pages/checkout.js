@@ -9,7 +9,7 @@ await iniciarShellCompra();
 const $ = id => document.getElementById(id);
 let cotizacion = null, metodos = [], metodo = null, secuencia = 0;
 let ocupado = false, terminado = false, vencimiento;
-let cuponAplicado = null, billetera = null, puntosCanjeados = 0, descuentoPuntosPen = 0;
+let beneficios = null, revisandoBeneficios = false, cambiosBeneficios = false, revisionBeneficios = 0;
 
 function mensaje(texto, tono = '') {
     $('checkout-status').textContent = texto;
@@ -20,7 +20,10 @@ function controles() {
     $('quote-refresh').disabled = ocupado;
     $('checkout-delivery').disabled = ocupado;
     $('payment-catalog').disabled = ocupado || !cotizacion;
-    $('btn-confirm-order').disabled = ocupado || terminado || !cotizacionVigente(cotizacion) || !metodo;
+    $('btn-confirm-order').disabled = ocupado || terminado || revisandoBeneficios || cambiosBeneficios || !cotizacionVigente(cotizacion) || !metodo;
+    for (const id of ['btn-aplicar-cupon', 'btn-aplicar-puntos']) $(id).disabled = ocupado || revisandoBeneficios || !cotizacionVigente(cotizacion);
+    for (const id of ['input-cupon', 'input-puntos', 'quitar-cupon', 'quitar-puntos']) $(id).disabled = ocupado;
+    for (const tipo of ['cupon', 'puntos']) $('quitar-' + tipo).hidden = !$('input-' + tipo).value.trim();
     $('btn-confirm-order').textContent = ocupado ? 'Registrando tu pedido…' : 'Confirmar mi pedido';
     $('btn-confirm-order').setAttribute('aria-busy', String(ocupado));
 }
@@ -49,20 +52,29 @@ async function iniciar() {
     $('checkout-currency').value = codigo;
     $('checkout-workspace').hidden = false;
 
-    $('btn-aplicar-cupon')?.addEventListener('click', manejarCupon);
-    $('input-cupon')?.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); manejarCupon(); } });
-    $('btn-aplicar-puntos')?.addEventListener('click', manejarPuntos);
-    $('input-puntos')?.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); manejarPuntos(); } });
+    for (const tipo of ['cupon', 'puntos']) {
+        $('btn-aplicar-' + tipo).addEventListener('click', () => revisarBeneficios());
+        $('input-' + tipo).addEventListener('keydown', e => {
+            if (e.key === 'Enter') { e.preventDefault(); if (!revisandoBeneficios) revisarBeneficios(); }
+        });
+        $('input-' + tipo).addEventListener('input', invalidarBeneficios);
+        $('quitar-' + tipo).addEventListener('click', () => {
+            $('input-' + tipo).value = '';
+            invalidarBeneficios();
+            revisarBeneficios();
+        });
+    }
 
     cargarBilletera().catch(() => {});
     await actualizar();
 }
 
 async function cargarBilletera() {
+    if (!auth.tienePermiso('CRM_VER_PUNTOS')) return;
     try {
         const res = await api.get('/api/crm/puntos/mi-billetera');
-        if (res.datos) {
-            billetera = res.datos;
+        if (res.exito && res.datos) {
+            const billetera = res.datos;
             const seccion = $('seccion-puntos-crm');
             if (seccion) {
                 seccion.hidden = false;
@@ -73,11 +85,12 @@ async function cargarBilletera() {
                     const equiv = Number(billetera.valorEstimadoPen ?? billetera.equivalentePen ?? 0).toFixed(2);
                     const nivel = billetera.nivelNombre || 'Bronce';
                     const mult = Number(billetera.multiplicador || 1).toFixed(2);
-                    $('puntos-equivalencia-txt').textContent = `Tienes ${billetera.saldoPuntos} puntos (≈ S/ ${equiv}) · Nivel ${nivel} (${mult}x puntos).`;
+                    $('puntos-equivalencia-txt').textContent = `${nivel} · ${mult}x de acumulación. Equivalente estimado: S/ ${equiv}. Canje mínimo: ${billetera.minimoPuntosCanje} puntos; cobertura máxima: ${billetera.maxCoberturaPorcentaje}%.`;
                 }
                 const input = $('input-puntos');
                 if (input) {
                     input.max = billetera.saldoPuntos;
+                    input.step = '1';
                 }
             }
         }
@@ -88,141 +101,79 @@ async function cargarBilletera() {
 
 function recalcularTotales() {
     if (!cotizacion?.datos) return;
-    const datos = cotizacion.datos;
-    const formato = valor => formatoMoneda(valor, datos.monedaCodigo);
-    const tasa = Number(datos.tasaPen || 1);
-    let totalFinal = Number(datos.total);
-
-    // Cupón
-    if (cuponAplicado) {
-        const descCuponMoneda = tasa > 0 ? (Number(cuponAplicado.descuentoCalculadoPen || 0) / tasa) : Number(cuponAplicado.descuentoCalculadoPen || 0);
-        totalFinal = Math.max(0, totalFinal - descCuponMoneda);
-        if ($('row-descuento-cupon')) {
-            $('row-descuento-cupon').hidden = false;
-            $('lbl-descuento-cupon').textContent = `Descuento Cupón (${esc(cuponAplicado.codigo)})`;
-            $('checkout-discount').textContent = `-${formato(descCuponMoneda)}`;
-        }
-    } else if ($('row-descuento-cupon')) {
-        $('row-descuento-cupon').hidden = true;
+    const formato = valor => formatoMoneda(valor, cotizacion.datos.monedaCodigo);
+    $('row-descuento-cupon').hidden = !beneficios?.cuponCodigo;
+    $('row-descuento-puntos').hidden = !(beneficios?.puntosCanjeados > 0);
+    if (beneficios) {
+        $('lbl-descuento-cupon').textContent = `Cupón ${beneficios.cuponCodigo || ''}`;
+        $('checkout-discount').textContent = `−${formato(beneficios.descuentoCupon)}`;
+        $('txt-puntos-canjeados').textContent = beneficios.puntosCanjeados;
+        $('checkout-discount-points').textContent = `−${formato(beneficios.descuentoPuntos)}`;
     }
-
-    // Puntos
-    if (puntosCanjeados > 0 && descuentoPuntosPen > 0) {
-        const descPuntosMoneda = tasa > 0 ? (descuentoPuntosPen / tasa) : descuentoPuntosPen;
-        totalFinal = Math.max(0, totalFinal - descPuntosMoneda);
-        if ($('row-descuento-puntos')) {
-            $('row-descuento-puntos').hidden = false;
-            if ($('txt-puntos-canjeados')) $('txt-puntos-canjeados').textContent = puntosCanjeados;
-            $('checkout-discount-points').textContent = `-${formato(descPuntosMoneda)}`;
-        }
-    } else if ($('row-descuento-puntos')) {
-        $('row-descuento-puntos').hidden = true;
-    }
-
-    $('checkout-total').textContent = formato(totalFinal);
+    // El total y ambos descuentos proceden del servidor; no se convierten ni se restan en el navegador.
+    $('checkout-total').textContent = formato(beneficios?.total ?? cotizacion.datos.total);
 }
 
-async function manejarCupon() {
-    const input = $('input-cupon');
-    const feedback = $('cupon-feedback');
-    const codigo = input?.value?.trim().toUpperCase();
-
-    if (!codigo) {
-        cuponAplicado = null;
-        if (feedback) { feedback.hidden = true; feedback.textContent = ''; }
-        recalcularTotales();
-        return;
-    }
-
-    if (!cotizacion?.datos) return;
-
-    try {
-        const subtotalPen = Number(cotizacion.datos.totalBasePen || cotizacion.datos.total || 0);
-        const res = await api.post('/api/crm/cupones/validar', {
-            codigo,
-            montoSubtotalPen: subtotalPen,
-            deseaCombinarConPuntos: puntosCanjeados > 0
-        });
-
-        if (res.exito && res.datos?.valido) {
-            cuponAplicado = {
-                codigo: res.datos.codigo,
-                descuentoCalculadoPen: res.datos.descuentoCalculadoPen,
-                permiteCombinarPuntos: res.datos.permiteCombinarPuntos
-            };
-            if (feedback) {
-                feedback.hidden = false;
-                feedback.style.color = '#059669';
-                feedback.textContent = `✓ Cupón '${codigo}' aplicado: S/ ${Number(res.datos.descuentoCalculadoPen).toFixed(2)} de descuento.`;
-            }
-        } else {
-            cuponAplicado = null;
-            if (feedback) {
-                feedback.hidden = false;
-                feedback.style.color = '#e11d48';
-                feedback.textContent = res.datos?.mensaje || 'El cupón no es válido para esta compra.';
-            }
-        }
-    } catch (e) {
-        cuponAplicado = null;
-        if (feedback) {
-            feedback.hidden = false;
-            feedback.style.color = '#e11d48';
-            feedback.textContent = e.message || 'Error al validar cupón';
-        }
-    }
+function invalidarBeneficios() {
+    ++revisionBeneficios;
+    revisandoBeneficios = false;
+    beneficios = null;
+    cambiosBeneficios = Boolean($('input-cupon').value.trim() || Number($('input-puntos').value));
+    $('row-descuento-cupon').hidden = true;
+    $('row-descuento-puntos').hidden = true;
+    $('beneficios-feedback').dataset.tone = '';
+    $('beneficios-feedback').textContent = cambiosBeneficios ? 'Aplica los cambios para revisar el total antes de confirmar.' : '';
     recalcularTotales();
+    controles();
 }
 
-async function manejarPuntos() {
-    const input = $('input-puntos');
-    const feedback = $('puntos-feedback');
-    const pts = parseInt(input?.value || '0', 10);
-
-    if (isNaN(pts) || pts <= 0) {
-        puntosCanjeados = 0;
-        descuentoPuntosPen = 0;
-        if (feedback) { feedback.hidden = true; feedback.textContent = ''; }
-        recalcularTotales();
-        return;
+async function revisarBeneficios() {
+    if (!cotizacionVigente(cotizacion)) return false;
+    const revision = ++revisionBeneficios, actual = cotizacion;
+    const codigo = $('input-cupon').value.trim().toUpperCase();
+    const puntos = Number($('input-puntos').value || 0);
+    const feedback = $('beneficios-feedback');
+    if (!Number.isSafeInteger(puntos) || puntos < 0) {
+        feedback.textContent = 'Ingresa una cantidad entera de puntos, igual o mayor a cero.';
+        return false;
     }
-
-    if (!cotizacion?.datos) return;
-
+    revisandoBeneficios = true;
+    cambiosBeneficios = true;
+    feedback.dataset.tone = '';
+    feedback.textContent = 'Revisando beneficios en el servidor…';
+    controles();
     try {
-        const subtotalPen = Number(cotizacion.datos.totalBasePen || cotizacion.datos.total || 0);
-        const res = await api.post('/api/crm/puntos/simular-canje', {
-            puntosACanjear: pts,
-            montoSubtotalPen: subtotalPen
-        });
-
-        if (res.exito && res.datos?.puedeCanjear) {
-            puntosCanjeados = res.datos.puntosCanjeados;
-            descuentoPuntosPen = res.datos.descuentoPen;
-            if (feedback) {
-                feedback.hidden = false;
-                feedback.style.color = '#d97706';
-                feedback.textContent = `✓ ${puntosCanjeados} puntos canjeados: S/ ${Number(descuentoPuntosPen).toFixed(2)} de descuento directo.`;
-            }
-        } else {
-            puntosCanjeados = 0;
-            descuentoPuntosPen = 0;
-            if (feedback) {
-                feedback.hidden = false;
-                feedback.style.color = '#e11d48';
-                feedback.textContent = res.datos?.mensaje || 'No fue posible canjear los puntos.';
-            }
+        if (!codigo && !puntos) {
+            beneficios = null;
+            cambiosBeneficios = false;
+            feedback.textContent = '';
+            return true;
         }
+        const res = await api.post('/api/checkout/beneficios', {
+            cotizacionToken: actual.token, cuponCodigo: codigo || null, puntosACanjear: puntos
+        });
+        if (revision !== revisionBeneficios || actual !== cotizacion) return false;
+        if (!res?.exito || res.datos?.monedaCodigo !== actual.datos.monedaCodigo
+            || !Number.isFinite(Number(res.datos?.total))) throw new Error('No se pudo revisar el total con beneficios.');
+        beneficios = res.datos;
+        $('input-cupon').value = beneficios.cuponCodigo || '';
+        $('input-puntos').value = beneficios.puntosCanjeados || '';
+        cambiosBeneficios = false;
+        feedback.textContent = 'Beneficios revisados. Los puntos y el cupón se consumirán solo al registrar el pedido.';
+        return true;
     } catch (e) {
-        puntosCanjeados = 0;
-        descuentoPuntosPen = 0;
-        if (feedback) {
-            feedback.hidden = false;
-            feedback.style.color = '#e11d48';
-            feedback.textContent = e.message || 'Error al canjear puntos';
+        if (revision !== revisionBeneficios || actual !== cotizacion) return false;
+        beneficios = null;
+        feedback.dataset.tone = 'error';
+        feedback.textContent = `${e.message || 'No se pudieron revisar los beneficios.'} Corrige o retira el beneficio para continuar.`;
+        return false;
+    } finally {
+        if (revision === revisionBeneficios) {
+            revisandoBeneficios = false;
+            recalcularTotales();
+            controles();
         }
     }
-    recalcularTotales();
 }
 
 async function actualizar() {
@@ -233,6 +184,7 @@ async function actualizar() {
         [...$('payment-fields').querySelectorAll('input, select, textarea')].map(input => [input.id, input.value])
     ) };
     cotizacion = null;
+    invalidarBeneficios();
     controles();
     mensaje('');
     $('quote-note').textContent = 'Calculando los importes en el servidor…';
@@ -266,6 +218,8 @@ async function actualizar() {
         $('quote-note').textContent = `Importe vigente hasta ${new Date(cotizacion.venceEn).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })}. Revisa el total antes de confirmar.`;
 
         recalcularTotales();
+        if (cambiosBeneficios) await revisarBeneficios();
+        if (revision !== secuencia) return;
         pintarMetodos();
         if (metodo.codigo === previo.codigo && metodo.version === previo.version) {
             $('payment-fields').querySelectorAll('input, select, textarea').forEach(input => {
@@ -276,6 +230,8 @@ async function actualizar() {
         vencimiento = setTimeout(() => {
             if (cotizacion !== cotizacionActual || terminado) return;
             cotizacion = null;
+            invalidarBeneficios();
+            $('checkout-total').textContent = '—';
             $('quote-note').textContent = 'La cotización venció. Actualiza el importe y revísalo antes de confirmar.';
             controles();
         }, Math.max(0, Date.parse(cotizacion.venceEn) - Date.now()));
@@ -298,13 +254,12 @@ function pintarMetodos() {
     list.replaceChildren();
     for (const item of metodos) {
         const option = document.createElement('label');
-        option.className = 'flow-method-card';
+        option.className = 'flow-payment';
         option.innerHTML = `
-            <input type="radio" name="metodo-seleccionado" value="${esc(item.codigo)}" ${item.codigo === metodo.codigo ? 'checked' : ''}>
+            <input type="radio" name="paymethod" value="${esc(item.codigo)}" ${item.codigo === metodo.codigo ? 'checked' : ''}>
             <div>
                 <strong>${esc(item.nombre)}</strong>
-                <p>${esc(item.descripcion || notaMetodo(item.codigo))}</p>
-                <small>${esc(item.procesamientoPago)}</small>
+                <small>${esc(item.descripcion || '')}</small>
             </div>`;
         option.querySelector('input').addEventListener('change', () => {
             metodo = item;
@@ -320,48 +275,57 @@ function pintarCampos() {
     const box = $('payment-fields');
     box.replaceChildren();
     if (!metodo) return;
-    const fields = Array.isArray(metodo.formulario?.campos) ? metodo.formulario.campos : [];
-    if (!fields.length) return;
-    const fieldset = document.createElement('fieldset');
-    fieldset.className = 'flow-form-section';
-    fieldset.innerHTML = `<h3>Datos para ${esc(metodo.nombre)}.</h3>`;
-    const grid = document.createElement('div');
-    grid.className = 'flow-fields';
+    if (metodo.instrucciones) {
+        const p = document.createElement('p');
+        p.className = 'flow-note';
+        p.textContent = metodo.instrucciones;
+        box.appendChild(p);
+    }
+    const fields = Array.isArray(metodo.campos) ? [...metodo.campos] : [];
+    if (metodo.requiereReferencia) fields.unshift({
+        clave: 'reference', etiqueta: metodo.etiquetaReferencia || 'Referencia de pago',
+        tipo: 'text', obligatorio: true, maxLongitud: 100, referencia: true
+    });
     for (const field of fields) {
         const wrapper = document.createElement('div');
-        wrapper.className = `flow-field ${field.tipo === 'TEXTAREA' ? 'full' : 'mobile-full'}`;
+        wrapper.className = 'flow-field';
         const label = document.createElement('label');
-        label.htmlFor = `pay-${field.campo}`;
+        label.htmlFor = field.referencia ? 'payment-reference' : `pago-${field.clave}`;
         label.textContent = `${field.etiqueta}${field.obligatorio ? ' *' : ''}`;
         wrapper.appendChild(label);
         let input;
-        if (field.tipo === 'SELECT') {
+        if (field.tipo === 'select') {
             input = document.createElement('select');
+            input.add(new Option('Selecciona una opción', ''));
             for (const option of field.opciones || []) {
-                input.add(new Option(option.label || option.valor, option.valor));
+                input.add(new Option(option, option));
             }
-        } else if (field.tipo === 'TEXTAREA') {
+        } else if (field.tipo === 'textarea') {
             input = document.createElement('textarea');
             input.rows = 2;
         } else {
             input = document.createElement('input');
-            input.type = field.tipo === 'NUMBER' ? 'number' : field.tipo === 'EMAIL' ? 'email' : 'text';
+            input.type = ['tel', 'date'].includes(field.tipo) ? field.tipo : 'text';
         }
-        input.id = `pay-${field.campo}`;
-        input.name = field.campo;
-        input.dataset.pago = field.campo;
+        input.id = label.htmlFor;
+        if (!field.referencia) input.dataset.pago = field.clave;
+        else input.minLength = 6;
+        input.maxLength = field.maxLongitud || 100;
+        input.autocomplete = 'off';
         input.required = Boolean(field.obligatorio);
         if (field.placeholder) input.placeholder = field.placeholder;
         wrapper.appendChild(input);
-        grid.appendChild(wrapper);
+        box.appendChild(wrapper);
     }
-    fieldset.appendChild(grid);
-    box.appendChild(fieldset);
+    const nota = document.createElement('p');
+    nota.className = 'flow-message';
+    nota.textContent = notaMetodo(metodo);
+    box.appendChild(nota);
 }
 
 async function confirmar(event) {
     event.preventDefault();
-    if (ocupado || terminado || !cotizacionVigente(cotizacion) || !metodo) return;
+    if (ocupado || terminado || revisandoBeneficios || cambiosBeneficios || !cotizacionVigente(cotizacion) || !metodo) return;
     for (const id of ['checkout-address', 'checkout-prov', 'checkout-dist', 'checkout-phone']) {
         $(id).setCustomValidity($(id).value.trim() ? '' : 'Completa este campo.');
     }
@@ -378,6 +342,15 @@ async function confirmar(event) {
     controles();
     mensaje('Registrando tu pedido. No cierres esta página.');
     try {
+        if (beneficios) {
+            const anterior = JSON.stringify(beneficios);
+            if (!await revisarBeneficios()) return;
+            if (anterior !== JSON.stringify(beneficios)) {
+                mensaje('Los beneficios cambiaron. Revisa el total y confirma nuevamente.');
+                return;
+            }
+        }
+        if (!cotizacionVigente(cotizacion)) return;
         const res = await api.post('/api/pedidos', {
             direccionEnvio: direccion,
             telefono,
@@ -386,8 +359,8 @@ async function confirmar(event) {
             cotizacionToken: cotizacion.token,
             referenciaComprobante: $('payment-reference')?.value.trim() || null,
             datosPago,
-            cuponCodigoAplicado: cuponAplicado ? cuponAplicado.codigo : null,
-            puntosACanjear: puntosCanjeados > 0 ? puntosCanjeados : null
+            cuponCodigoAplicado: beneficios?.cuponCodigo || null,
+            puntosACanjear: beneficios?.puntosCanjeados || null
         });
         if (!res?.exito || !res.datos?.id) throw new Error(res?.mensaje || 'No recibimos la confirmación del pedido.');
         terminado = true;

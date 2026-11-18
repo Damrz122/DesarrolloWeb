@@ -88,7 +88,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/productos/admin").hasAnyAuthority("PRODUCTOS_VER", "PRODUCTOS_GESTIONAR", "INVENTARIO_GESTIONAR")
                         .requestMatchers(HttpMethod.GET, "/api/productos/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/crm/niveles").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/crm/niveles", "/api/crm/puntos/reglas").permitAll()
 
                         // Handshake de WebSocket
                         .requestMatchers("/ws-chat/**").permitAll()

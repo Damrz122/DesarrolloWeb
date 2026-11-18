@@ -52,6 +52,7 @@
 .store-header .fx-nav-left { display: none; }
 .store-header .fx-nav-center { justify-content: center; gap: 34px; }
 .store-header .fx-nav-link { font-family: var(--store-font); font-size: 11px; color: #424245; font-weight: 400; min-height: 44px; padding-block: 0; }
+.store-header .fx-nav-link[aria-current="page"] { color: var(--store-accent); }
 .store-menu-icon { display: none; }
 .store-header .fx-nav-right { gap: 16px; }
 .store-header .fx-search-btn, .store-header .fx-cart-btn { width: 28px; height: 44px; display: inline-flex; align-items: center; justify-content: center; }
@@ -95,6 +96,12 @@
   #main-navbar.store-header { gap: 26px; }
   .store-header .fx-nav-center { gap: 18px; }
   .store-header .fx-nav-right { gap: 10px; }
+}
+@media (min-width: 761px) and (max-width: 1000px) {
+  #main-navbar.store-header { gap: 20px; }
+  .store-header .fx-navbar-inner { gap: 12px; }
+  .store-header .fx-nav-center { gap: 12px; }
+  .store-header .elx-user-name { display: none; }
 }
 @media (max-width: 760px) {
   .store-container { padding-inline: 22px; }

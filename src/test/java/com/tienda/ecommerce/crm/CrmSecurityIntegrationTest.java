@@ -29,6 +29,31 @@ class CrmSecurityIntegrationTest {
     private ObjectMapper objectMapper;
 
     @Test
+    void reglasPublicasNoExponenDatosDeClientes() throws Exception {
+        mockMvc.perform(get("/api/crm/puntos/reglas"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.datos.minimoPuntosCanje").isNumber())
+                .andExpect(jsonPath("$.datos.factorSolPorPunto").isNumber())
+                .andExpect(jsonPath("$.datos.usuarioEmail").doesNotExist())
+                .andExpect(jsonPath("$.datos.transacciones").doesNotExist());
+    }
+
+    @Test
+    void resumenDeCheckoutNoEsPublico() throws Exception {
+        mockMvc.perform(post("/api/checkout/beneficios").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"cotizacionToken\":\"x\",\"puntosACanjear\":0}"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(username = "sinpermiso@example.test", authorities = {"CRM_VER_PUNTOS"})
+    void resumenDeCheckoutExigeComprar() throws Exception {
+        mockMvc.perform(post("/api/checkout/beneficios").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"cotizacionToken\":\"x\",\"puntosACanjear\":0}"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
     @DisplayName("SEC-CRM-403: Solicitud anónima a CRM clientes debe ser rechazada con 403 Forbidden")
     void clientes_anonimo_rechazado() throws Exception {
         mockMvc.perform(get("/api/admin/crm/clientes"))

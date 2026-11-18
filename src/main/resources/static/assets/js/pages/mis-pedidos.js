@@ -3,6 +3,7 @@ import { auth } from '/assets/js/auth.js';
 import { formatoMoneda } from '/assets/js/money.js';
 import { iniciarShellCompra } from '/assets/js/ui/purchase-shell.js';
 import { escapar as esc, estadoPedido, estadoPago, PASOS_PEDIDO, fechaPedido } from '/assets/js/purchase-flow.js';
+import { resumenClub } from '/assets/js/ui/club-wallet.js';
 
 await iniciarShellCompra();
 
@@ -15,107 +16,20 @@ const abiertos = new Set();
 const buscado = new URLSearchParams(location.search).get('pedido');
 
 async function cargarBilletera() {
+    if (!auth.tienePermiso('CRM_VER_PUNTOS')) return;
+    const card = document.getElementById('billetera-crm-card');
+    const status = document.getElementById('orders-wallet-status');
+    card.setAttribute('aria-busy', 'true');
     try {
         const res = await api.get('/api/crm/puntos/mi-billetera');
-        if (!res?.exito || !res?.datos) return;
-        const b = res.datos;
-        const card = document.getElementById('billetera-crm-card');
-        if (!card) return;
-
+        if (!res?.exito || !res?.datos) throw new Error();
         card.hidden = false;
-        const saldoEl = document.getElementById('billetera-saldo-puntos');
-        if (saldoEl) saldoEl.textContent = `${b.saldoPuntos} pts`;
-        const valPen = Number(b.valorEstimadoPen ?? b.equivalentePen ?? 0).toFixed(2);
-        const valorEl = document.getElementById('billetera-valor-pen');
-        if (valorEl) valorEl.textContent = `S/ ${valPen}`;
-        const histEl = document.getElementById('billetera-puntos-historicos');
-        if (histEl) histEl.textContent = `Total histórico acumulado: ${b.puntosHistoricos || 0} pts`;
-
-        const nivelCodigo = (b.nivelCodigo || 'BRONCE').toUpperCase();
-        const nivelNombre = b.nivelNombre || nivelCodigo;
-        const nivelBadge = document.getElementById('billetera-nivel-badge');
-        const multBadge = document.getElementById('billetera-multiplicador-badge');
-        const envioBadge = document.getElementById('billetera-envio-badge');
-
-        if (nivelBadge) {
-            nivelBadge.textContent = nivelNombre;
-            if (nivelCodigo === 'ORO') {
-                nivelBadge.style.background = 'rgba(234, 179, 8, 0.3)';
-                nivelBadge.style.color = '#fef08a';
-                nivelBadge.style.borderColor = '#facc15';
-            } else if (nivelCodigo === 'PLATA') {
-                nivelBadge.style.background = 'rgba(148, 163, 184, 0.3)';
-                nivelBadge.style.color = '#f1f5f9';
-                nivelBadge.style.borderColor = '#cbd5e1';
-            } else {
-                nivelBadge.style.background = 'rgba(180, 83, 9, 0.6)';
-                nivelBadge.style.color = '#fde68a';
-                nivelBadge.style.borderColor = 'rgba(217, 119, 6, 0.5)';
-            }
-        }
-
-        if (multBadge) {
-            const mult = Number(b.multiplicador || 1).toFixed(2);
-            multBadge.textContent = `${mult}x Pts`;
-        }
-
-        if (envioBadge) {
-            envioBadge.style.display = b.beneficioEnvioGratis ? 'inline-block' : 'none';
-        }
-
-        const progresoTexto = document.getElementById('billetera-progreso-texto');
-        const progresoPct = document.getElementById('billetera-progreso-pct');
-        const progresoBarra = document.getElementById('billetera-progreso-barra');
-
-        if (progresoTexto && progresoBarra && progresoPct) {
-            const gastoAnual = Number(b.gastoAnualPen || 0).toFixed(2);
-            if (b.siguienteNivelNombre) {
-                const faltante = Number(b.montoFaltanteSiguienteNivelPen || 0).toFixed(2);
-                progresoTexto.innerHTML = `Llevas <strong>S/ ${gastoAnual}</strong> en compras este año. Te faltan <strong>S/ ${faltante}</strong> para alcanzar nivel <strong>${esc(b.siguienteNivelNombre)}</strong>.`;
-                const pct = Math.min(100, Math.max(0, Number(b.porcentajeProgresoNivel || 0)));
-                progresoPct.textContent = `${pct.toFixed(0)}%`;
-                progresoBarra.style.width = `${pct}%`;
-            } else {
-                progresoTexto.innerHTML = `¡Felicidades! Alcanzaste el <strong>nivel ${esc(nivelNombre)}</strong> (máximo nivel) con <strong>${Number(b.multiplicador || 1.5).toFixed(2)}x puntos</strong> y beneficios VIP exclusivos.`;
-                progresoPct.textContent = '100%';
-                progresoBarra.style.width = '100%';
-            }
-        }
-
-        const btnToggle = document.getElementById('btn-toggle-historial-puntos');
-        const panel = document.getElementById('historial-puntos-panel');
-        const tbody = document.getElementById('historial-puntos-tbody');
-
-        if (btnToggle && panel) {
-            btnToggle.onclick = () => {
-                const oculto = panel.hidden;
-                panel.hidden = !oculto;
-                btnToggle.textContent = oculto ? 'Ocultar movimientos ▲' : 'Ver movimientos de puntos ▼';
-            };
-        }
-
-        if (tbody) {
-            const txs = b.transaccionesRecientes ?? b.transacciones ?? [];
-            if (txs.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="padding: 0.75rem; text-align: center; color: #71717a;">Aún no registras movimientos de puntos</td></tr>';
-            } else {
-                tbody.innerHTML = txs.map(t => {
-                    const esPos = t.puntos > 0;
-                    const ptsColor = esPos ? '#34d399' : '#fbbf24';
-                    const ptsSign = esPos ? `+${t.puntos}` : `${t.puntos}`;
-                    const fecha = t.fecha ? new Date(t.fecha).toLocaleDateString('es-PE', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' }) : '-';
-                    return `<tr style="border-bottom: 1px solid #18181b;">
-                        <td style="padding: 0.375rem 0.5rem; color: #a1a1aa;">${fecha}</td>
-                        <td style="padding: 0.375rem 0.5rem; font-family: monospace; font-size: 0.6875rem; color: #d4d4d8;">${esc(t.tipo)}</td>
-                        <td style="padding: 0.375rem 0.5rem; color: #e4e4e7;">${esc(t.descripcion || '-')}</td>
-                        <td style="padding: 0.375rem 0.5rem; text-align: right; font-weight: 700; color: ${ptsColor};">${ptsSign} pts</td>
-                        <td style="padding: 0.375rem 0.5rem; text-align: right; color: #a1a1aa; font-family: monospace;">${t.saldoResultante} pts</td>
-                    </tr>`;
-                }).join('');
-            }
-        }
+        card.innerHTML = resumenClub(res.datos, true);
+        status.textContent = '';
     } catch (_) {
-        // Silencioso si no aplica billetera
+        status.textContent = 'No pudimos actualizar tus puntos. Tus pedidos se pueden consultar igualmente; vuelve a pulsar «Actualizar pedidos» para reintentar.';
+    } finally {
+        card.setAttribute('aria-busy', 'false');
     }
 }
 
@@ -178,18 +92,19 @@ function pintarPedidos() {
                             <small>${Number(item.cantidad)} × ${formato(item.precioUnitario)}${Number(item.impuestoPorcentaje) > 0 ? ` · Impuesto ${esc(item.impuestoPorcentaje)}% incluido` : ''}</small>
                         </span><span>${formato(item.subtotal)}</span></div>`).join('') : '<p class="flow-note">No hay artículos disponibles para mostrar en este pedido.</p>'}</div>
                     ${tieneDescuentoCupon || tieneDescuentoPuntos ? `
-                    <div style="margin: 0.75rem 0; padding: 0.75rem; background: var(--flow-surface-soft, #f8fafc); border-radius: 8px; font-size: 0.8125rem;">
+                    <dl class="flow-totals flow-order-totals">
                         ${tieneDescuentoCupon ? `
-                        <div style="display:flex; justify-content:space-between; color:#047857; margin-bottom: 0.25rem;">
-                            <span>Cupón aplicado (<strong>${esc(pedido.cuponCodigo)}</strong>)</span>
-                            <strong>-S/ ${Number(pedido.descuentoPen).toFixed(2)}</strong>
+                        <div class="flow-saving">
+                            <dt>Cupón ${esc(pedido.cuponCodigo)} · descuento en PEN</dt>
+                            <dd>−${formatoMoneda(pedido.descuentoPen, 'PEN')}</dd>
                         </div>` : ''}
                         ${tieneDescuentoPuntos ? `
-                        <div style="display:flex; justify-content:space-between; color:#b45309;">
-                            <span>Puntos canjeados (<strong>${pedido.puntosCanjeados} pts</strong>)</span>
-                            <strong>-S/ ${Number(pedido.descuentoPuntosPen || 0).toFixed(2)}</strong>
+                        <div class="flow-saving">
+                            <dt>${Number(pedido.puntosCanjeados)} puntos utilizados · descuento en PEN</dt>
+                            <dd>−${formatoMoneda(pedido.descuentoPuntosPen, 'PEN')}</dd>
                         </div>` : ''}
-                    </div>` : ''}
+                    <div class="flow-total"><dt>Total registrado (${esc(pedido.monedaCodigo || 'PEN')})</dt><dd>${formato(pedido.total)}</dd></div>
+                    </dl>` : ''}
                     <div class="flow-actions"><a href="/informacion.html#chat" class="flow-link">Ayuda con este pedido</a><a href="/informacion.html#despachos" class="flow-link">Información de despacho</a></div>
                 </div>
             </details>`;

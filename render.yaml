@@ -1,0 +1,48 @@
+# Un único servicio Free. Neon y Upstash se crean en sus propios planes Free.
+# Los secretos se introducen en Render, nunca se escriben en este archivo.
+services:
+  - type: web
+    name: electronix-demo
+    runtime: docker
+    plan: free
+    region: virginia
+    branch: main
+    dockerfilePath: ./Dockerfile.render
+    dockerContext: .
+    autoDeployTrigger: "off"
+    healthCheckPath: /actuator/health/readiness
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod,cloud
+      - key: JAVA_TOOL_OPTIONS
+        value: "-Xms64m -Xmx220m -XX:MaxMetaspaceSize=128m -XX:ReservedCodeCacheSize=48m -XX:MaxDirectMemorySize=32m -Xss512k -XX:+UseSerialGC -XX:ActiveProcessorCount=1"
+      - key: SPRING_DATASOURCE_URL
+        sync: false
+      - key: SPRING_DATASOURCE_USERNAME
+        sync: false
+      - key: SPRING_DATASOURCE_PASSWORD
+        sync: false
+      - key: SPRING_DATA_REDIS_HOST
+        sync: false
+      - key: SPRING_DATA_REDIS_PORT
+        value: "6379"
+      - key: SPRING_DATA_REDIS_PASSWORD
+        sync: false
+      - key: SPRING_DATA_REDIS_SSL_ENABLED
+        value: "true"
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        generateValue: true
+      - key: DEMO_USER_PASSWORD
+        generateValue: true
+      - key: DEMO_SEED_ENABLED
+        value: "true"
+      - key: DEMO_SEED_SECURE
+        value: "true"
+      - key: DEMO_EMAIL_DOMAIN
+        value: example.test
+      - key: APP_UPLOAD_DIR
+        value: /app/uploads

@@ -459,3 +459,4 @@ function exportarCSV() {
     document.body.removeChild(link);
     showToast('Exportación CSV completada', 'success');
 }
+import '/assets/js/ui/crm-dialogs.js';
